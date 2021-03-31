@@ -139,8 +139,6 @@ resource "google_compute_instance" "bastion" {
     scopes = ["compute-rw", "storage-ro", "service-management", "service-control", "logging-write", "monitoring"]
   }
 
-  metadata_startup_script = data.template_file.bastion_startup.rendered
-
   metadata = {
     sshKeys = "${var.gce_ssh_user}:${file(var.gce_ssh_pub_key_file)}"
   }
@@ -169,21 +167,22 @@ resource "google_compute_instance" "bastion" {
     }
   }
 
-//  provisioner "remote-exec" {
-//    inline = [
-//      "export ANSIBLE_HOST_KEY_CHECKING=False",
-//      "cd /home/${var.gce_ssh_user}/redis-ansible",
-//      "ansible-playbook -i ./inventories/boa-cluster.ini redislabs-install.yaml -e @./extra_vars/boa-extra-vars.yaml -e @./group_vars/all/main.yaml -e re_url=${var.redis_distro}",
-//      "ansible-playbook -i ./inventories/boa-cluster.ini redislabs-create-cluster.yaml -e @./extra_vars/boa-extra-vars.yaml -e @./group_vars/all/main.yaml"
-//    ]
-//
-//    connection {
-//      type        = "ssh"
-//      user        = var.gce_ssh_user
-//      private_key = file(var.gce_ssh_private_key_file)
-//      host        = google_compute_address.bastion-ip-address.address
-//    }
-//  }
+  provisioner "remote-exec" {
+    inline = [
+      "sudo yum -y update && sudo yum install -y git && sudo yum install -y ansible",
+      "cd /home/${var.gce_ssh_user} && git clone --branch tune_ups https://${var.ansible_repo_creds}@github.com/reza-rahim/redis-ansible",
+      "cd /home/${var.gce_ssh_user} && mv /home/${var.gce_ssh_user}/boa-inventory.ini /home/${var.gce_ssh_user}/redis-ansible/inventories/boa-cluster.ini",
+      "cd /home/${var.gce_ssh_user} && mv /home/${var.gce_ssh_user}/boa-extra-vars.yaml /home/${var.gce_ssh_user}/redis-ansible/extra_vars/boa-extra-vars.yaml",
+      "export ANSIBLE_HOST_KEY_CHECKING=False && cd /home/${var.gce_ssh_user}/redis-ansible && ansible-playbook -i ./inventories/boa-cluster.ini redislabs-install.yaml -e @./extra_vars/boa-extra-vars.yaml -e @./group_vars/all/main.yaml -e re_url=${var.redis_distro} && ansible-playbook -i ./inventories/boa-cluster.ini redislabs-create-cluster.yaml -e @./extra_vars/boa-extra-vars.yaml -e @./group_vars/all/main.yaml"
+    ]
+
+    connection {
+      type        = "ssh"
+      user        = var.gce_ssh_user
+      private_key = file(var.gce_ssh_private_key_file)
+      host        = google_compute_address.bastion-ip-address.address
+    }
+  }
 }
 
 ###################### redis nodes #################################
@@ -218,7 +217,7 @@ resource "google_compute_instance" "kube-worker" {
     sshKeys = "${var.gce_ssh_user}:${file(var.gce_ssh_pub_key_file)}"
   }
 
-  metadata_startup_script = "sed -i 's/PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config; systemctl restart sshd; yum -y update;"
+  metadata_startup_script = "yum -y update;"
 }
 
 ####################### create ansible inventory file  #######################
@@ -249,13 +248,6 @@ data  "template_file" "ssh" {
 resource "local_file" "ssh_file" {
   content  = data.template_file.ssh.rendered
   filename = "./scripts/ssh.sh"
-}
-
-data "template_file" "bastion_startup" {
-  template = file("./templates/startup.tpl")
-  vars = {
-    redis_user = var.gce_ssh_user
-  }
 }
 
 

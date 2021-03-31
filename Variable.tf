@@ -98,3 +98,9 @@ variable "kube_storage_disk_type" {
   default = "pd-ssd"
 }
 
+###### the repo creds are of the user_id:password format ####
+variable "ansible_repo_creds" {
+  #replace the following with your credentials
+  default = "xxxxxx:yyyyyyy"
+}
+
