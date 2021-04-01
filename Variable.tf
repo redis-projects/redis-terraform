@@ -23,6 +23,26 @@ variable "redis_distro" {
   default = "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.0.6/redislabs-6.0.6-39-rhel7-x86_64.tar"
 }
 
+variable "redis_cluster_name" {
+  default = "boa.rlabs.org"
+}
+
+variable "redis_user_name" {
+  default = "admin@admin.com"
+}
+
+variable "redis_pwd" {
+  default = "admin"
+}
+
+variable "redis_email_from" {
+  default = "admin@domain.tld"
+}
+
+variable "redis_smtp_host" {
+  default = "smtp.domain.tld"
+}
+
 variable "vpc" {
   default = "boatest"
 }

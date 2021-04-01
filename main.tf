@@ -144,7 +144,7 @@ resource "google_compute_instance" "bastion" {
   }
 
   provisioner "file" {
-    content  = data.template_file.k8s.rendered
+    content  = data.template_file.inventory.rendered
     destination = "/home/${var.gce_ssh_user}/boa-inventory.ini"
 
     connection {
@@ -156,7 +156,7 @@ resource "google_compute_instance" "bastion" {
   }
 
   provisioner "file" {
-    source  = "./templates/boa-extra-vars.yaml"
+    content  = data.template_file.extra_vars.rendered
     destination = "/home/${var.gce_ssh_user}/boa-extra-vars.yaml"
 
     connection {
@@ -221,33 +221,34 @@ resource "google_compute_instance" "kube-worker" {
 }
 
 ####################### create ansible inventory file  #######################
-data  "template_file" "k8s" {
-    template = file("./templates/k8s.tpl")
+data  "template_file" "inventory" {
+    template = file("./templates/inventory.tpl")
     vars = {
       worker_host_name = join("\n", google_compute_instance.kube-worker.*.name)
-      #worker_host_name = google_compute_instance.kube-worker.*.name
-      #worker_ip = google_compute_instance.kube-worker.*.network_interface[0].access_config[0].nat_ip
-      }
-}
-
-resource "local_file" "k8s_file" {
-  content  = data.template_file.k8s.rendered
-  filename = "./inventory/inventory.ini"
-}
-
-
-####################### create ssh files  ####################### 
-
-data  "template_file" "ssh" {
-    template = file("./templates/ssh.tpl")
-    vars = {
-        bastion_ip =  google_compute_address.bastion-ip-address.address
     }
 }
 
-resource "local_file" "ssh_file" {
-  content  = data.template_file.ssh.rendered
-  filename = "./scripts/ssh.sh"
+resource "local_file" "k8s_file" {
+  content  = data.template_file.inventory.rendered
+  filename = "./inventory/inventory.ini"
+}
+
+####################### create ansible extra vars file  #######################
+data  "template_file" "extra_vars" {
+  template = file("./templates/extra-vars.tpl")
+  vars = {
+    ansible_user = var.gce_ssh_user
+    redis_cluster_name = var.redis_cluster_name
+    redis_user_name = var.redis_user_name
+    redis_pwd = var.redis_pwd
+    redis_email_from = var.redis_email_from
+    redis_smtp_host = var.redis_smtp_host
+  }
+}
+
+resource "local_file" "extra_vars_file" {
+  content  = data.template_file.extra_vars.rendered
+  filename = "./inventory/boa-extra-vars.yaml"
 }
 
 
