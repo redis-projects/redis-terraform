@@ -5,7 +5,7 @@
 ```bash
 For Mac ssh with agent
 
-# aad the following .ssh/config
+# add the following .ssh/config
 Host *
   StrictHostKeyChecking no
   ForwardAgent yes
