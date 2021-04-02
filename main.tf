@@ -169,7 +169,7 @@ resource "google_compute_instance" "bastion" {
 
   provisioner "remote-exec" {
     inline = [
-      "sudo yum -y update && sudo yum install -y git && sudo yum install -y ansible",
+      "sudo yum -y update --nogpgcheck && sudo yum install -y git --nogpgcheck && sudo yum install -y ansible --nogpgcheck",
       "cd /home/${var.gce_ssh_user} && git clone --branch tune_ups https://${var.ansible_repo_creds}@github.com/reza-rahim/redis-ansible",
       "cd /home/${var.gce_ssh_user} && mv /home/${var.gce_ssh_user}/boa-inventory.ini /home/${var.gce_ssh_user}/redis-ansible/inventories/boa-cluster.ini",
       "cd /home/${var.gce_ssh_user} && mv /home/${var.gce_ssh_user}/boa-extra-vars.yaml /home/${var.gce_ssh_user}/redis-ansible/extra_vars/boa-extra-vars.yaml",
@@ -217,7 +217,7 @@ resource "google_compute_instance" "kube-worker" {
     sshKeys = "${var.gce_ssh_user}:${file(var.gce_ssh_pub_key_file)}"
   }
 
-  metadata_startup_script = "yum -y update;"
+  metadata_startup_script = "yum -y update --nogpgcheck;"
 }
 
 ####################### create ansible inventory file  #######################
