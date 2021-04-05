@@ -15,19 +15,19 @@ resource "google_compute_network" "vpc" {
 ################################   ##subnet and route ##########################
 
 resource "google_compute_subnetwork" "public-subnet" {
-  name          = "${var.vpc}-public-subnet"
+  name          = "${var.vpc}-${random_id.id.hex}-public-subnet"
   network       = google_compute_network.vpc.name
   ip_cidr_range = var.gce_public_subnet_cidr
 }
 
 resource "google_compute_subnetwork" "private-subnet" {
-  name          = "${var.vpc}-private-subnet"
+  name          = "${var.vpc}-${random_id.id.hex}-private-subnet"
   network       = google_compute_network.vpc.name
   ip_cidr_range = var.gce_private_subnet_cidr
 }
 
 resource "google_compute_router" "router" {
-  name    = "${var.vpc}-router"
+  name    = "${var.vpc}-${random_id.id.hex}-router"
   region  = google_compute_subnetwork.private-subnet.region
   network = google_compute_network.vpc.self_link
   bgp {
@@ -39,7 +39,7 @@ resource "google_compute_router" "router" {
 ################################ nat  ############################
 
 resource "google_compute_router_nat" "simple-nat" {
-  name                               = "${var.vpc}-nat"
+  name                               = "${var.vpc}-${random_id.id.hex}-nat"
   router                             = google_compute_router.router.name
   region                             = var.region
   nat_ip_allocate_option             = "AUTO_ONLY"
@@ -51,7 +51,7 @@ resource "google_compute_router_nat" "simple-nat" {
 
 
 resource "google_compute_firewall" "private-firewall" {
-  name    = "${var.vpc}-private-firewall"
+  name    = "${var.vpc}-${random_id.id.hex}-private-firewall"
   network = google_compute_network.vpc.name
 
   allow {
@@ -76,7 +76,7 @@ resource "google_compute_firewall" "private-firewall" {
 }
 
 resource "google_compute_firewall" "public-firewall" {
-  name    = "${var.vpc}-public-firewall"
+  name    = "${var.vpc}-${random_id.id.hex}-public-firewall"
   network = google_compute_network.vpc.name
 
   allow {
@@ -101,15 +101,11 @@ resource "google_compute_firewall" "public-firewall" {
 
 
 resource "google_compute_address" "bastion-ip-address" {
-  #count = var.bastion-ip-address-count
-  #name  = "bastion-ip-address-${count.index}"
-  name  = "${var.vpc}-bastion-ip-address"
+  name  = "${var.vpc}-${random_id.id.hex}-bastion-ip-address"
 }
 
 resource "google_compute_instance" "bastion" {
-  #count        = var.bastion-ip-address-count
-  #name         = "bastion-${count.index}"
-  name         = "${var.vpc}-bastion"
+  name         = "${var.vpc}-${random_id.id.hex}-bastion"
   machine_type = var.bastion_machine_type
 
   #can_ip_forward  = true
@@ -189,7 +185,7 @@ resource "google_compute_instance" "bastion" {
 
 resource "google_compute_instance" "kube-worker" {
   count        = var.kube_worker_machine_count
-  name         = "${var.vpc}-worker-${count.index}"
+  name         = "${var.vpc}-${random_id.id.hex}-worker-${count.index}"
   machine_type = var.kube_worker_machine_type
 
   can_ip_forward  = true
@@ -249,6 +245,11 @@ data  "template_file" "extra_vars" {
 resource "local_file" "extra_vars_file" {
   content  = data.template_file.extra_vars.rendered
   filename = "./inventory/boa-extra-vars.yaml"
+}
+
+###################### random id generator ####################################
+resource "random_id" "id" {
+  byte_length = 8
 }
 
 
