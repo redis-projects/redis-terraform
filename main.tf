@@ -29,7 +29,7 @@ module "bastion" {
  gce_public_subnet_cidr = var.gce_public_subnet_cidr
  gce_private_subnet_cidr = var.gce_private_subnet_cidr
  region = var.region
- public_subnet_name = module.network.public-subnet-name
+ subnet = module.network.public-subnet-name
  os = var.os
  boot_disk_size = var.boot_disk_size
  bastion_machine_type = var.bastion_machine_type
@@ -45,44 +45,25 @@ module "bastion" {
 
 ###################### redis nodes #################################
 
-resource "google_compute_instance" "kube-worker" {
-  count        = var.kube_worker_machine_count
-  name         = "${var.vpc}-${module.random_id.id.hex}-worker-${count.index}"
-  machine_type = var.kube_worker_machine_type
+module "re" {
+ source = "./modules/gcp/re"
 
-  can_ip_forward  = true
-
-  tags = ["kubernetes-the-easy-way", "kube-worker"]
-
-  boot_disk {
-    initialize_params {
-      image = var.os
-      size  = var.boot_disk_size
-    }
-  }
-
-
-  network_interface {
-    subnetwork = module.network.private-subnet-name
-    #network_ip = "10.20.0.${count.index+3}"
-  }
-
-  service_account {
-    scopes = ["compute-rw", "storage-ro", "service-management", "service-control", "logging-write", "monitoring"]
-  }
-
-  metadata = {
-    sshKeys = "${var.gce_ssh_user}:${file(var.gce_ssh_pub_key_file)}"
-  }
-
-  metadata_startup_script = "yum -y update --nogpgcheck;"
+ vpc = var.vpc
+ random_id = module.random_id.id.hex
+ kube_worker_machine_count = var.kube_worker_machine_count
+ kube_worker_machine_type = var.kube_worker_machine_type
+ boot_disk_size = var.boot_disk_size
+ os = var.os
+ subnet = module.network.private-subnet-name
+ gce_ssh_user = var.gce_ssh_user
+ gce_ssh_pub_key_file = var.gce_ssh_pub_key_file
 }
 
 ####################### create ansible inventory file  #######################
 data  "template_file" "inventory" {
     template = file("./templates/inventory.tpl")
     vars = {
-      worker_host_name = join("\n", google_compute_instance.kube-worker.*.name)
+      worker_host_name = join("\n", module.re.re-nodes.*.name)
     }
 }
 

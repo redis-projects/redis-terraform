@@ -19,7 +19,7 @@ resource "google_compute_instance" "bastion" {
 
 
   network_interface {
-    subnetwork = var.public_subnet_name
+    subnetwork = var.subnet
 
     #network_ip = "10.10.0.${count.index+2}"
 
