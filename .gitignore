@@ -38,3 +38,5 @@ ssh.*
 /terraform_account.json
 
 /.terraform.lock.hcl
+
+inventory/

@@ -5,94 +5,18 @@ provider "google" {
   zone        = var.zone
 }
 
-resource "google_compute_network" "vpc" {
-  name                    = var.vpc
-  auto_create_subnetworks = "false"
-  routing_mode            = "GLOBAL"
+module "network" {
+ source = "./modules/network"
 
+ vpc = var.vpc
+ random_id = module.random_id.id.hex
+ gce_public_subnet_cidr = var.gce_public_subnet_cidr
+ gce_private_subnet_cidr = var.gce_private_subnet_cidr
+ region = var.region
 }
 
-################################   ##subnet and route ##########################
-
-resource "google_compute_subnetwork" "public-subnet" {
-  name          = "${var.vpc}-${random_id.id.hex}-public-subnet"
-  network       = google_compute_network.vpc.name
-  ip_cidr_range = var.gce_public_subnet_cidr
-}
-
-resource "google_compute_subnetwork" "private-subnet" {
-  name          = "${var.vpc}-${random_id.id.hex}-private-subnet"
-  network       = google_compute_network.vpc.name
-  ip_cidr_range = var.gce_private_subnet_cidr
-}
-
-resource "google_compute_router" "router" {
-  name    = "${var.vpc}-${random_id.id.hex}-router"
-  region  = google_compute_subnetwork.private-subnet.region
-  network = google_compute_network.vpc.self_link
-  bgp {
-    asn = 64514
-  }
-}
-
-
-################################ nat  ############################
-
-resource "google_compute_router_nat" "simple-nat" {
-  name                               = "${var.vpc}-${random_id.id.hex}-nat"
-  router                             = google_compute_router.router.name
-  region                             = var.region
-  nat_ip_allocate_option             = "AUTO_ONLY"
-  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
-}
-
-
-################################ fire wall ############################
-
-
-resource "google_compute_firewall" "private-firewall" {
-  name    = "${var.vpc}-${random_id.id.hex}-private-firewall"
-  network = google_compute_network.vpc.name
-
-  allow {
-    protocol = "icmp"
-  }
-
-  allow {
-    protocol = "udp"
-    ports    = ["0-65535"]
-  }
-
-  allow {
-    protocol = "tcp"
-     ports    = ["0-65535"]
-  }
-
-  allow {
-    protocol = "ipip"
-  }
-
-  source_ranges = [var.gce_public_subnet_cidr, var.gce_private_subnet_cidr, "130.211.0.0/22",  "35.191.0.0/16"]
-}
-
-resource "google_compute_firewall" "public-firewall" {
-  name    = "${var.vpc}-${random_id.id.hex}-public-firewall"
-  network = google_compute_network.vpc.name
-
-  allow {
-    protocol = "icmp"
-  }
-
-  allow {
-    protocol = "udp"
-  }
-
-  allow {
-    protocol = "tcp"
-    ports    = ["22","80", "443", "9443"]
-  }
-
-  source_ranges = ["0.0.0.0/0"]
+module "random_id" {
+ source = "./modules/random_id"
 }
 
 ########################### bastion ############################ 
@@ -101,11 +25,11 @@ resource "google_compute_firewall" "public-firewall" {
 
 
 resource "google_compute_address" "bastion-ip-address" {
-  name  = "${var.vpc}-${random_id.id.hex}-bastion-ip-address"
+  name  = "${var.vpc}-${module.random_id.id.hex}-bastion-ip-address"
 }
 
 resource "google_compute_instance" "bastion" {
-  name         = "${var.vpc}-${random_id.id.hex}-bastion"
+  name         = "${var.vpc}-${module.random_id.id.hex}-bastion"
   machine_type = var.bastion_machine_type
 
   #can_ip_forward  = true
@@ -121,7 +45,7 @@ resource "google_compute_instance" "bastion" {
 
 
   network_interface {
-    subnetwork = google_compute_subnetwork.public-subnet.name
+    subnetwork = module.network.public-subnet-name
 
     #network_ip = "10.10.0.${count.index+2}"
 
@@ -185,7 +109,7 @@ resource "google_compute_instance" "bastion" {
 
 resource "google_compute_instance" "kube-worker" {
   count        = var.kube_worker_machine_count
-  name         = "${var.vpc}-${random_id.id.hex}-worker-${count.index}"
+  name         = "${var.vpc}-${module.random_id.id.hex}-worker-${count.index}"
   machine_type = var.kube_worker_machine_type
 
   can_ip_forward  = true
@@ -201,7 +125,7 @@ resource "google_compute_instance" "kube-worker" {
 
 
   network_interface {
-    subnetwork = google_compute_subnetwork.private-subnet.name
+    subnetwork = module.network.private-subnet-name
     #network_ip = "10.20.0.${count.index+3}"
   }
 
@@ -246,10 +170,4 @@ resource "local_file" "extra_vars_file" {
   content  = data.template_file.extra_vars.rendered
   filename = "./inventory/boa-extra-vars.yaml"
 }
-
-###################### random id generator ####################################
-resource "random_id" "id" {
-  byte_length = 8
-}
-
 
