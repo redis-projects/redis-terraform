@@ -1,7 +1,16 @@
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+    }
+  }
+}
+
 resource "google_compute_instance" "node" {
   count        = var.kube_worker_machine_count
-  name         = "${var.vpc}-${var.random_id}-node-${count.index}"
+  name         = "${var.name}-node-${count.index}"
   machine_type = var.kube_worker_machine_type
+  zone = var.zones[count.index % length(var.zones)]
 
   can_ip_forward  = true
 

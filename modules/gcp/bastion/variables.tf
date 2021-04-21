@@ -1,4 +1,4 @@
-
+variable "zone" {}
 variable "vpc" {}
 variable "random_id" {}
 variable "gce_public_subnet_cidr" {}
@@ -14,4 +14,3 @@ variable "inventory" {}
 variable "gce_ssh_private_key_file" {}
 variable "extra_vars" {}
 variable "redis_distro" {}
-variable "ansible_repo_creds" {}

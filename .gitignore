@@ -40,3 +40,7 @@ ssh.*
 /.terraform.lock.hcl
 
 inventory/
+
+*.tf.json
+
+cli/
