@@ -43,9 +43,9 @@ def create_gcp_network(name=None, region=REGION, public_cidr=PUBLIC_CIDR, privat
     create_gcp_bastion(name, bastion_zone)
 
 def create_gcp_bastion(name, zone):
-    inventory = Data("template_file", "inventory",
+    inventory = Data("template_file", "inventory-%s" % name,
         template = relative_file("./templates/inventory.tpl"),
-        vars = {'worker_host_name': 'join("\n", module.re.re-nodes.*.name)'}
+        vars = {'worker_host_name': "${join(\"\\n\", module.re-%s.re-nodes.*.name)}" % name}
     )
 
     extra_vars = Data("template_file", "extra_vars",
@@ -73,18 +73,16 @@ def create_gcp_bastion(name, zone):
         bastion_machine_type = BASTION_MACHINE_TYPE,
         gce_ssh_user = GCE_SSH_USER,
         gce_ssh_pub_key_file = GCE_SSH_PUB_KEY_FILE,
-        inventory = '${data.template_file.inventory}',
+        inventory = '${data.template_file.inventory-%s}' % name,
         extra_vars = '${data.template_file.extra_vars}',
         gce_ssh_private_key_file = GCE_SSH_PRIVATE_KEY_FILE,
         redis_distro = REDIS_DISTRO,
-        ansible_repo_creds = "blah blah",
         providers = {"google": "google.%s" % name},
         zone = zone
     )
 
 
-def create_gcp_cluster(name=None, 
-                            worker_count=WORKER_MACHINE_COUNT, 
+def create_gcp_cluster(worker_count=WORKER_MACHINE_COUNT, 
                             machine_type=WORKER_MACHINE_TYPE,
                             vpc=None,
                             zones=None):
@@ -98,9 +96,9 @@ def create_gcp_cluster(name=None,
     
     #validate zone
 
-    Module("re-%s" % name, 
+    Module("re-%s" % (vpc,), 
         source = "./modules/gcp/re",
-        name = '%s-%s' % (DEPLOYMENT_NAME, name),
+        name = '%s-%s' % (DEPLOYMENT_NAME, vpc),
         kube_worker_machine_count = worker_count,
         kube_worker_machine_type = machine_type,
         boot_disk_size = BOOT_DISK_SIZE,
