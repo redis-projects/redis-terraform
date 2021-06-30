@@ -45,7 +45,10 @@ def create_gcp_network(name=None, region=REGION, public_cidr=PUBLIC_CIDR, privat
 def create_gcp_bastion(name, zone):
     inventory = Data("template_file", "inventory-%s" % name,
         template = relative_file("./templates/inventory.tpl"),
-        vars = {'worker_host_name': "${join(\"\\n\", module.re-%s.re-nodes.*.name)}" % name}
+        vars = {
+            'ip_addrs': "${join(\",\", module.re-%s.re-nodes.*.name)}" % name,
+            'rack_id': zone
+        }
     )
 
     extra_vars = Data("template_file", "extra_vars",
