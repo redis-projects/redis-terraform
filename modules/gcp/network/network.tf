@@ -77,6 +77,18 @@ resource "google_compute_firewall" "private-firewall" {
   source_ranges = [var.gce_public_subnet_cidr, var.gce_private_subnet_cidr, "130.211.0.0/22",  "35.191.0.0/16"]
 }
 
+resource "google_compute_firewall" "private-ui-firewall" {
+  name    = "${var.name}-private-ui-firewall"
+  network = google_compute_network.vpc.name
+
+  allow {
+    protocol = "tcp"
+     ports    = ["8443"]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+}
+
 resource "google_compute_firewall" "public-firewall" {
   name    = "${var.name}-public-firewall"
   network = google_compute_network.vpc.name

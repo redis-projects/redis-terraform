@@ -23,10 +23,9 @@ WORKER_MACHINE_COUNT="8"
 WORKER_MACHINE_TYPE = "n1-standard-4"
 
 gcp_provider = Provider("google", project="redislabs-sa-training-services", region=REGION, zone=ZONE, credentials=relative_file("./terraform_account.json"))
-gcp_provider2 = Provider("google", project="redislabs-sa-training-services", region="us-east1", zone="us-east1-b", credentials=relative_file("./terraform_account.json"), alias="alternate")
+#gcp_provider2 = Provider("google", project="redislabs-sa-training-services", region="us-east1", zone="us-east1-b", credentials=relative_file("./terraform_account.json"), alias="alternate")
 
 random_id = Module("random_id", source="./modules/random_id") 
-
 
 def create_gcp_network(name=None, region=REGION, public_cidr=PUBLIC_CIDR, private_cidr=PRIVATE_CIDR, bastion_zone=ZONE):
     if name is None:
@@ -85,7 +84,8 @@ def create_gcp_bastion(name, zone):
 def create_gcp_cluster(worker_count=WORKER_MACHINE_COUNT, 
                             machine_type=WORKER_MACHINE_TYPE,
                             vpc=None,
-                            zones=None):
+                            zones=None,
+                            expose_ui=False):
     if zones is None:
         print("zones cannot be None")
         exit(1)
@@ -94,8 +94,6 @@ def create_gcp_cluster(worker_count=WORKER_MACHINE_COUNT,
         print("vpc cannot be None")
         exit(1)
     
-    #validate zone
-
     Module("re-%s" % (vpc,), 
         source = "./modules/gcp/re",
         name = '%s-%s' % (DEPLOYMENT_NAME, vpc),
@@ -110,6 +108,20 @@ def create_gcp_cluster(worker_count=WORKER_MACHINE_COUNT,
         zones = zones
     )
 
+    if expose_ui:
+        create_gcp_re_ui(vpc)
+
+def create_gcp_re_ui(vpc):
+    if vpc is None:
+        print("vpc cannot be None")
+        exit(1)
+
+    Module("re-ui-%s" % vpc, source="./modules/gcp/re-ui", 
+        name= '%s-%s' % (DEPLOYMENT_NAME, vpc), 
+        instances= '${module.re-%s.re-nodes.*.name}' % vpc,
+        providers = {"google": "google.%s" % vpc},
+        zones = '${module.re-%s.re-nodes.*.zone}' % vpc)
+
 def generate(config_file):
     if 'networks' in config_file:
         for network in config_file['networks']:
@@ -117,7 +129,6 @@ def generate(config_file):
     if 'clusters' in config_file:
         for cluster in config_file['clusters']:
             create_gcp_cluster(**cluster)
-#print(config_file['network'])     
 
 if "name" not in os.environ:
     print("Usage: name=xxxx terraformpy where xxxx is the name of this deployment.  used to maintain isolation between deployments")
