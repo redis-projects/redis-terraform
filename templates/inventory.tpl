@@ -1,3 +1,3 @@
-%{ for addr in split(",", ip_addrs) ~}
-${addr} rack_id=${rack_id}
+%{ for index,addr in split(",", ip_addrs) ~}
+${addr} %{ if length(rack_ids) > 0 }rack_id=${split(",", rack_ids)[index]}%{ endif }
 %{ endfor ~}

@@ -27,7 +27,7 @@ gcp_provider = Provider("google", project="redislabs-sa-training-services", regi
 
 random_id = Module("random_id", source="./modules/random_id") 
 
-def create_gcp_network(name=None, region=REGION, public_cidr=PUBLIC_CIDR, private_cidr=PRIVATE_CIDR, bastion_zone=ZONE):
+def create_gcp_network(name=None, region=REGION, public_cidr=PUBLIC_CIDR, private_cidr=PRIVATE_CIDR, bastion_zone=ZONE, rack_aware=False):
     if name is None:
         print("name cannot be None")
         exit(1)
@@ -39,14 +39,14 @@ def create_gcp_network(name=None, region=REGION, public_cidr=PUBLIC_CIDR, privat
         gce_public_subnet_cidr=public_cidr, 
         region=region, 
         gce_private_subnet_cidr=private_cidr)
-    create_gcp_bastion(name, bastion_zone)
+    create_gcp_bastion(name, bastion_zone, rack_aware)
 
-def create_gcp_bastion(name, zone):
+def create_gcp_bastion(name, zone, rack_aware=False):
     inventory = Data("template_file", "inventory-%s" % name,
         template = relative_file("./templates/inventory.tpl"),
         vars = {
             'ip_addrs': "${join(\",\", module.re-%s.re-nodes.*.name)}" % name,
-            'rack_id': zone
+            'rack_ids': "${join(\",\", module.re-%s.re-nodes.*.zone)}" % name if rack_aware else ""
         }
     )
 

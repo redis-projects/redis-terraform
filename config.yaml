@@ -21,6 +21,7 @@ networks:
     private_cidr: 10.2.0.0/16 
     region: us-central1
     bastion_zone: us-central1-f
+    rack_aware: True
   - name: vpc-east
     public_cidr: 10.1.0.0/24
     private_cidr: 10.2.0.0/16
