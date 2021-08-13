@@ -5,7 +5,10 @@ import yaml
 from . import PUBLIC_CIDR, PRIVATE_CIDR, REGION, OS, AWS_REDIS_DISTRO, BOOT_DISK_SIZE, BASTION_MACHINE_TYPE, SSH_USER, SSH_PUB_KEY_FILE, SSH_PRIVATE_KEY_FILE, REDIS_CLUSTER_NAME, REDIS_PWD, REDIS_EMAIL_FROM, REDIS_SMTP_HOST, ZONE, WORKER_MACHINE_COUNT, WORKER_MACHINE_TYPE, REDIS_USER_NAME, DEPLOYMENT_NAME, AWS_VPC_CIDR, AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_OS, REDIS_USER, AWS_SSH_USER, AWS_BASTION_MACHINE_TYPE
 
 
-def create_network(name=None, region=REGION, vpc_cidr=AWS_VPC_CIDR, public_cidr=PUBLIC_CIDR, private_cidr=PRIVATE_CIDR, bastion_zone=ZONE, rack_aware=False, zone=ZONE):
+def create_network(name=None, region=REGION, vpc_cidr=AWS_VPC_CIDR, public_cidr=PUBLIC_CIDR, 
+                  private_cidr=PRIVATE_CIDR, bastion_zone=ZONE, bastion_machine_image=AWS_OS,
+                  bastion_machine_type=AWS_BASTION_MACHINE_TYPE, rack_aware=False, 
+                  redis_distro=AWS_REDIS_DISTRO):
     if name is None:
         print("name cannot be None")
         exit(1)
@@ -17,15 +20,15 @@ def create_network(name=None, region=REGION, vpc_cidr=AWS_VPC_CIDR, public_cidr=
     network_mod = Module("network-%s" % name, source="./modules/aws/network", 
         name= '%s-%s' % (DEPLOYMENT_NAME, name),
         vpc_cidr=vpc_cidr,
+        availability_zone = bastion_zone,
         public_subnet_cidr=public_cidr, 
-        availability_zone=zone, 
         private_subnet_cidr=private_cidr)
-    create_bastion(name, bastion_zone, rack_aware)
+    create_bastion(name, bastion_zone, rack_aware, bastion_machine_type, bastion_machine_image, redis_distro)
 
 def create_keypair(name):
     Module("keypair-%s" % name, name="%s-%s-keypair" % (DEPLOYMENT_NAME, name), source="./modules/aws/keypair", ssh_public_key=SSH_PUB_KEY_FILE)
 
-def create_bastion(name, zone, rack_aware=False):
+def create_bastion(name, zone, rack_aware, machine_type, machine_image, redis_distro):
     create_keypair(name)
     
     inventory = Data("template_file", "inventory-%s" % name,
@@ -54,14 +57,16 @@ def create_bastion(name, zone, rack_aware=False):
         name = "%s-%s" % (DEPLOYMENT_NAME, name),
         #region = REGION,
         subnet = '${module.network-%s.public-subnet}' % name,
-        ami = AWS_OS,
-        instance_type = AWS_BASTION_MACHINE_TYPE,
+        ami = machine_image,
+        instance_type = machine_type,
+        redis_user = REDIS_USER,
         ssh_user = AWS_SSH_USER,
+        ssh_public_key = SSH_PUB_KEY_FILE,
         ssh_key_name = '${module.keypair-%s.key-name}' % name,
         inventory = '${data.template_file.inventory-%s}' % name,
         extra_vars = '${data.template_file.extra_vars}',
         ssh_private_key = SSH_PRIVATE_KEY_FILE,
-        redis_distro = AWS_REDIS_DISTRO,
+        redis_distro = redis_distro,
         providers = {"aws": "aws.%s" % name},
         availability_zone = zone,
         security_groups = '${module.network-%s.public-security-groups}' % name
@@ -73,6 +78,7 @@ def create_bastion(name, zone, rack_aware=False):
 
 def create_re_cluster(worker_count=WORKER_MACHINE_COUNT, 
                             machine_type=WORKER_MACHINE_TYPE,
+                            machine_image=AWS_OS,
                             vpc=None,
                             zones=None,
                             expose_ui=False):
@@ -89,14 +95,14 @@ def create_re_cluster(worker_count=WORKER_MACHINE_COUNT,
         name = '%s-%s' % (DEPLOYMENT_NAME, vpc),
         worker_count = worker_count,
         instance_type = machine_type,
-        ami = 'ami-0747bdcabd34c712a',
-        subnet = '${module.network-%s.private-subnet}' % vpc,
+        ami = machine_image,
         security_groups = '${module.network-%s.private-security-groups}' % (vpc,),
         redis_user = REDIS_USER,
         ssh_public_key = SSH_PUB_KEY_FILE,
         ssh_key_name = '${module.keypair-%s.key-name}' % vpc,
         providers = {"aws": "aws.%s" % vpc},
-        zones = zones
+        zones = zones,
+        subnet = '${module.network-%s.private-subnet}' % vpc
     )
 
     if expose_ui:

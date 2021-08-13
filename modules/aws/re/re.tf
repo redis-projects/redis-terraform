@@ -7,6 +7,31 @@ terraform {
   }
 }
 
+###########################################################
+# Network Interface
+
+resource "aws_network_interface" "cluster_nic" {
+  subnet_id       = var.subnet[count.index].id
+  security_groups = var.security_groups
+  count           = length(var.subnet)
+
+  tags = {
+    Name = "${var.name}-cluster-nic-${count.index}"
+  }
+}
+
+
+# Elastic IP to the Network Interface
+resource "aws_eip" "eip" {
+  vpc                       = true
+  count                     = var.worker_count
+  network_interface         = aws_network_interface.cluster_nic[count.index].id
+  associate_with_private_ip = aws_network_interface.cluster_nic[count.index].private_ip
+
+  tags = {
+    Name = "${var.name}-cluster-eip-${count.index}"
+  }
+}
 
 ###########################################################
 # EC2
@@ -14,11 +39,14 @@ terraform {
 resource "aws_instance" "node" {
   ami = var.ami 
   instance_type = var.instance_type
-  availability_zone = var.zones[count.index % length(var.zones)]
-  subnet_id = var.subnet
-  vpc_security_group_ids = var.security_groups
+  availability_zone = sort(var.zones)[count.index % length(var.zones)]
   key_name = var.ssh_key_name
   count    = var.worker_count
+
+  network_interface {
+    device_index = 0
+    network_interface_id = aws_network_interface.cluster_nic[count.index].id
+  }
 
   user_data = <<-EOF
     #cloud-config
@@ -34,7 +62,7 @@ resource "aws_instance" "node" {
 	EOF
 
   tags = {
-    Name = "${var.name}-node-0"
+    Name = "${var.name}-node-${count.index}"
   }
 }
 

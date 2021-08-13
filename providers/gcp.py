@@ -8,7 +8,9 @@ from . import PUBLIC_CIDR, PRIVATE_CIDR, REGION, OS, REDIS_DISTRO, BOOT_DISK_SIZ
 #TODO: is this needed
 #random_id = Module("random_id", source="./modules/random_id") 
 
-def create_network(name=None, region=REGION, public_cidr=PUBLIC_CIDR, private_cidr=PRIVATE_CIDR, bastion_zone=ZONE, rack_aware=False):
+def create_network(name=None, region=REGION, public_cidr=PUBLIC_CIDR, private_cidr=PRIVATE_CIDR, 
+                  bastion_zone=ZONE, bastion_machine_image=OS, redis_distro=REDIS_DISTRO,
+                  bastion_machine_type=BASTION_MACHINE_TYPE, rack_aware=False):
     if name is None:
         print("name cannot be None")
         exit(1)
@@ -20,9 +22,9 @@ def create_network(name=None, region=REGION, public_cidr=PUBLIC_CIDR, private_ci
         gce_public_subnet_cidr=public_cidr, 
         region=region, 
         gce_private_subnet_cidr=private_cidr)
-    create_bastion(name, bastion_zone, rack_aware)
+    create_bastion(name, bastion_zone, rack_aware, bastion_machine_type, bastion_machine_image, redis_distro)
 
-def create_bastion(name, zone, rack_aware=False):
+def create_bastion(name, zone, rack_aware, machine_type, machine_image, redis_distro):
     inventory = Data("template_file", "inventory-%s" % name,
         template = relative_file("../templates/inventory.tpl"),
         vars = {
@@ -51,15 +53,15 @@ def create_bastion(name, zone, rack_aware=False):
         gce_private_subnet_cidr = PRIVATE_CIDR, 
         region = REGION,
         subnet = '${module.network-%s.public-subnet-name}' % name,
-        os = OS,
+        os = machine_image,
         boot_disk_size = BOOT_DISK_SIZE,
-        bastion_machine_type = BASTION_MACHINE_TYPE,
+        bastion_machine_type = machine_type,
         gce_ssh_user = SSH_USER,
         gce_ssh_pub_key_file = SSH_PUB_KEY_FILE,
         inventory = '${data.template_file.inventory-%s}' % name,
         extra_vars = '${data.template_file.extra_vars}',
         gce_ssh_private_key_file = SSH_PRIVATE_KEY_FILE,
-        redis_distro = REDIS_DISTRO,
+        redis_distro = redis_distro,
         providers = {"google": "google.%s" % name},
         zone = zone
     )
@@ -69,6 +71,7 @@ def create_bastion(name, zone, rack_aware=False):
 
 def create_re_cluster(worker_count=WORKER_MACHINE_COUNT, 
                             machine_type=WORKER_MACHINE_TYPE,
+                            machine_image=OS,
                             vpc=None,
                             zones=None,
                             expose_ui=False):
@@ -86,7 +89,7 @@ def create_re_cluster(worker_count=WORKER_MACHINE_COUNT,
         kube_worker_machine_count = worker_count,
         kube_worker_machine_type = machine_type,
         boot_disk_size = BOOT_DISK_SIZE,
-        os = OS,
+        kube_worker_machine_image =  machine_image,
         subnet = '${module.network-%s.private-subnet-name}' % vpc,
         gce_ssh_user = SSH_USER,
         gce_ssh_pub_key_file = SSH_PUB_KEY_FILE,

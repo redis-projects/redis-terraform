@@ -6,6 +6,11 @@ terraform {
   }
 }
 
+resource "google_compute_address" "cluster-ip-address" {
+  name  = "${var.name}-${count.index}-cluster-ip-address"
+  count = var.kube_worker_machine_count
+}
+
 resource "google_compute_instance" "node" {
   count        = var.kube_worker_machine_count
   name         = "${var.name}-node-${count.index}"
@@ -18,13 +23,17 @@ resource "google_compute_instance" "node" {
 
   boot_disk {
     initialize_params {
-      image = var.os
+      image = var.kube_worker_machine_image
       size  = var.boot_disk_size
     }
   }
 
   network_interface {
     subnetwork = var.subnet
+
+    access_config {
+      nat_ip  = google_compute_address.cluster-ip-address[count.index].address
+    }
   }
 
   service_account {

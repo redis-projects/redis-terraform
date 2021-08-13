@@ -73,10 +73,10 @@ variable "redis_distro" {
   type        = string
 }
 
-#variable "redis-user" {
-#  description = "Redis linux user"
-#  type        = string
-#}
+variable "ssh_public_key" {
+  description = "Path to SSH public key"
+  type        = string
+}
 
 #variable "redis-cluster-name" {
 #  description = "Redis cluster name"

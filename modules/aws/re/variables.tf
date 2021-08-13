@@ -3,14 +3,14 @@ variable "name" {
   type        = string
 }
 
+variable "subnet" {
+  description = "list of subnets"
+  type        = list
+}
+
 variable "zones" {
   description = "Availability zone"
   type        = list(string)
-}
-
-variable "subnet" {
-  description = "Network subnet"
-  type        = string
 }
 
 variable "security_groups" {

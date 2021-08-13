@@ -30,11 +30,8 @@ resource "google_compute_instance" "bastion" {
   network_interface {
     subnetwork = var.subnet
 
-    #network_ip = "10.10.0.${count.index+2}"
-
     access_config {
       nat_ip  = google_compute_address.bastion-ip-address.address
-      #nat_ip  = element(google_compute_address.bastion-ip-address.*.address, count.index)
     }
   }
 
@@ -82,13 +79,22 @@ resource "google_compute_instance" "bastion" {
     }
   }
 
+  provisioner "file" {
+    source      = "./bin/post_provision.sh"
+    destination = "/home/${var.gce_ssh_user}/post_provision.sh"
+
+    connection {
+      type        = "ssh"
+      user        = var.gce_ssh_user
+      private_key = file(var.gce_ssh_private_key_file)
+      host        = google_compute_address.bastion-ip-address.address
+    }
+  }
+
   provisioner "remote-exec" {
     inline = [
-      "sudo yum -y update --nogpgcheck && sudo yum install -y git --nogpgcheck && sudo yum install -y ansible --nogpgcheck",
-      "cd /home/${var.gce_ssh_user} && tar -xf redis-ansible.tar.gz",
-      "cd /home/${var.gce_ssh_user} && mv /home/${var.gce_ssh_user}/boa-inventory.ini /home/${var.gce_ssh_user}/redis-ansible/inventories/boa-cluster.ini",
-      "cd /home/${var.gce_ssh_user} && mv /home/${var.gce_ssh_user}/boa-extra-vars.yaml /home/${var.gce_ssh_user}/redis-ansible/extra_vars/boa-extra-vars.yaml",
-      "export ANSIBLE_HOST_KEY_CHECKING=False && cd /home/${var.gce_ssh_user}/redis-ansible && ansible-playbook -i ./inventories/boa-cluster.ini redislabs-install.yaml -e @./extra_vars/boa-extra-vars.yaml -e @./group_vars/all/main.yaml -e re_url=${var.redis_distro} && ansible-playbook -i ./inventories/boa-cluster.ini redislabs-create-cluster.yaml -e @./extra_vars/boa-extra-vars.yaml -e @./group_vars/all/main.yaml"
+      "chmod +x /home/${var.gce_ssh_user}/post_provision.sh",
+      "/home/${var.gce_ssh_user}/post_provision.sh ${var.redis_distro} > post_provision.out 2>&1",
     ]
 
     connection {

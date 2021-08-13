@@ -1,33 +1,44 @@
+---
 clusters:
-  - vpc: vpc-central
+  - vpc: vpc-gcp
     worker_count: 3 
     machine_type: n1-standard-4
+    machine_image: rhel-8-v20210721
     zones: 
-    - us-central1-a
-    - us-central1-b
-    - us-central1-c
+    - europe-west3-a
+    - europe-west3-b
+    - europe-west3-c
     expose_ui: True
-  - vpc: vpc-east
-    worker_count: 3 
-    machine_type: t2.xlarge 
-    zones: 
-    - us-east-1c
-    - us-east-1c
-    - us-east-1c
+  - vpc: vpc-aws
+    worker_count: 3
+    machine_type: t2.xlarge
+    machine_image: ami-01f6fd1863750f580
+    zones:
+    - eu-central-1c
+    - eu-central-1b
+    - eu-central-1a
     expose_ui: False
 networks:
-  - name: vpc-central
+  - name: vpc-gcp
     public_cidr: 10.1.0.0/24
     private_cidr: 10.2.0.0/16 
-    region: us-central1
-    bastion_zone: us-central1-f
+    region: europe-west3
+    bastion_zone: europe-west3-b
+    bastion_machine_image: rhel-7-v20210721
+    bastion_machine_type: n1-standard-1
     rack_aware: True
     provider: gcp
-  - name: vpc-east
+    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
+  - name: vpc-aws
     vpc_cidr: 10.0.0.0/16
     public_cidr: 10.0.1.0/24
-    private_cidr: 10.0.2.0/24
-    region: us-east-1 
-    bastion_zone: us-east-1c
+    private_cidr: 
+      eu-central-1b: 10.0.3.0/24
+      eu-central-1a: 10.0.2.0/24
+      eu-central-1c: 10.0.4.0/24
+    region: eu-central-1
+    bastion_zone: eu-central-1b
+    bastion_machine_image: ami-02241e4f36e06d650
+    bastion_machine_type: t2.micro
     provider: aws
-    zone: us-east-1c
+    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar

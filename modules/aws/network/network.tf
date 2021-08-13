@@ -46,12 +46,13 @@ resource "aws_subnet" "public-subnet-1" {
 }
 
 resource "aws_subnet" "private-subnet-1" {
+  count = length(var.private_subnet_cidr)
   vpc_id = aws_vpc.vpc.id
-  cidr_block = var.private_subnet_cidr
-  availability_zone = var.availability_zone
+  cidr_block = values(var.private_subnet_cidr)[count.index]
+  availability_zone = keys(var.private_subnet_cidr)[count.index]
 
   tags = {
-    Name = "${var.name}-private-subnet-1"
+    Name = "${var.name}-private-subnet-${count.index}"
   }
 }
 
@@ -121,6 +122,7 @@ resource "aws_route_table_association" "rt-to-public-subnet" {
 
 # Associate Private Subnet with Route Table
 resource "aws_route_table_association" "rt-to-private-subnet" {
-  subnet_id = aws_subnet.private-subnet-1.id
+  count = length(var.private_subnet_cidr)
+  subnet_id = aws_subnet.private-subnet-1[count.index].id
   route_table_id = aws_route_table.rt-private.id
 }
