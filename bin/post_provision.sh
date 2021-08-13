@@ -42,11 +42,11 @@ else
     exit 1
 fi
 
-sudo yum -y update --nogpgcheck  || exit 1
-sudo yum install -y git wget --nogpgcheck || exit 1
+sudo yum -y update --nogpgcheck
+sudo yum install -y git wget --nogpgcheck
 wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-${OS_MAJOR}.noarch.rpm || exit 1
-sudo yum install -y --nogpgcheck epel-release-latest-${OS_MAJOR}.noarch.rpm || exit 1
-sudo yum install -y ansible || exit 1
+sudo yum install -y --nogpgcheck epel-release-latest-${OS_MAJOR}.noarch.rpm
+sudo yum install -y ansible
 tar -xf redis-ansible.tar.gz || exit 1
 mv boa-inventory.ini redis-ansible/inventories/boa-cluster.ini || exit 1
 mv boa-extra-vars.yaml redis-ansible/extra_vars/boa-extra-vars.yaml || exit 1
@@ -69,7 +69,7 @@ ansible-playbook -i ./inventories/boa-cluster.ini redislabs-create-cluster.yaml 
 get_distro
 
 # Run the correct deployment function
-[[ $DISTRO == unknown ]] || exit 1
+[[ $DISTRO != unknown ]] || exit 1
 [[ $DISTRO =~ Red[[:space:]]Hat[[:space:]]Enterprise[[:space:]]Linux* ]] && deploy_redhat $1
 [[ $DISTRO =~ CentOS* ]] && deploy_redhat $1
 
