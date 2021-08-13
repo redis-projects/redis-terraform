@@ -39,4 +39,3 @@ clusters on a public clould infrastructure.
 - We no longer use the ec2-user by default as login account for the AWS
   bastion node. To be consistent, the user "redislabs" is used for AWS
   as well as GCP
---------------------------------------------------------------------------------
