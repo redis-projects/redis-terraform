@@ -73,6 +73,11 @@ variable "redis_distro" {
   type        = string
 }
 
+variable "redis_user" {
+  description = "Redis linux user"
+  type        = string
+}
+
 variable "ssh_public_key" {
   description = "Path to SSH public key"
   type        = string
