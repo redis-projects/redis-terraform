@@ -13,12 +13,18 @@ random_id = Module("random_id", source="./modules/random_id")
 
 def generate(config_file):
     network_map = {}
+    fqdn_map = {}
+
+    if 'nameservers' in config_file:
+        for nameserver in config_file['nameservers']:
+            fqdn_map[nameserver["vpc"]] = nameserver["cluster_fqdn"]
 
     if 'networks' in config_file:
         for network in config_file['networks']:
             provider = network.pop('provider', "gcp")
             network_map[network["name"]] = provider
             if provider == "gcp":
+                network.update(redis_cluster_name = fqdn_map[network["name"]])
                 gcp.create_network(**network)
             elif provider == "aws":
                 aws.create_network(**network)
@@ -32,7 +38,16 @@ def generate(config_file):
                 gcp.create_re_cluster(**cluster)
             elif provider == "aws":
                 aws.create_re_cluster(**cluster)
-            
+
+    if 'nameservers' in config_file:
+        for nameserver in config_file['nameservers']:
+            provider = nameserver.pop('provider', "gcp")
+            if provider == "gcp":
+                gcp.create_ns_records(**nameserver)
+            elif provider == "aws":
+                aws.create_ns_records(**nameserver)
+            else: 
+                print("unsupported provider n nameservers section {}".format(provider))
 
 if "name" not in os.environ:
     print("Usage: name=xxxx terraformpy where xxxx is the name of this deployment.  used to maintain isolation between deployments")

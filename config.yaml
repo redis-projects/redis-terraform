@@ -42,3 +42,13 @@ networks:
     bastion_machine_type: t2.micro
     provider: aws
     redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
+nameservers:
+  - vpc: vpc-gcp
+    parent_zone: ps-redislabs
+    cluster_fqdn: mehrig.ps-redislabs.com
+    provider: gcp
+#  - vpc: vpc-aws
+#    parent_zone: ps-redis.com
+#    cluster_fqdn: mehrig.ps-redis.com
+#    provider: aws
+   

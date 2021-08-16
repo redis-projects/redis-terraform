@@ -10,21 +10,24 @@ from . import PUBLIC_CIDR, PRIVATE_CIDR, REGION, OS, REDIS_DISTRO, BOOT_DISK_SIZ
 
 def create_network(name=None, region=REGION, public_cidr=PUBLIC_CIDR, private_cidr=PRIVATE_CIDR, 
                   bastion_zone=ZONE, bastion_machine_image=OS, redis_distro=REDIS_DISTRO,
-                  bastion_machine_type=BASTION_MACHINE_TYPE, rack_aware=False):
+                  bastion_machine_type=BASTION_MACHINE_TYPE, rack_aware=False,
+                  redis_cluster_name=REDIS_CLUSTER_NAME):
     if name is None:
         print("name cannot be None")
         exit(1)
 
     Provider("google", project="redislabs-sa-training-services", region=region, credentials=relative_file("../terraform_account.json"), alias=name)
+    Provider("google-beta", project="redislabs-sa-training-services", region=region, credentials=relative_file("../terraform_account.json"), alias=name)
 
     network_mod = Module("network-%s" % name, source="./modules/gcp/network", 
         name= '%s-%s' % (DEPLOYMENT_NAME, name), 
         gce_public_subnet_cidr=public_cidr, 
         region=region, 
         gce_private_subnet_cidr=private_cidr)
-    create_bastion(name, bastion_zone, rack_aware, bastion_machine_type, bastion_machine_image, redis_distro)
+    create_bastion(name, bastion_zone, rack_aware, bastion_machine_type, bastion_machine_image, redis_distro,
+                  redis_cluster_name)
 
-def create_bastion(name, zone, rack_aware, machine_type, machine_image, redis_distro):
+def create_bastion(name, zone, rack_aware, machine_type, machine_image, redis_distro, redis_cluster_name):
     inventory = Data("template_file", "inventory-%s" % name,
         template = relative_file("../templates/inventory.tpl"),
         vars = {
@@ -33,11 +36,11 @@ def create_bastion(name, zone, rack_aware, machine_type, machine_image, redis_di
         }
     )
 
-    extra_vars = Data("template_file", "extra_vars",
+    extra_vars = Data("template_file", "extra_vars-"+name,
         template = relative_file("../templates/extra-vars.tpl"),
         vars = {
             'ansible_user': SSH_USER,
-            'redis_cluster_name': REDIS_CLUSTER_NAME,
+            'redis_cluster_name': redis_cluster_name,
             'redis_user_name': REDIS_USER_NAME,
             'redis_pwd': REDIS_PWD,
             'redis_email_from': REDIS_EMAIL_FROM,
@@ -59,7 +62,7 @@ def create_bastion(name, zone, rack_aware, machine_type, machine_image, redis_di
         gce_ssh_user = SSH_USER,
         gce_ssh_pub_key_file = SSH_PUB_KEY_FILE,
         inventory = '${data.template_file.inventory-%s}' % name,
-        extra_vars = '${data.template_file.extra_vars}',
+        extra_vars = '${data.template_file.extra_vars-%s}' % name,
         gce_ssh_private_key_file = SSH_PRIVATE_KEY_FILE,
         redis_distro = redis_distro,
         providers = {"google": "google.%s" % name},
@@ -114,3 +117,28 @@ def create_re_ui(vpc):
 
     Output("gcp-re-ui-%s-ip-output" % vpc,
             value = '${module.re-ui-%s.ui-ip.address}' % vpc)
+
+def create_ns_records(vpc=None,
+                      cluster_fqdn=None,
+                      parent_zone=None):
+
+    if cluster_fqdn is None:
+        print("cluster_fqdn cannot be None")
+        exit(1)
+
+    if parent_zone is None:
+        print("parent_zone cannot be None")
+        exit(1)
+
+    if vpc is None:
+        print("vpc cannot be None")
+        exit(1)
+
+    Module("ns-%s" % (vpc,),
+        source = "./modules/gcp/ns",
+        name = '%s-%s' % (DEPLOYMENT_NAME, vpc),
+        providers = {"google-beta": "google-beta.%s" % vpc},
+        cluster_fqdn=cluster_fqdn,
+        parent_zone=parent_zone,
+        ip_addresses = '${module.re-%s.re-public-ips}' % vpc
+    )

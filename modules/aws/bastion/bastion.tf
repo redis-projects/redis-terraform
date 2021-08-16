@@ -110,7 +110,7 @@ resource "aws_instance" "bastion" {
   provisioner "remote-exec" {
     inline = [
       "chmod +x /home/${var.ssh_user}/post_provision.sh",
-      "/home/${var.ssh_user}/post_provision.sh ${var.redis_distro} > post_provision.out 2>&1",
+      "/home/${var.ssh_user}/post_provision.sh ${var.redis_distro} | tee  post_provision.out 2>&1",
     ]
 
     connection {
