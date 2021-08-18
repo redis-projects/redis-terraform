@@ -56,6 +56,18 @@ resource "google_compute_instance" "bastion" {
   }
 
   provisioner "file" {
+    content  = var.active_active_script.rendered
+    destination = "/home/${var.gce_ssh_user}/create_aa_db.sh"
+
+    connection {
+      type        = "ssh"
+      user        = var.gce_ssh_user
+      private_key = file(var.gce_ssh_private_key_file)
+      host        = google_compute_address.bastion-ip-address.address
+    }
+  }
+
+  provisioner "file" {
     content  = var.extra_vars.rendered
     destination = "/home/${var.gce_ssh_user}/boa-extra-vars.yaml"
 

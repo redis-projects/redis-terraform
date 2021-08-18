@@ -36,7 +36,18 @@ def create_bastion(name, zone, rack_aware, machine_type, machine_image, redis_di
         }
     )
 
-    extra_vars = Data("template_file", "extra_vars-"+name,
+    active_active_script = Data("template_file", "aa_db",
+        template = relative_file("../templates/create_aa_db.tpl"),
+        vars = {
+            'redis_user_name': REDIS_USER_NAME,
+            'redis_pwd': REDIS_PWD,
+            'redis_cluster_name': REDIS_CLUSTER_NAME,
+            'FQDN1': 'domain1.test.net',
+            'FQDN2': 'domain2.test.net'
+        }
+    )
+
+    extra_vars = Data("template_file", "extra_vars",
         template = relative_file("../templates/extra-vars.tpl"),
         vars = {
             'ansible_user': SSH_USER,
@@ -62,7 +73,8 @@ def create_bastion(name, zone, rack_aware, machine_type, machine_image, redis_di
         gce_ssh_user = SSH_USER,
         gce_ssh_pub_key_file = SSH_PUB_KEY_FILE,
         inventory = '${data.template_file.inventory-%s}' % name,
-        extra_vars = '${data.template_file.extra_vars-%s}' % name,
+        active_active_script = '${data.template_file.aa_db}',
+        extra_vars = '${data.template_file.extra_vars}',
         gce_ssh_private_key_file = SSH_PRIVATE_KEY_FILE,
         redis_distro = redis_distro,
         providers = {"google": "google.%s" % name},
