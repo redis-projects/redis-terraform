@@ -27,6 +27,7 @@ resource "aws_eip" "eip" {
   count                     = var.worker_count
   network_interface         = aws_network_interface.cluster_nic[count.index].id
   associate_with_private_ip = aws_network_interface.cluster_nic[count.index].private_ip
+  depends_on                = [aws_instance.node]
 
   tags = {
     Name = "${var.name}-cluster-eip-${count.index}"

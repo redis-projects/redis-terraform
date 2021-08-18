@@ -32,6 +32,14 @@ resource "aws_security_group" "allow-local" {
   vpc_id = aws_vpc.vpc.id
 
   ingress {
+    description = "DNS"
+    from_port = 53
+    to_port = 53
+    protocol = "udp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
     description = "Local Traffic"
     from_port = 0
     to_port = 0

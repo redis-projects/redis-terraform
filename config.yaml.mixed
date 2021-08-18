@@ -1,15 +1,15 @@
 ---
 clusters:
-  - vpc: vpc-aws-us
+  - vpc: vpc-gcp
     worker_count: 3 
-    machine_type: t2.xlarge
-    machine_image: ami-0825995a6bb26087c
+    machine_type: n1-standard-4
+    machine_image: rhel-8-v20210721
     zones: 
-    - us-west-1a
-    - us-west-1b
-    - us-west-1c
-    expose_ui: False
-  - vpc: vpc-aws-europe
+    - europe-west3-a
+    - europe-west3-b
+    - europe-west3-c
+    expose_ui: True
+  - vpc: vpc-aws
     worker_count: 3
     machine_type: t2.xlarge
     machine_image: ami-01f6fd1863750f580
@@ -19,21 +19,17 @@ clusters:
     - eu-central-1a
     expose_ui: False
 networks:
-  - name: vpc-aws-us
-    vpc_cidr: 10.1.0.0/16
-    public_cidr: 10.1.1.0/24
-    private_cidr: 
-      us-west-1a: 10.1.3.0/24
-      us-west-1b: 10.1.2.0/24
-      us-west-1c: 10.1.4.0/24
-    region: us-west-1
-    rack_aware: False
-    bastion_zone: us-west-1c
-    bastion_machine_image: ami-045973274043aefb1
-    bastion_machine_type: t2.micro
-    provider: aws
+  - name: vpc-gcp
+    public_cidr: 10.1.0.0/24
+    private_cidr: 10.2.0.0/16 
+    region: europe-west3
+    bastion_zone: europe-west3-b
+    bastion_machine_image: rhel-7-v20210721
+    bastion_machine_type: n1-standard-1
+    rack_aware: True
+    provider: gcp
     redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
-  - name: vpc-aws-europe
+  - name: vpc-aws
     vpc_cidr: 10.0.0.0/16
     public_cidr: 10.0.1.0/24
     private_cidr: 
@@ -41,18 +37,17 @@ networks:
       eu-central-1a: 10.0.2.0/24
       eu-central-1c: 10.0.4.0/24
     region: eu-central-1
-    rack_aware: False
     bastion_zone: eu-central-1b
     bastion_machine_image: ami-02241e4f36e06d650
     bastion_machine_type: t2.micro
     provider: aws
     redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
 nameservers:
-  - vpc: vpc-aws-us
+  - vpc: vpc-gcp
+    parent_zone: ps-redislabs
+    cluster_fqdn: mehrig.ps-redislabs.com
+    provider: gcp
+  - vpc: vpc-aws
     parent_zone: aws.ps-redislabs.com
-    cluster_fqdn: mehrig-us.aws.ps-redislabs.com
-    provider: aws
-  - vpc: vpc-aws-europe
-    parent_zone: aws.ps-redislabs.com
-    cluster_fqdn: mehrig-europe.aws.ps-redislabs.com
+    cluster_fqdn: mehrig.aws.ps-redislabs.com
     provider: aws

@@ -23,8 +23,8 @@ def generate(config_file):
         for network in config_file['networks']:
             provider = network.pop('provider', "gcp")
             network_map[network["name"]] = provider
+            network.update(redis_cluster_name = fqdn_map[network["name"]])
             if provider == "gcp":
-                network.update(redis_cluster_name = fqdn_map[network["name"]])
                 gcp.create_network(**network)
             elif provider == "aws":
                 aws.create_network(**network)

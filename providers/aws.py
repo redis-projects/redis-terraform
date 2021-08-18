@@ -8,7 +8,7 @@ from . import PUBLIC_CIDR, PRIVATE_CIDR, REGION, OS, AWS_REDIS_DISTRO, BOOT_DISK
 def create_network(name=None, region=REGION, vpc_cidr=AWS_VPC_CIDR, public_cidr=PUBLIC_CIDR, 
                   private_cidr=PRIVATE_CIDR, bastion_zone=ZONE, bastion_machine_image=AWS_OS,
                   bastion_machine_type=AWS_BASTION_MACHINE_TYPE, rack_aware=False, 
-                  redis_distro=AWS_REDIS_DISTRO):
+                  redis_distro=AWS_REDIS_DISTRO,redis_cluster_name=REDIS_CLUSTER_NAME):
     if name is None:
         print("name cannot be None")
         exit(1)
@@ -23,12 +23,13 @@ def create_network(name=None, region=REGION, vpc_cidr=AWS_VPC_CIDR, public_cidr=
         availability_zone = bastion_zone,
         public_subnet_cidr=public_cidr, 
         private_subnet_cidr=private_cidr)
-    create_bastion(name, bastion_zone, rack_aware, bastion_machine_type, bastion_machine_image, redis_distro)
+    create_bastion(name, bastion_zone, rack_aware, bastion_machine_type, bastion_machine_image, redis_distro,
+                  redis_cluster_name)
 
 def create_keypair(name):
     Module("keypair-%s" % name, name="%s-%s-keypair" % (DEPLOYMENT_NAME, name), source="./modules/aws/keypair", ssh_public_key=SSH_PUB_KEY_FILE)
 
-def create_bastion(name, zone, rack_aware, machine_type, machine_image, redis_distro):
+def create_bastion(name, zone, rack_aware, machine_type, machine_image, redis_distro, redis_cluster_name):
     create_keypair(name)
     
     inventory = Data("template_file", "inventory-%s" % name,
@@ -39,11 +40,11 @@ def create_bastion(name, zone, rack_aware, machine_type, machine_image, redis_di
         }
     )
 
-    extra_vars = Data("template_file", "extra_vars",
+    extra_vars = Data("template_file", "extra_vars-"+name,
         template = relative_file("../templates/extra-vars.tpl"),
         vars = {
           'ansible_user': REDIS_USER,
-          'redis_cluster_name': REDIS_CLUSTER_NAME,
+          'redis_cluster_name': redis_cluster_name,
           'redis_user_name': REDIS_USER_NAME,
           'redis_pwd': REDIS_PWD,
           'redis_email_from': REDIS_EMAIL_FROM,
@@ -64,7 +65,7 @@ def create_bastion(name, zone, rack_aware, machine_type, machine_image, redis_di
         ssh_public_key = SSH_PUB_KEY_FILE,
         ssh_key_name = '${module.keypair-%s.key-name}' % name,
         inventory = '${data.template_file.inventory-%s}' % name,
-        extra_vars = '${data.template_file.extra_vars}',
+        extra_vars = '${data.template_file.extra_vars-%s}' % name,
         ssh_private_key = SSH_PRIVATE_KEY_FILE,
         redis_distro = redis_distro,
         providers = {"aws": "aws.%s" % name},
@@ -120,3 +121,28 @@ def create_re_ui(vpc):
         instances= '${module.re-%s.re-nodes.*.tags_all}' % vpc,
         providers = {"aws": "aws.%s" % vpc},
         zones = '${module.re-%s.re-nodes.*.zone}' % vpc)
+
+def create_ns_records(vpc=None,
+                      cluster_fqdn=None,
+                      parent_zone=None):
+
+    if cluster_fqdn is None:
+        print("cluster_fqdn cannot be None")
+        exit(1)
+
+    if parent_zone is None:
+        print("parent_zone cannot be None")
+        exit(1)
+
+    if vpc is None:
+        print("vpc cannot be None")
+        exit(1)
+
+    Module("ns-%s" % (vpc,),
+        source = "./modules/aws/ns",
+        name = '%s-%s' % (DEPLOYMENT_NAME, vpc),
+        providers = {"aws": "aws.%s" % vpc},
+        cluster_fqdn=cluster_fqdn,
+        parent_zone=parent_zone,
+        ip_addresses = '${module.re-%s.re-public-ips}' % vpc
+    )
