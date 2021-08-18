@@ -15,19 +15,20 @@ def create_network(name=None, region=REGION, vpc_cidr=AWS_VPC_CIDR, public_cidr=
 
     #Provider("aws", project="redislabs-sa-training-services", region=region, credentials=relative_file("../terraform_account_aws.json"), alias=name)
 
-    Provider("aws", region=AWS_REGION, access_key=AWS_ACCESS_KEY_ID, secret_key=AWS_SECRET_ACCESS_KEY, alias=name)
+    Provider("aws", region=region, access_key=AWS_ACCESS_KEY_ID, secret_key=AWS_SECRET_ACCESS_KEY, alias=name)
 
     network_mod = Module("network-%s" % name, source="./modules/aws/network", 
         name= '%s-%s' % (DEPLOYMENT_NAME, name),
         vpc_cidr=vpc_cidr,
         availability_zone = bastion_zone,
         public_subnet_cidr=public_cidr, 
+        providers = {"aws": "aws.%s" % name},
         private_subnet_cidr=private_cidr)
     create_bastion(name, bastion_zone, rack_aware, bastion_machine_type, bastion_machine_image, redis_distro,
                   redis_cluster_name)
 
 def create_keypair(name):
-    Module("keypair-%s" % name, name="%s-%s-keypair" % (DEPLOYMENT_NAME, name), source="./modules/aws/keypair", ssh_public_key=SSH_PUB_KEY_FILE)
+    Module("keypair-%s" % name, name="%s-%s-keypair" % (DEPLOYMENT_NAME, name), source="./modules/aws/keypair", ssh_public_key=SSH_PUB_KEY_FILE, providers = {"aws": "aws.%s" % name},)
 
 def create_bastion(name, zone, rack_aware, machine_type, machine_image, redis_distro, redis_cluster_name):
     create_keypair(name)

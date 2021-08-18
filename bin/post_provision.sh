@@ -46,7 +46,7 @@ sudo yum -y update --nogpgcheck
 sudo yum install -y git wget --nogpgcheck
 wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-${OS_MAJOR}.noarch.rpm || exit 1
 sudo yum install -y --nogpgcheck epel-release-latest-${OS_MAJOR}.noarch.rpm
-sudo yum install -y ansible
+sudo yum install -y --enablerepo="*epel*" ansible
 tar -xf redis-ansible.tar.gz || exit 1
 mv boa-inventory.ini redis-ansible/inventories/boa-cluster.ini || exit 1
 mv boa-extra-vars.yaml redis-ansible/extra_vars/boa-extra-vars.yaml || exit 1
