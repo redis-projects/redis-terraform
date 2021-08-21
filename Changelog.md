@@ -8,10 +8,8 @@ clusters on a public clould infrastructure.
 - A new section called 'nameservers' has been added to automate the setup of
   DNS (currently on AWS only!) records for the new cluster(s). This new
   section supports 3 keys. "parent_zone" is the name of the zone. The zone
-  is expected to exist already and won't be created or destroyed! The
-  second parameter is "cluster_fqdn" and describes the Fully Qualified
-  Domain Name of the Redis cluster in that vpc. Third keyword is "provider".
-  Please take into account that this is not neccessarily the provider where
+  is expected to exist already and won't be created or destroyed! Second keyword 
+  is "provider". Please take into account that this is not neccessarily the provider where
   the cluster was created but the provider that is hosting the DNS domain for
   the cluster.
 ### Changed

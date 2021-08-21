@@ -147,3 +147,6 @@ def create_ns_records(vpc=None,
         parent_zone=parent_zone,
         ip_addresses = '${module.re-%s.re-public-ips}' % vpc
     )
+
+    Output("%s-dns-name" % vpc,
+            value = cluster_fqdn)

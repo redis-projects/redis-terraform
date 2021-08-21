@@ -2,7 +2,8 @@ from terraformpy import Module, Provider, Data
 from terraformpy.helpers import relative_file
 import os
 import yaml
-from providers import aws, gcp, REGION, ZONE, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION
+import sys
+from providers import aws, gcp, REGION, ZONE, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, DEPLOYMENT_NAME
 
 gcp_provider = Provider("google", project="redislabs-sa-training-services", region=REGION, zone=ZONE, credentials=relative_file("./terraform_account.json"))
 aws_provider = Provider("aws", region=AWS_REGION, access_key=AWS_ACCESS_KEY_ID, secret_key=AWS_SECRET_ACCESS_KEY)
@@ -17,13 +18,15 @@ def generate(config_file):
 
     if 'nameservers' in config_file:
         for nameserver in config_file['nameservers']:
-            fqdn_map[nameserver["vpc"]] = nameserver["cluster_fqdn"]
+            fqdn_map[nameserver["vpc"]] = "%s-%s.%s" % (DEPLOYMENT_NAME, nameserver["vpc"], nameserver["parent_zone"])
+            nameserver["cluster_fqdn"] = fqdn_map[nameserver["vpc"]]
 
     if 'networks' in config_file:
         for network in config_file['networks']:
             provider = network.pop('provider', "gcp")
             network_map[network["name"]] = provider
-            network.update(redis_cluster_name = fqdn_map[network["name"]])
+            if network["name"] in fqdn_map:
+                network.update(redis_cluster_name = fqdn_map[network["name"]])
             if provider == "gcp":
                 gcp.create_network(**network)
             elif provider == "aws":
@@ -53,6 +56,8 @@ if "name" not in os.environ:
     print("Usage: name=xxxx terraformpy where xxxx is the name of this deployment.  used to maintain isolation between deployments")
     exit(1)
 
-f = open("config.yaml", "r")
+config_file_name = os.getenv("config","config.yaml")
+
+f = open(config_file_name, "r")
 config_file = yaml.load(f, Loader=yaml.FullLoader)
 generate(config_file)
