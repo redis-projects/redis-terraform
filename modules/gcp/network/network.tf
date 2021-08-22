@@ -103,7 +103,24 @@ resource "google_compute_firewall" "public-firewall" {
 
   allow {
     protocol = "tcp"
-    ports    = ["22","80", "443", "9443"]
+    ports    = ["22", "80", "443", "9443"]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+}
+
+resource "google_compute_firewall" "dns-firewall" {
+  name    = "${var.name}-dns-firewall"
+  network = google_compute_network.vpc.name
+
+  allow {
+    protocol = "udp"
+    ports = ["53"]
+  }
+
+  allow {
+    protocol = "tcp"
+    ports    = ["53"]
   }
 
   source_ranges = ["0.0.0.0/0"]

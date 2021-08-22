@@ -3,6 +3,19 @@
 Tracking all changes for the "Terraform" project building Redis-Enterprise
 clusters on a public clould infrastructure.
 
+## [0.8.1] - Unreleased
+### Added
+- A new section called 'nameservers' has been added to automate the setup of
+  DNS (currently on AWS only!) records for the new cluster(s). This new
+  section supports 3 keys. "parent_zone" is the name of the zone. The zone
+  is expected to exist already and won't be created or destroyed! Second keyword 
+  is "provider". Please take into account that this is not neccessarily the provider where
+  the cluster was created but the provider that is hosting the DNS domain for
+  the cluster.
+### Changed
+- The output of the script bin/post_provision.sh is now directed to stdout 
+  as well as to the post_provision.out file on the bastion node(s)
+
 ## [0.8.0] - 2021-08-13
 ### Added
 - In the 'clusters' section of config.yaml the OS image for the cluster nodes
