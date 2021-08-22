@@ -45,9 +45,9 @@ networks:
 nameservers:
   - vpc: vpc-gcp
     parent_zone: ps-redislabs
-    cluster_fqdn: mehrig.ps-redislabs.com
+    domain: ps-redislabs.com
     provider: gcp
   - vpc: vpc-aws
     parent_zone: aws.ps-redislabs.com
-    cluster_fqdn: mehrig.aws.ps-redislabs.com
+    domain: aws.ps-redislabs.com
     provider: aws

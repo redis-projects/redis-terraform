@@ -50,9 +50,9 @@ networks:
 nameservers:
   - vpc: vpc-aws-us
     parent_zone: aws.ps-redislabs.com
-    cluster_fqdn: mehrig-us.aws.ps-redislabs.com
+    domain: aws.ps-redislabs.com
     provider: aws
   - vpc: vpc-aws-europe
     parent_zone: aws.ps-redislabs.com
-    cluster_fqdn: mehrig-europe.aws.ps-redislabs.com
+    domain: aws.ps-redislabs.com
     provider: aws

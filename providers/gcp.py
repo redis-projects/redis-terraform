@@ -134,9 +134,6 @@ def create_ns_records(vpc=None,
         print("vpc cannot be None")
         exit(1)
 
-    #the zone in gcp is named ps-redislabs which kinda creates an issue.  should be name ps-redislabs.com instead to maintain convention and simplify config
-    cluster_fqdn = "%s.com" % cluster_fqdn
-
     Module("ns-%s" % (vpc,),
         source = "./modules/gcp/ns",
         name = '%s-%s' % (DEPLOYMENT_NAME, vpc),

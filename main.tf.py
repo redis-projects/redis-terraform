@@ -18,7 +18,8 @@ def generate(config_file):
 
     if 'nameservers' in config_file:
         for nameserver in config_file['nameservers']:
-            fqdn_map[nameserver["vpc"]] = "%s-%s.%s" % (DEPLOYMENT_NAME, nameserver["vpc"], nameserver["parent_zone"])
+            assert nameserver["domain"] is not None, "Please supply domain for all nameservers"
+            fqdn_map[nameserver["vpc"]] = "%s-%s.%s" % (DEPLOYMENT_NAME, nameserver["vpc"], nameserver["domain"])
             nameserver["cluster_fqdn"] = fqdn_map[nameserver["vpc"]]
 
     if 'networks' in config_file:
@@ -45,6 +46,7 @@ def generate(config_file):
     if 'nameservers' in config_file:
         for nameserver in config_file['nameservers']:
             provider = nameserver.pop('provider', "gcp")
+            nameserver.pop('domain')
             if provider == "gcp":
                 gcp.create_ns_records(**nameserver)
             elif provider == "aws":
