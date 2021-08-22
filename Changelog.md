@@ -6,12 +6,16 @@ clusters on a public clould infrastructure.
 ## [0.8.1] - Unreleased
 ### Added
 - A new section called 'nameservers' has been added to automate the setup of
-  DNS (currently on AWS only!) records for the new cluster(s). This new
+  DNS records for the new cluster(s). This new
   section supports 3 keys. "parent_zone" is the name of the zone. The zone
   is expected to exist already and won't be created or destroyed! Second keyword 
   is "provider". Please take into account that this is not neccessarily the provider where
   the cluster was created but the provider that is hosting the DNS domain for
-  the cluster.
+  the cluster. Third keyword is domain.  This value specifies the subdomain where the
+  FQDN of the cluster will be created.  The resulting FQDN is
+  DEPLOYMENT_NAME-CLUSTER_VPC-DOMAIN
+- Added the ability to specify a config file using the config environment variable
+- 
 ### Changed
 - The output of the script bin/post_provision.sh is now directed to stdout 
   as well as to the post_provision.out file on the bastion node(s)

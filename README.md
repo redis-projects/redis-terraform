@@ -28,11 +28,34 @@ AWS setup
  
 ## Configuration file
 
-The configuration is in yaml format and is provided in a file called config.yaml
+The configuration is in yaml format and is by default expected in a file called config.yaml.  A different configuration file can be specified by specifying the path in an environment variable called config.
 
 ### Sections
 
-There are currently two sections supported in the configuration: clusters and networks
+There are currently three sections supported in the configuration: clusters, nameservers, networks
+
+#### nameservers
+
+An optional section that defines the dns configuration for the clusters
+
+##### parent_zone
+
+The name of the zone definition in the cloud provider DNS configuration.   
+  
+Use aws.ps-redislabs.com for AWS  
+Use ps-redislabs for GCP  
+
+##### provider
+
+The provider to install the DNS records to.  This is not neccessarily the provider where the cluster was created but the provider that is hosting the DNS domain for the cluster. 
+
+##### domain
+
+This value specifies the subdomain where the FQDN of the cluster will be created.  The resulting FQDN is DEPLOYMENT_NAME-CLUSTER_VPC-DOMAIN  
+
+Use aws.ps-redislabs.com for AWS  
+  
+Use ps-redislabs.com for GCP
 
 #### networks
 
@@ -159,7 +182,7 @@ networks:
 - Install Python dependencies
   - pip install -r requirements.txt
 - Execute terraformpy
-  - PYTHONPATH=. name=xxxxx terraformpy, where xxxxx is the name to give this deployment
+  - PYTHONPATH=. name=xxxxx config=ccccc terraformpy, where xxxxx is the name to give this deployment and config is an optional parameter to specify a different config file from config.yaml
 - Run terraform:
   - terraform init
   - terraform plan
@@ -180,7 +203,7 @@ The created nodes are in a private subnet so it is necessary to go through the b
 - SSH to the instances
   - ssh redislabs@*ip*
 - Access cluster endpoint
-  - From bastion: curl -k --fail -u admin@admin.com:admin https://*ip*:9443/v1/nodes
+  - From bastion: curl -k --fail -u admin@admin.com:admin https://*ip*:9443/v1/nodes.  You can also use the DNS names provided as terraform output
   - From Redis Enterprise node: curl -k --fail -u admin@admin.com:admin https://localhost:9443/v1/nodes
 
 ## Features Coming soon
