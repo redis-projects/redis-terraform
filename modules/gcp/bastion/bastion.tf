@@ -68,18 +68,6 @@ resource "google_compute_instance" "bastion" {
   }
 
   provisioner "file" {
-    source = "bin/redis-ansible.tar.gz"
-    destination = "/home/${var.gce_ssh_user}/redis-ansible.tar.gz"
-
-    connection {
-      type        = "ssh"
-      user        = var.gce_ssh_user
-      private_key = file(var.gce_ssh_private_key_file)
-      host        = google_compute_address.bastion-ip-address.address
-    }
-  }
-
-  provisioner "file" {
     source      = "./bin/post_provision.sh"
     destination = "/home/${var.gce_ssh_user}/post_provision.sh"
 

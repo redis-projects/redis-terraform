@@ -84,18 +84,6 @@ resource "aws_instance" "bastion" {
   }
 
   provisioner "file" {
-    source = "bin/redis-ansible.tar.gz"
-    destination = "/home/${var.ssh_user}/redis-ansible.tar.gz"
-
-    connection {
-      type = "ssh"
-      host = self.public_ip
-      user = var.ssh_user
-      private_key = file(var.ssh_private_key)
-    }
-  }
-
-  provisioner "file" {
     source      = "./bin/post_provision.sh"
     destination = "/home/${var.ssh_user}/post_provision.sh"
 
