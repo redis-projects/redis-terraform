@@ -45,7 +45,7 @@ The name of the zone definition in the cloud provider DNS configuration.
 Use aws.ps-redislabs.com for AWS  
 Use ps-redislabs for GCP  
 
-##### provider
+##### provider (Optional)
 
 The provider to install the DNS records to.  This is not neccessarily the provider where the cluster was created but the provider that is hosting the DNS domain for the cluster. 
 

@@ -45,14 +45,14 @@ def generate(config_file):
 
     if 'nameservers' in config_file:
         for nameserver in config_file['nameservers']:
-            provider = nameserver.pop('provider', "gcp")
+            provider = nameserver.pop('provider', network_map[nameserver["vpc"]])
             nameserver.pop('domain')
             if provider == "gcp":
                 gcp.create_ns_records(**nameserver)
             elif provider == "aws":
                 aws.create_ns_records(**nameserver)
             else: 
-                print("unsupported provider n nameservers section {}".format(provider))
+                print("unsupported provider in nameservers section {}".format(provider))
 
 if "name" not in os.environ:
     print("Usage: name=xxxx terraformpy where xxxx is the name of this deployment.  used to maintain isolation between deployments")

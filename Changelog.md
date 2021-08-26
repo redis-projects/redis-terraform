@@ -3,6 +3,11 @@
 Tracking all changes for the "Terraform" project building Redis-Enterprise
 clusters on a public clould infrastructure.
 
+## [0.8.2]
+### Changed
+- Changed to download redislabs ansible from gcs
+- Changed to default nameserver provider to network provider if not provided
+
 ## [0.8.1] - Unreleased
 ### Added
 - A new section called 'nameservers' has been added to automate the setup of
