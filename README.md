@@ -45,7 +45,7 @@ The name of the zone definition in the cloud provider DNS configuration.
 Use aws.ps-redislabs.com for AWS  
 Use ps-redislabs for GCP  
 
-##### provider
+##### provider (Optional)
 
 The provider to install the DNS records to.  This is not neccessarily the provider where the cluster was created but the provider that is hosting the DNS domain for the cluster. 
 
@@ -65,15 +65,15 @@ Defines VPCs and other characteristics of the network
 
 The zone to which to deploy the vpc's bastion host.  Should match the zones for the selected **provider**  
 
-For AWS, this should be the same as the zone specified for the cluster
-
 ##### name
 
 The name of the network.  Used to refer to this network while creating a cluster
 
 ##### private_cidr
 
-The cidr for the private subnet portion of the vpc.  This is where the Redis Enterprise nodes will be installed
+The cidr for the private subnet portion of the vpc.  This is where the Redis Enterprise nodes will be installed.
+For AWS, multiple regions and zones require different subnets/CIDRs. Therefore the private_cidr setting is a plain 
+string for GCP but a map for AWS where the keys are the zones and the values are the CIDRs.
 
 ##### provider
 
@@ -97,15 +97,32 @@ The region to deploy the vpc to.  Should match the regions for the selected **pr
 
 The cidr for the VPC
 
-##### zone (AWS Only)
+##### bastion_zone
 
-The zone to which to deploy the VPC.  GCP supports VPCs that span zones and regions but AWS is only by availability zone.
+The zone where the bastion node shold be deployed
+
+##### bastion_machine_image
+
+The bastion_machine_image instructs automation which OS image is desired for the bastion node
+
+##### bastion_machine_type
+
+bastion_machine_type specifies which machine type is requested for the bastion node
+
+##### redis_distro
+
+redis_distro contains the URL for the Redis distribution (tar ball) that should be deployed on the cluster nodes
+
+##### peer_with
+
+Only required for AWS if more than one region is used. The value is a ist of network names to which
+peering should be requested
 
 #### clusters
 
 Defines the clusters to be deployed
 
-##### expose_ui (GCP Only)
+##### expose_ui
 
 Exposes the Redis Enterprise UI.  This is currently IP based, hence not secure.  The IP will be provided in the output once terraform runs
 
@@ -125,7 +142,9 @@ The number of machines to deploy, one of which will be a main node
 
 An array of zones to which to deploy the Redis Enterprise nodes.  The zones are applied to the workers in a round robin fashion.  If there are more zones than workers, the extraneous zones are ignored.  If there are more workers than zones, the list is restarted.  Should match the zones for the selected **provider**  
 
-For AWS to work properly, only supply one zone
+#### machine_image
+
+OS image desired to deploy on the cluster nodes
 
 ### Example
 

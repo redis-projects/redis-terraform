@@ -3,6 +3,22 @@
 Tracking all changes for the "Terraform" project building Redis-Enterprise
 clusters on a public clould infrastructure.
 
+## [0.8.3] - Unreleased
+### Added
+- VPC peering has been added to AWS. This is necessary because VPC's cannot span regions 
+  in AWS. To accomplish peering, the "peer_with" flag is now available in the "network" section. 
+  Its value is a list of all VPC names which should be peered.
+- The Web-based GUI (SM) is now available for AWS too. Simply set the flag "expose_ui" to 
+  "True" in the "clusters" section of "config.yaml" file.
+### Fixed
+- The GCP platform now uses session affinity for the load balancer, i.e. there should
+  no longer be permanent password requests when using the GUI
+
+## [0.8.2]
+### Changed
+- Changed to download redislabs ansible from gcs
+- Changed to default nameserver provider to network provider if not provided
+
 ## [0.8.1] - Unreleased
 ### Added
 - A new section called 'nameservers' has been added to automate the setup of
@@ -15,7 +31,7 @@ clusters on a public clould infrastructure.
   FQDN of the cluster will be created.  The resulting FQDN is
   DEPLOYMENT_NAME-CLUSTER_VPC-DOMAIN
 - Added the ability to specify a config file using the config environment variable
-- 
+ 
 ### Changed
 - The output of the script bin/post_provision.sh is now directed to stdout 
   as well as to the post_provision.out file on the bastion node(s)
