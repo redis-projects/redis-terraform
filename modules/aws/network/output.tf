@@ -33,3 +33,7 @@ output "internet-gateway" {
   value       = aws_internet_gateway.igw 
 }
 
+output "peering-request-ids" {
+  description = "map of Peering request IDs"
+  value       = zipmap(var.peer_request_list, aws_vpc_peering_connection.peer.*.id)
+}

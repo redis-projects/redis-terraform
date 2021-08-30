@@ -8,7 +8,8 @@ from . import PUBLIC_CIDR, PRIVATE_CIDR, REGION, OS, AWS_REDIS_DISTRO, BOOT_DISK
 def create_network(name=None, region=REGION, vpc_cidr=AWS_VPC_CIDR, public_cidr=PUBLIC_CIDR, 
                   private_cidr=PRIVATE_CIDR, bastion_zone=ZONE, bastion_machine_image=AWS_OS,
                   bastion_machine_type=AWS_BASTION_MACHINE_TYPE, rack_aware=False, 
-                  redis_distro=AWS_REDIS_DISTRO,redis_cluster_name=REDIS_CLUSTER_NAME):
+                  redis_distro=AWS_REDIS_DISTRO,redis_cluster_name=REDIS_CLUSTER_NAME,
+                  peer_request_list=[], peer_accept_list=[], region_map={}, cidr_map={}):
     if name is None:
         print("name cannot be None")
         exit(1)
@@ -17,13 +18,29 @@ def create_network(name=None, region=REGION, vpc_cidr=AWS_VPC_CIDR, public_cidr=
 
     Provider("aws", region=region, access_key=AWS_ACCESS_KEY_ID, secret_key=AWS_SECRET_ACCESS_KEY, alias=name)
 
+    vpc_request_list = ['${module.network-' + s + '.vpc}' for s in peer_request_list]
+    vpc_accept_list  = ['${module.network-' + s + '.vpc}' for s in peer_accept_list]
+
+    vpc_conn_index = []
+    for s in peer_accept_list:
+        vpc_conn_index.append('${module.network-%s.peering-request-ids["%s"]}' % (s,name))
+
     network_mod = Module("network-%s" % name, source="./modules/aws/network", 
         name= '%s-%s' % (DEPLOYMENT_NAME, name),
+        vpc_name= name,
         vpc_cidr=vpc_cidr,
         availability_zone = bastion_zone,
         public_subnet_cidr=public_cidr, 
         providers = {"aws": "aws.%s" % name},
+        peer_request_list = peer_request_list,
+        peer_accept_list = peer_accept_list,
+        vpc_request_list = vpc_request_list,
+        vpc_accept_list = vpc_accept_list,
+        region_map = region_map,
+        cidr_map = cidr_map,
+        vpc_conn_index = vpc_conn_index,
         private_subnet_cidr=private_cidr)
+
     create_bastion(name, bastion_zone, rack_aware, bastion_machine_type, bastion_machine_image, redis_distro,
                   redis_cluster_name)
 
@@ -111,17 +128,20 @@ def create_re_cluster(worker_count=WORKER_MACHINE_COUNT,
         create_re_ui(vpc)
 
 def create_re_ui(vpc):
-    raise Exception("create ui not currently supported in aws")
 
     if vpc is None:
         print("vpc cannot be None")
         exit(1)
 
-    Module("re-ui-%s" % vpc, source="./modules/gcp/re-ui", 
-        name= '%s-%s' % (DEPLOYMENT_NAME, vpc), 
-        instances= '${module.re-%s.re-nodes.*.tags_all}' % vpc,
-        providers = {"aws": "aws.%s" % vpc},
-        zones = '${module.re-%s.re-nodes.*.zone}' % vpc)
+    Module("re-ui-%s" % vpc, source="./modules/aws/re-ui", 
+        name      = '%s-%s' % (DEPLOYMENT_NAME, vpc), 
+        vpc       = '${module.network-%s.vpc}' % vpc,
+        ips       = '${module.re-%s.re-nodes.*.private_ip}' % vpc,
+        subnets   = '${module.network-%s.private-subnet.*.id}' % vpc,
+        providers = {"aws": "aws.%s" % vpc})
+
+    Output("%s-ui-endpoint" % vpc,
+            value = '${module.re-ui-%s.ui-ip}' % vpc)
 
 def create_ns_records(vpc=None,
                       cluster_fqdn=None,

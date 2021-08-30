@@ -10,6 +10,7 @@ terraform {
 
 resource "google_compute_target_pool" "default" {
   name = "${var.name}-lb"
+  session_affinity = "CLIENT_IP"
   instances = [
     for i, name in var.instances :
      format("%s/%s",var.zones[i],name)

@@ -86,16 +86,6 @@ resource "aws_nat_gateway" "nat_gateway" {
 resource "aws_route_table" "rt-public" {
   vpc_id = aws_vpc.vpc.id
 
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
-  }
-
-  route {
-    ipv6_cidr_block = "::/0"
-    gateway_id = aws_internet_gateway.igw.id
-  }
-
   tags = {
     Name = "${var.name}-rt-public"
   }
@@ -103,16 +93,6 @@ resource "aws_route_table" "rt-public" {
 
 resource "aws_route_table" "rt-private" {
   vpc_id = aws_vpc.vpc.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
-  }
-
-  route {
-    ipv6_cidr_block = "::/0"
-    gateway_id = aws_internet_gateway.igw.id
-  }
 
   tags = {
     Name = "${var.name}-rt-private"
@@ -130,4 +110,63 @@ resource "aws_route_table_association" "rt-to-private-subnet" {
   count = length(var.private_subnet_cidr)
   subnet_id = aws_subnet.private-subnet-1[count.index].id
   route_table_id = aws_route_table.rt-private.id
+}
+
+############################################################
+# Route Entries
+
+resource "aws_route" "public-allipv4" {
+  route_table_id         = aws_route_table.rt-public.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.igw.id
+}
+
+resource "aws_route" "public-allowipv6" {
+  route_table_id              = aws_route_table.rt-public.id
+  destination_ipv6_cidr_block = "::/0"
+  gateway_id                  = aws_internet_gateway.igw.id
+}
+
+resource "aws_route" "private-allipv4" {
+  route_table_id         = aws_route_table.rt-private.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.igw.id
+}
+
+resource "aws_route" "private-allowipv6" {
+  route_table_id              = aws_route_table.rt-private.id
+  destination_ipv6_cidr_block = "::/0"
+  gateway_id                  = aws_internet_gateway.igw.id
+}
+
+# Add route to the VPC of the peering request to routing table (private)
+resource "aws_route" "private-req" {
+  route_table_id            = aws_route_table.rt-private.id
+  destination_cidr_block    = var.cidr_map[var.peer_request_list[count.index]]
+  vpc_peering_connection_id = aws_vpc_peering_connection.peer[count.index].id
+  count                     = length(var.peer_request_list)
+}
+
+# Add route to the VPC of the peering request to routing table (public)
+resource "aws_route" "public-req" {
+  route_table_id            = aws_route_table.rt-public.id
+  destination_cidr_block    = var.cidr_map[var.peer_request_list[count.index]]
+  vpc_peering_connection_id = aws_vpc_peering_connection.peer[count.index].id
+  count                     = length(var.peer_request_list)
+}
+
+# Add route to the VPC of the peering accept to routing table (private)
+resource "aws_route" "private-acc" {
+  route_table_id            = aws_route_table.rt-private.id
+  destination_cidr_block    = var.cidr_map[var.peer_accept_list[count.index]]
+  vpc_peering_connection_id = var.vpc_conn_index[count.index]
+  count                     = length(var.peer_accept_list)
+}
+
+# Add route to the VPC of the peering accept to routing table (public)
+resource "aws_route" "public-acc" {
+  route_table_id            = aws_route_table.rt-public.id
+  destination_cidr_block    = var.cidr_map[var.peer_accept_list[count.index]]
+  vpc_peering_connection_id = var.vpc_conn_index[count.index]
+  count                     = length(var.peer_accept_list)
 }
