@@ -1,0 +1,4 @@
+#!/bin/bash
+#the following POST request will create an active-active db. Syntax: FQDN1=abc FQDN2=xyz ./create-aa.sh
+echo Creating an aa db for clusters $FQDN1 and $FQDN2
+curl --user ${redis_user_name}:${redis_pwd} -v -k -H "Content-Type: application/json" -X POST -d '{"default_db_config": {"name": "sample-crdb","bigstore": false,"data_persistence": "disabled","replication": true,"memory_size": 1073741824,"aof_policy":"appendfsync-every-sec","snapshot_policy": [],"sharding": true,"shards_count": 1,"port": 13000},"instances": [{"cluster": {"url": "https://${FQDN1}:9443","credentials": {"username": "${redis_user_name}","password": "${redis_pwd}"},"name": "${redis_cluster_name}"},"compression": 3},{"cluster": {"url":"http://${FQDN2}:9443","credentials": {"username": "${redis_user_name}","password": "${redis_pwd}"},"name": "${redis_cluster_name}"},"compression": 3}],"name": "sample-crdb"}' https://10.2.0.3:9443/v1/crdbs

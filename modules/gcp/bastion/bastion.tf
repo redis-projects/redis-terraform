@@ -56,8 +56,8 @@ resource "google_compute_instance" "bastion" {
   }
 
   provisioner "file" {
-    content  = var.extra_vars.rendered
-    destination = "/home/${var.gce_ssh_user}/boa-extra-vars.yaml"
+    content  = var.active_active_script.rendered
+    destination = "/home/${var.gce_ssh_user}/create_aa_db.sh"
 
     connection {
       type        = "ssh"
@@ -68,8 +68,8 @@ resource "google_compute_instance" "bastion" {
   }
 
   provisioner "file" {
-    source = "bin/redis-ansible.tar.gz"
-    destination = "/home/${var.gce_ssh_user}/redis-ansible.tar.gz"
+    content  = var.extra_vars.rendered
+    destination = "/home/${var.gce_ssh_user}/boa-extra-vars.yaml"
 
     connection {
       type        = "ssh"

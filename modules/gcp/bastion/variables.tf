@@ -11,6 +11,7 @@ variable "subnet" {}
 variable "gce_ssh_user" {}
 variable "gce_ssh_pub_key_file" {}
 variable "inventory" {}
+variable "active_active_script" {}
 variable "gce_ssh_private_key_file" {}
 variable "extra_vars" {}
 variable "redis_distro" {}
