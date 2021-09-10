@@ -5,6 +5,8 @@ import yaml
 import sys
 from providers import aws, gcp, REGION, ZONE, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, DEPLOYMENT_NAME
 
+gcp_provider = Provider("google", project="redislabs-sa-training-services", region=REGION, zone=ZONE, credentials=relative_file("./terraform_account.json"))
+
 random_id = Module("random_id", source="./modules/random_id") 
 
 def generate(config_file):
@@ -23,7 +25,10 @@ def generate(config_file):
 
     if 'networks' in config_file:
         for network in config_file['networks']:
-            provider = network.pop('provider', "gcp")
+            if "provider" not in network:
+                print("ERROR: a provider must be specified for each network (google or aws)")
+                exit(1)
+            provider = network["provider"]
             network_map[network["name"]] = provider
             if "peer_with" in network:
                 for vpc_peer in network['peer_with']:
@@ -43,11 +48,11 @@ def generate(config_file):
                         peer_accept_map[vpc_peer] = []
                     peer_request_map[network['name']].append(vpc_peer)
                     peer_accept_map[vpc_peer].append(network["name"])
-            cidr_map[network["name"]] = network['vpc_cidr']
+            if  provider == 'aws': cidr_map[network["name"]] = network['vpc_cidr']
             region_map[network["name"]] = network['region']
 
         for network in config_file['networks']:
-            network.pop('provider', "gcp")
+            provider = network.pop('provider', "gcp")
             network.pop('peer_with','default')
             if network["name"] in peer_request_map:
                 network.update(peer_request_list = peer_request_map[network["name"]])
