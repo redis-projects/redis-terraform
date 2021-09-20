@@ -11,14 +11,14 @@ from . import PUBLIC_CIDR, PRIVATE_CIDR, REGION, OS, REDIS_DISTRO, BOOT_DISK_SIZ
 def create_network(name=None, region=REGION, public_cidr=PUBLIC_CIDR, private_cidr=PRIVATE_CIDR, 
                   bastion_zone=ZONE, bastion_machine_image=OS, redis_distro=REDIS_DISTRO,
                   bastion_machine_type=BASTION_MACHINE_TYPE, rack_aware=False,
-                  redis_cluster_name=REDIS_CLUSTER_NAME,
+                  redis_cluster_name=REDIS_CLUSTER_NAME, project="redislabs-sa-training-services",
                   peer_request_list=[], peer_accept_list=[]):
     if name is None:
         print("name cannot be None")
         exit(1)
 
-    Provider("google", project="redislabs-sa-training-services", region=region, credentials=relative_file("../terraform_account.json"), alias=name)
-    Provider("google-beta", project="redislabs-sa-training-services", region=region, credentials=relative_file("../terraform_account.json"), alias=name)
+    Provider("google", project=project, region=region, credentials=relative_file("../terraform_account.json"), alias=name)
+    Provider("google-beta", project=project, region=region, credentials=relative_file("../terraform_account.json"), alias=name)
 
     vpc_request_list = ['${module.network-' + s + '.vpc}' for s in peer_request_list]
     vpc_accept_list  = ['${module.network-' + s + '.vpc}' for s in peer_accept_list]
