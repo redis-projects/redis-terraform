@@ -24,7 +24,16 @@ ZONE='us-central1-a'
 WORKER_MACHINE_COUNT="8"
 WORKER_MACHINE_TYPE = "n1-standard-4"
 DEPLOYMENT_NAME = os.environ["name"]
-AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
-AWS_SECRET_ACCESS_KEY = os.environ["AWS_SECRET_ACCESS_KEY"]
-AWS_REGION = os.environ["AWS_DEFAULT_REGION"]
+if os.environ.get('AWS_ACCESS_KEY_ID') is not None: 
+    AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
+else:
+    AWS_ACCESS_KEY_ID = ""
+if os.environ.get('AWS_SECRET_ACCESS_KEY') is not None: 
+    AWS_SECRET_ACCESS_KEY = os.environ["AWS_SECRET_ACCESS_KEY"]
+else:
+    AWS_SECRET_ACCESS_KEY = ""
+if os.environ.get('AWS_REGION') is not None:
+    AWS_REGION = os.environ["AWS_DEFAULT_REGION"]
+else:
+    AWS_REGION = ""
 AWS_REDIS_DISTRO = 'https://s3.amazonaws.com/redis-enterprise-software-downloads/6.0.8/redislabs-6.0.8-28-bionic-amd64.tar'

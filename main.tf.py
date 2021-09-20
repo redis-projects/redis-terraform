@@ -5,13 +5,13 @@ import yaml
 import sys
 from providers import aws, gcp, REGION, ZONE, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, DEPLOYMENT_NAME
 
-gcp_provider = Provider("google", project="redislabs-sa-training-services", region=REGION, zone=ZONE, credentials=relative_file("./terraform_account.json"))
+#gcp_provider = Provider("google", project="redislabs-sa-training-services", region=REGION, zone=ZONE, credentials=relative_file("./terraform_account.json"))
 
 random_id = Module("random_id", source="./modules/random_id") 
 
 def generate(config_file):
     network_map = {}
-    cidr_map = {}
+    aws_cidr_map = {}
     region_map = {}
     fqdn_map = {}
     peer_request_map = {}
@@ -39,16 +39,13 @@ def generate(config_file):
                     if  provider != vpc_provider:
                         print(f'ERROR: Peering network {vpc_peer} uses different provider ({vpc_provider}) than requester vpc ({provider})')
                         exit(1)
-                    if  provider == 'gcp':
-                        print(f'ERROR: Peering with GCP is not implemented because it is not required')
-                        exit(1)
                     if network['name'] not in peer_request_map:
                         peer_request_map[network['name']] = []
                     if vpc_peer not in peer_accept_map:
                         peer_accept_map[vpc_peer] = []
                     peer_request_map[network['name']].append(vpc_peer)
                     peer_accept_map[vpc_peer].append(network["name"])
-            if  provider == 'aws': cidr_map[network["name"]] = network['vpc_cidr']
+            if  provider == 'aws': aws_cidr_map[network["name"]] = network['vpc_cidr']
             region_map[network["name"]] = network['region']
 
         for network in config_file['networks']:
@@ -63,7 +60,7 @@ def generate(config_file):
             if provider == "gcp":
                 gcp.create_network(**network)
             elif provider == "aws":
-                network.update(cidr_map = cidr_map)
+                network.update(cidr_map = aws_cidr_map)
                 network.update(region_map = region_map)
                 aws.create_network(**network)
             else: 

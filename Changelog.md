@@ -3,6 +3,18 @@
 Tracking all changes for the "Terraform" project building Redis-Enterprise
 clusters on a public clould infrastructure.
 
+## [0.8.4] - Unreleased
+### Added
+- VPC peering has been added to GCP. Although GCP is able to span a single VPC across
+  regions we implemented a solution comparable to AWS where each "network" in the
+  config file is its own VPC. Therefore, it is required to peer multiple VPCs
+  even for GCP. Just like AWS we use the "peer_with" flag for GCP
+### Changed
+- AWS credentials do not have to be set as environment variables. In case of
+  a deployment outside AWS they are irrelevant.
+### Fixed
+- remove CIDRs "130.211.0.0/22" and "35.191.0.0/16" for access to private subnets
+
 ## [0.8.3] - Unreleased
 ### Added
 - VPC peering has been added to AWS. This is necessary because VPC's cannot span regions 
