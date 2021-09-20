@@ -9,6 +9,8 @@ clusters on a public clould infrastructure.
   regions we implemented a solution comparable to AWS where each "network" in the
   config file is its own VPC. Therefore, it is required to peer multiple VPCs
   even for GCP. Just like AWS we use the "peer_with" flag for GCP
+- For GCP the name of the project can now be specified under the "network" section
+  using the flag "project" and is no longer hard-coded
 ### Changed
 - AWS credentials do not have to be set as environment variables. In case of
   a deployment outside AWS they are irrelevant.
