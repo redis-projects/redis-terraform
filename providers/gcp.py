@@ -12,7 +12,7 @@ def create_network(name=None, region=REGION, public_cidr=PUBLIC_CIDR, private_ci
                   bastion_zone=ZONE, bastion_machine_image=OS, redis_distro=REDIS_DISTRO,
                   bastion_machine_type=BASTION_MACHINE_TYPE, rack_aware=False,
                   redis_cluster_name=REDIS_CLUSTER_NAME, project="redislabs-sa-training-services",
-                  peer_request_list=[], peer_accept_list=[]):
+                  peer_request_list=[], peer_accept_list=[], cidr_map={}):
     if name is None:
         print("name cannot be None")
         exit(1)
@@ -23,6 +23,16 @@ def create_network(name=None, region=REGION, public_cidr=PUBLIC_CIDR, private_ci
     vpc_request_list = ['${module.network-' + s + '.vpc}' for s in peer_request_list]
     vpc_accept_list  = ['${module.network-' + s + '.vpc}' for s in peer_accept_list]
 
+    cidr_list  = []
+    # add all public CIDRs of the networks requesting peering
+    [cidr_list.append(cidr_map[s][0]) for s in peer_accept_list]
+    # add all private CIDRs of the networks requesting peering
+    [cidr_list.append(cidr_map[s][1]) for s in peer_accept_list]
+    # add all public CIDRs of the networks we request to pair with
+    [cidr_list.append(cidr_map[s][0]) for s in peer_request_list]
+    # add all private CIDRs of the networks we request to pair with
+    [cidr_list.append(cidr_map[s][1]) for s in peer_request_list]
+
     network_mod = Module("network-%s" % name, source="./modules/gcp/network", 
         name                    = '%s-%s' % (DEPLOYMENT_NAME, name), 
         gce_public_subnet_cidr  = public_cidr, 
@@ -30,6 +40,7 @@ def create_network(name=None, region=REGION, public_cidr=PUBLIC_CIDR, private_ci
         providers               = {"google": "google.%s" % name},
         vpc_request_list        = vpc_request_list,
         vpc_accept_list         = vpc_accept_list,
+        cidr_list               = cidr_list,
         gce_private_subnet_cidr = private_cidr)
 
     create_bastion(name, bastion_zone, rack_aware, bastion_machine_type, bastion_machine_image, redis_distro,

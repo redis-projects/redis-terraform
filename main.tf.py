@@ -12,6 +12,7 @@ random_id = Module("random_id", source="./modules/random_id")
 def generate(config_file):
     network_map = {}
     aws_cidr_map = {}
+    gcp_cidr_map = {}
     region_map = {}
     fqdn_map = {}
     peer_request_map = {}
@@ -46,6 +47,7 @@ def generate(config_file):
                     peer_request_map[network['name']].append(vpc_peer)
                     peer_accept_map[vpc_peer].append(network["name"])
             if  provider == 'aws': aws_cidr_map[network["name"]] = network['vpc_cidr']
+            if  provider == 'gcp': gcp_cidr_map[network["name"]] = [network['public_cidr'], network['private_cidr']]
             region_map[network["name"]] = network['region']
 
         for network in config_file['networks']:
@@ -58,6 +60,7 @@ def generate(config_file):
             if network["name"] in fqdn_map:
                 network.update(redis_cluster_name = fqdn_map[network["name"]])
             if provider == "gcp":
+                network.update(cidr_map = gcp_cidr_map)
                 gcp.create_network(**network)
             elif provider == "aws":
                 network.update(cidr_map = aws_cidr_map)

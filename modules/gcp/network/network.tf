@@ -74,7 +74,7 @@ resource "google_compute_firewall" "private-firewall" {
     protocol = "ipip"
   }
 
-  source_ranges = [var.gce_public_subnet_cidr, var.gce_private_subnet_cidr]
+  source_ranges = concat([var.gce_public_subnet_cidr], [var.gce_private_subnet_cidr], var.cidr_list)
 }
 
 resource "google_compute_firewall" "private-ui-firewall" {
