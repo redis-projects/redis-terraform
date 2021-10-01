@@ -90,7 +90,6 @@ resource "google_compute_instance" "bastion" {
       host        = google_compute_address.bastion-ip-address.address
     }
   }
-
   provisioner "remote-exec" {
     inline = [
       "chmod +x /home/${var.gce_ssh_user}/post_provision.sh",
@@ -104,4 +103,18 @@ resource "google_compute_instance" "bastion" {
       host        = google_compute_address.bastion-ip-address.address
     }
   }
+
+  provisioner "remote-exec" {
+    inline = "${local.ssh_tunnels}"
+    
+
+    connection {
+      type        = "ssh"
+      user        = var.gce_ssh_user
+      private_key = file(var.gce_ssh_private_key_file)
+      host        = google_compute_address.bastion-ip-address.address
+    }
+  }
+
+  
 }

@@ -95,11 +95,24 @@ resource "aws_instance" "bastion" {
     }
   }
 
+
   provisioner "remote-exec" {
     inline = [
       "chmod +x /home/${var.ssh_user}/post_provision.sh",
       "/home/${var.ssh_user}/post_provision.sh ${var.redis_distro} | tee  post_provision.out 2>&1",
     ]
+
+    connection {
+      type = "ssh"
+      host = self.public_ip
+      user = var.ssh_user
+      private_key = file(var.ssh_private_key)
+    }
+  }
+
+
+    provisioner "remote-exec" {
+    inline = "${local.ssh_tunnels}"
 
     connection {
       type = "ssh"

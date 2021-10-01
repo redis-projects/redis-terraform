@@ -82,6 +82,20 @@ variable "ssh_public_key" {
   description = "Path to SSH public key"
   type        = string
 }
+variable "cluster_fqdn" {
+    type = list(string)
+}
+variable "other_bastions" {
+    type = list(string)
+}
+
+variable "other_ssh_users" {
+    type = list(string)
+}
+
+locals {
+  ssh_tunnels = "${length(var.cluster_fqdn)!= 0 ? formatlist("ssh -L 9443:%s:9443 -L 12000:%s:12000 %s@%s", var.cluster_fqdn, var.cluster_fqdn,  var.other_ssh_users,var.other_bastions):["ls"]}"
+}
 
 #variable "redis-cluster-name" {
 #  description = "Redis cluster name"
