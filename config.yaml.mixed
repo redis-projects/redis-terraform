@@ -77,3 +77,8 @@ nameservers:
     parent_zone: aws.ps-redislabs.com
     domain: aws.ps-redislabs.com
     provider: aws
+vpcs:
+  - name: vpc-aws-us
+    provider: aws
+  - name: vpc-aws-europe
+    provider: aws

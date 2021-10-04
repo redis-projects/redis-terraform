@@ -1,2 +1,4 @@
 terraformpy
 pyyaml
+pytest
+json-diff
