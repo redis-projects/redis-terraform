@@ -1,13 +1,13 @@
 ---
 clusters:
-  - vpc: vpc-gcp-europe
+  - vpc: vpc-gcp-east1
     worker_count: 3 
     machine_type: n1-standard-4
     machine_image: rhel-8-v20210721
     zones: 
-    - europe-west1-d
-    - europe-west1-b
-    - europe-west1-c
+    - us-east1-b
+    - us-east1-c
+    - us-east1-d
     expose_ui: True
   - vpc: vpc-gcp-us
     worker_count: 3
@@ -19,11 +19,11 @@ clusters:
     - us-central1-c
     expose_ui: True
 networks:
-  - name: vpc-gcp-europe
+  - name: vpc-gcp-east1
     public_cidr: 10.1.0.0/24
     private_cidr: 10.2.0.0/16 
-    region: europe-west1
-    bastion_zone: europe-west1-b
+    region: us-east1
+    bastion_zone: us-east1-b
     bastion_machine_image: rhel-7-v20210721
     bastion_machine_type: n1-standard-1
     rack_aware: True
@@ -44,7 +44,7 @@ networks:
     project: redislabs-sa-training-services
     redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
 nameservers:
-  - vpc: vpc-gcp-europe
+  - vpc: vpc-gcp-east1
     parent_zone: ps-redislabs
     domain: ps-redislabs.com
   - vpc: vpc-gcp-us

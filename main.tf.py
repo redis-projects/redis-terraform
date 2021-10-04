@@ -5,8 +5,6 @@ import yaml
 import sys
 from providers import aws, gcp, REGION, ZONE, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, DEPLOYMENT_NAME
 
-#gcp_provider = Provider("google", project="redislabs-sa-training-services", region=REGION, zone=ZONE, credentials=relative_file("./terraform_account.json"))
-
 random_id = Module("random_id", source="./modules/random_id") 
 
 def generate(config_file):
