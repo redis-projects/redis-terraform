@@ -15,7 +15,7 @@
                 "template": "${file(\"${path.module}/templates/extra-vars.tpl\")}",
                 "vars": {
                     "ansible_user": "redislabs",
-                    "redis_cluster_name": "deji-test-vpc-aws-europe.aws.ps-redislabs.com",
+                    "redis_cluster_name": "unit-test-name-vpc-aws-europe.aws.ps-redislabs.com",
                     "redis_email_from": "admin@domain.tld",
                     "redis_pwd": "admin",
                     "redis_smtp_host": "smtp.domain.tld",
@@ -26,7 +26,7 @@
                 "template": "${file(\"${path.module}/templates/extra-vars.tpl\")}",
                 "vars": {
                     "ansible_user": "redislabs",
-                    "redis_cluster_name": "deji-test-vpc-aws-us.aws.ps-redislabs.com",
+                    "redis_cluster_name": "unit-test-name-vpc-aws-us.aws.ps-redislabs.com",
                     "redis_email_from": "admin@domain.tld",
                     "redis_pwd": "admin",
                     "redis_smtp_host": "smtp.domain.tld",
@@ -72,7 +72,7 @@
             "ami": "ami-02241e4f36e06d650",
             "availability_zone": "eu-central-1b",
             "instance_type": "t2.micro",
-            "name": "deji-test-vpc-aws-europe",
+            "name": "unit-test-name-vpc-aws-europe",
             "providers": {
                 "aws": "aws.vpc-aws-europe"
             },
@@ -88,7 +88,7 @@
             "ami": "ami-0b1db37f0fa006678",
             "availability_zone": "us-east-1c",
             "instance_type": "t2.micro",
-            "name": "deji-test-vpc-aws-us",
+            "name": "unit-test-name-vpc-aws-us",
             "providers": {
                 "aws": "aws.vpc-aws-us"
             },
@@ -108,7 +108,7 @@
             "gce_public_subnet_cidr": "10.0.1.0/24",
             "gce_ssh_pub_key_file": "~/.ssh/id_rsa.pub",
             "gce_ssh_user": "redislabs",
-            "name": "deji-test-vpc-gcp",
+            "name": "unit-test-name-vpc-gcp",
             "os": "rhel-7-v20210721",
             "providers": {
                 "google": "google.vpc-gcp"
@@ -119,7 +119,7 @@
             "zone": "europe-west3-b"
         },
         "keypair-vpc-aws-europe": {
-            "name": "deji-test-vpc-aws-europe-keypair",
+            "name": "unit-test-name-vpc-aws-europe-keypair",
             "providers": {
                 "aws": "aws.vpc-aws-europe"
             },
@@ -127,7 +127,7 @@
             "ssh_public_key": "~/.ssh/id_rsa.pub"
         },
         "keypair-vpc-aws-us": {
-            "name": "deji-test-vpc-aws-us-keypair",
+            "name": "unit-test-name-vpc-aws-us-keypair",
             "providers": {
                 "aws": "aws.vpc-aws-us"
             },
@@ -140,7 +140,7 @@
                 "vpc-aws-europe": "10.0.0.0/16",
                 "vpc-aws-us": "10.1.0.0/16"
             },
-            "name": "deji-test-vpc-aws-europe",
+            "name": "unit-test-name-vpc-aws-europe",
             "peer_accept_list": [
                 "vpc-aws-us"
             ],
@@ -176,7 +176,7 @@
                 "vpc-aws-europe": "10.0.0.0/16",
                 "vpc-aws-us": "10.1.0.0/16"
             },
-            "name": "deji-test-vpc-aws-us",
+            "name": "unit-test-name-vpc-aws-us",
             "peer_accept_list": [],
             "peer_request_list": [
                 "vpc-aws-europe"
@@ -208,7 +208,7 @@
             "cidr_list": [],
             "gce_private_subnet_cidr": "10.2.0.0/16",
             "gce_public_subnet_cidr": "10.1.0.0/24",
-            "name": "deji-test-vpc-gcp",
+            "name": "unit-test-name-vpc-gcp",
             "providers": {
                 "google": "google.vpc-gcp"
             },
@@ -218,9 +218,9 @@
             "vpc_request_list": []
         },
         "ns-vpc-aws-europe": {
-            "cluster_fqdn": "deji-test-vpc-aws-europe.aws.ps-redislabs.com",
+            "cluster_fqdn": "unit-test-name-vpc-aws-europe.aws.ps-redislabs.com",
             "ip_addresses": "${module.re-vpc-aws-europe.re-public-ips}",
-            "name": "deji-test-vpc-aws-europe",
+            "name": "unit-test-name-vpc-aws-europe",
             "parent_zone": "aws.ps-redislabs.com",
             "providers": {
                 "aws": "aws.vpc-aws-europe"
@@ -228,9 +228,9 @@
             "source": "./modules/aws/ns"
         },
         "ns-vpc-aws-us": {
-            "cluster_fqdn": "deji-test-vpc-aws-us.aws.ps-redislabs.com",
+            "cluster_fqdn": "unit-test-name-vpc-aws-us.aws.ps-redislabs.com",
             "ip_addresses": "${module.re-vpc-aws-us.re-public-ips}",
-            "name": "deji-test-vpc-aws-us",
+            "name": "unit-test-name-vpc-aws-us",
             "parent_zone": "aws.ps-redislabs.com",
             "providers": {
                 "aws": "aws.vpc-aws-us"
@@ -266,7 +266,7 @@
         },
         "re-ui-vpc-aws-europe": {
             "ips": "${module.re-vpc-aws-europe.re-nodes.*.private_ip}",
-            "name": "deji-test-vpc-aws-europe",
+            "name": "unit-test-name-vpc-aws-europe",
             "providers": {
                 "aws": "aws.vpc-aws-europe"
             },
@@ -276,7 +276,7 @@
         },
         "re-ui-vpc-aws-us": {
             "ips": "${module.re-vpc-aws-us.re-nodes.*.private_ip}",
-            "name": "deji-test-vpc-aws-us",
+            "name": "unit-test-name-vpc-aws-us",
             "providers": {
                 "aws": "aws.vpc-aws-us"
             },
@@ -286,7 +286,7 @@
         },
         "re-ui-vpc-gcp": {
             "instances": "${module.re-vpc-gcp.re-nodes.*.name}",
-            "name": "deji-test-vpc-gcp",
+            "name": "unit-test-name-vpc-gcp",
             "providers": {
                 "google": "google.vpc-gcp"
             },
@@ -296,7 +296,7 @@
         "re-vpc-aws-europe": {
             "ami": "ami-01f6fd1863750f580",
             "instance_type": "t2.xlarge",
-            "name": "deji-test-vpc-aws-europe",
+            "name": "unit-test-name-vpc-aws-europe",
             "providers": {
                 "aws": "aws.vpc-aws-europe"
             },
@@ -316,7 +316,7 @@
         "re-vpc-aws-us": {
             "ami": "ami-05f238ddab9a512be",
             "instance_type": "t2.xlarge",
-            "name": "deji-test-vpc-aws-us",
+            "name": "unit-test-name-vpc-aws-us",
             "providers": {
                 "aws": "aws.vpc-aws-us"
             },
@@ -340,7 +340,7 @@
             "kube_worker_machine_count": 3,
             "kube_worker_machine_image": "rhel-8-v20210721",
             "kube_worker_machine_type": "n1-standard-4",
-            "name": "deji-test-vpc-gcp",
+            "name": "unit-test-name-vpc-gcp",
             "providers": {
                 "google": "google.vpc-gcp"
             },
@@ -367,25 +367,19 @@
             "value": "${module.re-ui-vpc-gcp.ui-ip.address}"
         },
         "vpc-aws-europe-dns-name": {
-            "value": "deji-test-vpc-aws-europe.aws.ps-redislabs.com"
+            "value": "unit-test-name-vpc-aws-europe.aws.ps-redislabs.com"
         },
         "vpc-aws-europe-ui-endpoint": {
             "value": "${module.re-ui-vpc-aws-europe.ui-ip}"
         },
         "vpc-aws-us-dns-name": {
-            "value": "deji-test-vpc-aws-us.aws.ps-redislabs.com"
+            "value": "unit-test-name-vpc-aws-us.aws.ps-redislabs.com"
         },
         "vpc-aws-us-ui-endpoint": {
             "value": "${module.re-ui-vpc-aws-us.ui-ip}"
         }
     },
     "provider": {
-        "google": {
-            "alias": "vpc-gcp",
-            "credentials": "${file(\"${path.module}/terraform_account.json\")}",
-            "project": "redislabs-sa-training-services",
-            "region": "europe-west3"
-        },
         "aws": {
             "access_key": "",
             "alias": "vpc-aws-europe",
@@ -397,6 +391,12 @@
             "alias": "vpc-aws-us",
             "region": "us-east-1",
             "secret_key": ""
+        },
+        "google": {
+            "alias": "vpc-gcp",
+            "credentials": "${file(\"${path.module}/terraform_account.json\")}",
+            "project": "redislabs-sa-training-services",
+            "region": "europe-west3"
         },
         "google-beta": {
             "alias": "vpc-gcp",

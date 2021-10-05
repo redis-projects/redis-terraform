@@ -15,7 +15,7 @@
                 "template": "${file(\"${path.module}/templates/extra-vars.tpl\")}",
                 "vars": {
                     "ansible_user": "redislabs",
-                    "redis_cluster_name": "deji-test-vpc-gcp-east1.ps-redislabs.com",
+                    "redis_cluster_name": "unit-test-name-vpc-gcp-east1.ps-redislabs.com",
                     "redis_email_from": "admin@domain.tld",
                     "redis_pwd": "admin",
                     "redis_smtp_host": "smtp.domain.tld",
@@ -26,7 +26,7 @@
                 "template": "${file(\"${path.module}/templates/extra-vars.tpl\")}",
                 "vars": {
                     "ansible_user": "redislabs",
-                    "redis_cluster_name": "deji-test-vpc-gcp-us.ps-redislabs.com",
+                    "redis_cluster_name": "unit-test-name-vpc-gcp-us.ps-redislabs.com",
                     "redis_email_from": "admin@domain.tld",
                     "redis_pwd": "admin",
                     "redis_smtp_host": "smtp.domain.tld",
@@ -58,7 +58,7 @@
             "gce_public_subnet_cidr": "10.0.1.0/24",
             "gce_ssh_pub_key_file": "~/.ssh/id_rsa.pub",
             "gce_ssh_user": "redislabs",
-            "name": "deji-test-vpc-gcp-east1",
+            "name": "unit-test-name-vpc-gcp-east1",
             "os": "rhel-7-v20210721",
             "providers": {
                 "google": "google.vpc-gcp-east1"
@@ -76,7 +76,7 @@
             "gce_public_subnet_cidr": "10.0.1.0/24",
             "gce_ssh_pub_key_file": "~/.ssh/id_rsa.pub",
             "gce_ssh_user": "redislabs",
-            "name": "deji-test-vpc-gcp-us",
+            "name": "unit-test-name-vpc-gcp-us",
             "os": "rhel-7-v20210721",
             "providers": {
                 "google": "google.vpc-gcp-us"
@@ -93,7 +93,7 @@
             ],
             "gce_private_subnet_cidr": "10.2.0.0/16",
             "gce_public_subnet_cidr": "10.1.0.0/24",
-            "name": "deji-test-vpc-gcp-east1",
+            "name": "unit-test-name-vpc-gcp-east1",
             "providers": {
                 "google": "google.vpc-gcp-east1"
             },
@@ -111,7 +111,7 @@
             ],
             "gce_private_subnet_cidr": "10.4.0.0/16",
             "gce_public_subnet_cidr": "10.3.0.0/24",
-            "name": "deji-test-vpc-gcp-us",
+            "name": "unit-test-name-vpc-gcp-us",
             "providers": {
                 "google": "google.vpc-gcp-us"
             },
@@ -123,9 +123,9 @@
             "vpc_request_list": []
         },
         "ns-vpc-gcp-east1": {
-            "cluster_fqdn": "deji-test-vpc-gcp-east1.ps-redislabs.com",
+            "cluster_fqdn": "unit-test-name-vpc-gcp-east1.ps-redislabs.com",
             "ip_addresses": "${module.re-vpc-gcp-east1.re-public-ips}",
-            "name": "deji-test-vpc-gcp-east1",
+            "name": "unit-test-name-vpc-gcp-east1",
             "parent_zone": "ps-redislabs",
             "providers": {
                 "google-beta": "google-beta.vpc-gcp-east1"
@@ -133,9 +133,9 @@
             "source": "./modules/gcp/ns"
         },
         "ns-vpc-gcp-us": {
-            "cluster_fqdn": "deji-test-vpc-gcp-us.ps-redislabs.com",
+            "cluster_fqdn": "unit-test-name-vpc-gcp-us.ps-redislabs.com",
             "ip_addresses": "${module.re-vpc-gcp-us.re-public-ips}",
-            "name": "deji-test-vpc-gcp-us",
+            "name": "unit-test-name-vpc-gcp-us",
             "parent_zone": "ps-redislabs",
             "providers": {
                 "google-beta": "google-beta.vpc-gcp-us"
@@ -162,7 +162,7 @@
         },
         "re-ui-vpc-gcp-east1": {
             "instances": "${module.re-vpc-gcp-east1.re-nodes.*.name}",
-            "name": "deji-test-vpc-gcp-east1",
+            "name": "unit-test-name-vpc-gcp-east1",
             "providers": {
                 "google": "google.vpc-gcp-east1"
             },
@@ -171,7 +171,7 @@
         },
         "re-ui-vpc-gcp-us": {
             "instances": "${module.re-vpc-gcp-us.re-nodes.*.name}",
-            "name": "deji-test-vpc-gcp-us",
+            "name": "unit-test-name-vpc-gcp-us",
             "providers": {
                 "google": "google.vpc-gcp-us"
             },
@@ -185,7 +185,7 @@
             "kube_worker_machine_count": 3,
             "kube_worker_machine_image": "rhel-8-v20210721",
             "kube_worker_machine_type": "n1-standard-4",
-            "name": "deji-test-vpc-gcp-east1",
+            "name": "unit-test-name-vpc-gcp-east1",
             "providers": {
                 "google": "google.vpc-gcp-east1"
             },
@@ -204,7 +204,7 @@
             "kube_worker_machine_count": 3,
             "kube_worker_machine_image": "rhel-8-v20210721",
             "kube_worker_machine_type": "n1-standard-4",
-            "name": "deji-test-vpc-gcp-us",
+            "name": "unit-test-name-vpc-gcp-us",
             "providers": {
                 "google": "google.vpc-gcp-us"
             },
@@ -231,26 +231,20 @@
             "value": "${module.re-ui-vpc-gcp-us.ui-ip.address}"
         },
         "vpc-gcp-east1-dns-name": {
-            "value": "deji-test-vpc-gcp-east1.ps-redislabs.com"
+            "value": "unit-test-name-vpc-gcp-east1.ps-redislabs.com"
         },
         "vpc-gcp-us-dns-name": {
-            "value": "deji-test-vpc-gcp-us.ps-redislabs.com"
+            "value": "unit-test-name-vpc-gcp-us.ps-redislabs.com"
         }
     },
     "provider": {
         "google": {
-            "alias": "vpc-gcp-us",
+            "alias": "vpc-gcp-east1",
             "credentials": "${file(\"${path.module}/terraform_account.json\")}",
             "project": "redislabs-sa-training-services",
-            "region": "us-central1"
+            "region": "us-east1"
         },
         "google": {
-            "alias": "vpc-gcp-east1",
-            "credentials": "${file(\"${path.module}/terraform_account.json\")}",
-            "project": "redislabs-sa-training-services",
-            "region": "us-east1"
-        },
-        "google-beta": {
             "alias": "vpc-gcp-us",
             "credentials": "${file(\"${path.module}/terraform_account.json\")}",
             "project": "redislabs-sa-training-services",
@@ -261,6 +255,12 @@
             "credentials": "${file(\"${path.module}/terraform_account.json\")}",
             "project": "redislabs-sa-training-services",
             "region": "us-east1"
+        },
+        "google-beta": {
+            "alias": "vpc-gcp-us",
+            "credentials": "${file(\"${path.module}/terraform_account.json\")}",
+            "project": "redislabs-sa-training-services",
+            "region": "us-central1"
         }
     }
 }
