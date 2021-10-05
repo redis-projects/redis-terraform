@@ -54,19 +54,15 @@
             "active_active_script": "${data.template_file.aa_db}",
             "bastion_machine_type": "n1-standard-1",
             "boot_disk_size": 50,
-            "extra_vars": "${data.template_file.extra_vars-vpc-gcp-east1}",
             "gce_private_subnet_cidr": "10.0.2.0/24",
             "gce_public_subnet_cidr": "10.0.1.0/24",
-            "gce_ssh_private_key_file": "~/.ssh/id_rsa",
             "gce_ssh_pub_key_file": "~/.ssh/id_rsa.pub",
             "gce_ssh_user": "redislabs",
-            "inventory": "${data.template_file.inventory-vpc-gcp-east1}",
             "name": "deji-test-vpc-gcp-east1",
             "os": "rhel-7-v20210721",
             "providers": {
                 "google": "google.vpc-gcp-east1"
             },
-            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
             "region": "us-central1",
             "source": "./modules/gcp/bastion",
             "subnet": "${module.network-vpc-gcp-east1.public-subnet-name}",
@@ -76,19 +72,15 @@
             "active_active_script": "${data.template_file.aa_db}",
             "bastion_machine_type": "n1-standard-1",
             "boot_disk_size": 50,
-            "extra_vars": "${data.template_file.extra_vars-vpc-gcp-us}",
             "gce_private_subnet_cidr": "10.0.2.0/24",
             "gce_public_subnet_cidr": "10.0.1.0/24",
-            "gce_ssh_private_key_file": "~/.ssh/id_rsa",
             "gce_ssh_pub_key_file": "~/.ssh/id_rsa.pub",
             "gce_ssh_user": "redislabs",
-            "inventory": "${data.template_file.inventory-vpc-gcp-us}",
             "name": "deji-test-vpc-gcp-us",
             "os": "rhel-7-v20210721",
             "providers": {
                 "google": "google.vpc-gcp-us"
             },
-            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
             "region": "us-central1",
             "source": "./modules/gcp/bastion",
             "subnet": "${module.network-vpc-gcp-us.public-subnet-name}",
@@ -149,6 +141,24 @@
                 "google-beta": "google-beta.vpc-gcp-us"
             },
             "source": "./modules/gcp/ns"
+        },
+        "re-provisioner-vpc-gcp-east1": {
+            "extra_vars": "${data.template_file.extra_vars-vpc-gcp-east1}",
+            "host": "${module.bastion-vpc-gcp-east1.bastion-public-ip.address}",
+            "inventory": "${data.template_file.inventory-vpc-gcp-east1}",
+            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
+            "source": "./modules/ansible/re",
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "ssh_user": "redislabs"
+        },
+        "re-provisioner-vpc-gcp-us": {
+            "extra_vars": "${data.template_file.extra_vars-vpc-gcp-us}",
+            "host": "${module.bastion-vpc-gcp-us.bastion-public-ip.address}",
+            "inventory": "${data.template_file.inventory-vpc-gcp-us}",
+            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
+            "source": "./modules/ansible/re",
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "ssh_user": "redislabs"
         },
         "re-ui-vpc-gcp-east1": {
             "instances": "${module.re-vpc-gcp-east1.re-nodes.*.name}",
@@ -241,16 +251,16 @@
             "region": "us-east1"
         },
         "google-beta": {
-            "alias": "vpc-gcp-east1",
-            "credentials": "${file(\"${path.module}/terraform_account.json\")}",
-            "project": "redislabs-sa-training-services",
-            "region": "us-east1"
-        },
-        "google-beta": {
             "alias": "vpc-gcp-us",
             "credentials": "${file(\"${path.module}/terraform_account.json\")}",
             "project": "redislabs-sa-training-services",
             "region": "us-central1"
+        },
+        "google-beta": {
+            "alias": "vpc-gcp-east1",
+            "credentials": "${file(\"${path.module}/terraform_account.json\")}",
+            "project": "redislabs-sa-training-services",
+            "region": "us-east1"
         }
     }
 }

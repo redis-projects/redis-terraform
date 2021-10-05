@@ -74,18 +74,12 @@ def create_bastion(name, zone, rack_aware, machine_type, machine_image, redis_di
         source = "./modules/aws/bastion",
         vpc = '${module.network-%s.vpc}' % name,
         name = "%s-%s" % (DEPLOYMENT_NAME, name),
-        #region = REGION,
         subnet = '${module.network-%s.public-subnet}' % name,
         ami = machine_image,
         instance_type = machine_type,
         redis_user = REDIS_USER,
-        ssh_user = AWS_SSH_USER,
         ssh_public_key = SSH_PUB_KEY_FILE,
         ssh_key_name = '${module.keypair-%s.key-name}' % name,
-        inventory = '${data.template_file.inventory-%s}' % name,
-        extra_vars = '${data.template_file.extra_vars-%s}' % name,
-        ssh_private_key = SSH_PRIVATE_KEY_FILE,
-        redis_distro = redis_distro,
         providers = {"aws": "aws.%s" % name},
         availability_zone = zone,
         security_groups = '${module.network-%s.public-security-groups}' % name
@@ -94,6 +88,15 @@ def create_bastion(name, zone, rack_aware, machine_type, machine_image, redis_di
     Output("aws-bastion-%s-ip-output" % name,
             value = "${module.bastion-%s}" % name)
 
+    provisioner = Module("re-provisioner-%s" % name, 
+        source = "./modules/ansible/re",
+        ssh_user = AWS_SSH_USER,
+        inventory = '${data.template_file.inventory-%s}' % name,
+        extra_vars = '${data.template_file.extra_vars-%s}' % name,
+        ssh_private_key_file = SSH_PRIVATE_KEY_FILE,
+        host="${module.bastion-%s.bastion-public-ip}" % name,
+        redis_distro=redis_distro
+    )
 
 def create_re_cluster(worker_count=WORKER_MACHINE_COUNT, 
                             machine_type=WORKER_MACHINE_TYPE,
