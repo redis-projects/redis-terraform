@@ -186,9 +186,6 @@
             },
             "source": "./modules/aws/ns"
         },
-        "random_id": {
-            "source": "./modules/random_id"
-        },
         "re-ui-vpc-aws-europe": {
             "ips": "${module.re-vpc-aws-europe.re-nodes.*.private_ip}",
             "name": "deji-test-vpc-aws-europe",

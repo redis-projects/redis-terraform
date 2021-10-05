@@ -121,16 +121,15 @@
             "gce_ssh_pub_key_file": "~/.ssh/id_rsa.pub",
             "gce_ssh_user": "redislabs",
             "inventory": "${data.template_file.inventory-vpc-gcp}",
+            "name": "deji-test-vpc-gcp",
             "os": "rhel-7-v20210721",
             "providers": {
                 "google": "google.vpc-gcp"
             },
-            "random_id": "vpc-gcp",
             "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
             "region": "us-central1",
             "source": "./modules/gcp/bastion",
             "subnet": "${module.network-vpc-gcp.public-subnet-name}",
-            "vpc": "deji-test",
             "zone": "europe-west3-b"
         },
         "keypair-vpc-aws-europe": {
@@ -251,9 +250,6 @@
                 "aws": "aws.vpc-aws-us"
             },
             "source": "./modules/aws/ns"
-        },
-        "random_id": {
-            "source": "./modules/random_id"
         },
         "re-ui-vpc-aws-europe": {
             "ips": "${module.re-vpc-aws-europe.re-nodes.*.private_ip}",

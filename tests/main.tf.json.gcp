@@ -61,16 +61,15 @@
             "gce_ssh_pub_key_file": "~/.ssh/id_rsa.pub",
             "gce_ssh_user": "redislabs",
             "inventory": "${data.template_file.inventory-vpc-gcp-east1}",
+            "name": "deji-test-vpc-gcp-east1",
             "os": "rhel-7-v20210721",
             "providers": {
                 "google": "google.vpc-gcp-east1"
             },
-            "random_id": "vpc-gcp-east1",
             "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
             "region": "us-central1",
             "source": "./modules/gcp/bastion",
             "subnet": "${module.network-vpc-gcp-east1.public-subnet-name}",
-            "vpc": "deji-test",
             "zone": "us-east1-b"
         },
         "bastion-vpc-gcp-us": {
@@ -84,16 +83,15 @@
             "gce_ssh_pub_key_file": "~/.ssh/id_rsa.pub",
             "gce_ssh_user": "redislabs",
             "inventory": "${data.template_file.inventory-vpc-gcp-us}",
+            "name": "deji-test-vpc-gcp-us",
             "os": "rhel-7-v20210721",
             "providers": {
                 "google": "google.vpc-gcp-us"
             },
-            "random_id": "vpc-gcp-us",
             "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
             "region": "us-central1",
             "source": "./modules/gcp/bastion",
             "subnet": "${module.network-vpc-gcp-us.public-subnet-name}",
-            "vpc": "deji-test",
             "zone": "us-central1-b"
         },
         "network-vpc-gcp-east1": {
@@ -151,9 +149,6 @@
                 "google-beta": "google-beta.vpc-gcp-us"
             },
             "source": "./modules/gcp/ns"
-        },
-        "random_id": {
-            "source": "./modules/random_id"
         },
         "re-ui-vpc-gcp-east1": {
             "instances": "${module.re-vpc-gcp-east1.re-nodes.*.name}",

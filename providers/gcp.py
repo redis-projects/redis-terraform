@@ -80,8 +80,7 @@ def create_bastion(name, zone, rack_aware, machine_type, machine_image, redis_di
 
     bastion_mod = Module("bastion-%s" % name, 
         source = "./modules/gcp/bastion",
-        vpc = DEPLOYMENT_NAME,
-        random_id = name,
+        name = "%s-%s" % (DEPLOYMENT_NAME, name),
         gce_public_subnet_cidr = PUBLIC_CIDR,
         gce_private_subnet_cidr = PRIVATE_CIDR, 
         region = REGION,

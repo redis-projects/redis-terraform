@@ -7,11 +7,11 @@ terraform {
 }
 
 resource "google_compute_address" "bastion-ip-address" {
-  name  = "${var.vpc}-${var.random_id}-bastion-ip-address"
+  name  = "${var.name}-bastion-ip-address"
 }
 
 resource "google_compute_instance" "bastion" {
-  name         = "${var.vpc}-${var.random_id}-bastion"
+  name         = "${var.name}-bastion"
   machine_type = var.bastion_machine_type
   zone         = var.zone
 

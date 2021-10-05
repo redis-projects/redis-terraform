@@ -3,8 +3,6 @@ from terraformpy.helpers import relative_file
 import sys
 from providers import aws, gcp, REGION, ZONE, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, DEPLOYMENT_NAME
 
-random_id = Module("random_id", source="./modules/random_id")
-
 def generate(config_file):
     network_map = {}
     aws_cidr_map = {}
