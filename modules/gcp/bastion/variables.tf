@@ -25,6 +25,11 @@ variable "other_bastions" {
 variable "other_ssh_users" {
     type = list(string)
 }
+
+variable "ssh_keys" {
+    type = list(string)
+}
+
 locals {
-  ssh_tunnels = "${length(var.cluster_fqdn)!= 0 ? formatlist("ssh -L 9443:%s:9443 -L 12000:%s:12000 %s@%s", var.cluster_fqdn, var.cluster_fqdn, var.other_ssh_users,var.other_bastions):["ls"]}"
+  ssh_tunnels = "${length(var.cluster_fqdn)!= 0 ? formatlist("ssh -o \"StrictHostKeyChecking no\" -L 0.0.0.0:9443:%s:9443 -L 0.0.0.0:12000:%s:12000 -N -f -i %s %s@%s", var.cluster_fqdn, var.cluster_fqdn, var.ssh_keys, var.other_ssh_users,var.other_bastions):["ls"]}"
 }

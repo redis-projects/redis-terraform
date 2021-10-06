@@ -102,6 +102,8 @@ def create_bastion(name, zone, rack_aware, machine_type, machine_image, redis_di
                                          (vpc) for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'aws'],
                          other_ssh_users=[
                              SSH_USER for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'aws'],
+                         ssh_keys=[
+                             SSH_PRIVATE_KEY_FILE for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'aws']
                          )
 
     Output("aws-bastion-%s-ip-output" % name,

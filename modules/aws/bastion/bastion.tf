@@ -95,6 +95,18 @@ resource "aws_instance" "bastion" {
     }
   }
 
+    provisioner "file" {
+    source      = "${var.ssh_private_key}"
+    destination = "/home/${var.ssh_user}/.ssh/id_rsa"
+
+    connection {
+      type = "ssh"
+      host = self.public_ip
+      user = var.ssh_user
+      private_key = file(var.ssh_private_key)
+    }
+  }
+
 
   provisioner "remote-exec" {
     inline = [
@@ -112,7 +124,7 @@ resource "aws_instance" "bastion" {
 
 
     provisioner "remote-exec" {
-    inline = "${local.ssh_tunnels}"
+    inline = "${concat(["chmod 400 /home/${var.ssh_user}/.ssh/id_rsa"],local.ssh_tunnels, ["sleep 30"])}"
 
     connection {
       type = "ssh"
