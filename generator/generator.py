@@ -14,26 +14,24 @@ def generate(config_file):
 
     if 'nameservers' in config_file:
         for nameserver in config_file['nameservers']:
-            assert nameserver["domain"] is not None, "Please supply domain for all nameservers"
+            if "domain" not in nameserver or nameserver["domain"] is None:
+                raise Exception ("Please supply domain for all nameservers")
             fqdn_map[nameserver["vpc"]] = "%s-%s.%s" % (DEPLOYMENT_NAME, nameserver["vpc"], nameserver["domain"])
             nameserver["cluster_fqdn"] = fqdn_map[nameserver["vpc"]]
 
     if 'networks' in config_file:
         for network in config_file['networks']:
             if "provider" not in network:
-                print("ERROR: a provider must be specified for each network (google or aws)")
-                exit(1)
+                raise Exception("ERROR: a provider must be specified for each network (google or aws)")
             provider = network["provider"]
             network_map[network["name"]] = provider
             if "peer_with" in network:
                 for vpc_peer in network['peer_with']:
                     if  not next((item  for item in config_file['networks']  if item['name'] == vpc_peer), False):
-                        print(f'ERROR: Requested peering vpc {vpc_peer} not found in config file')
-                        exit(1)
+                        raise Exception(f'ERROR: Requested peering vpc {vpc_peer} not found in config file')
                     vpc_provider = next(item['provider']  for item in config_file['networks']  if item['name'] == vpc_peer)
                     if  provider != vpc_provider:
-                        print(f'ERROR: Peering network {vpc_peer} uses different provider ({vpc_provider}) than requester vpc ({provider})')
-                        exit(1)
+                        raise Exception(f'ERROR: Peering network {vpc_peer} uses different provider ({vpc_provider}) than requester vpc ({provider})')
                     if network['name'] not in peer_request_map:
                         peer_request_map[network['name']] = []
                     if vpc_peer not in peer_accept_map:
@@ -61,8 +59,7 @@ def generate(config_file):
                 network.update(region_map = region_map)
                 aws.create_network(**network)
             else: 
-                print("unsupported provider {}".format(provider))
-                exit(1)
+                raise Exception("unsupported provider {}".format(provider))
     if 'clusters' in config_file:
         for cluster in config_file['clusters']:
             provider = network_map[cluster["vpc"]]
@@ -80,4 +77,4 @@ def generate(config_file):
             elif provider == "aws":
                 aws.create_ns_records(**nameserver)
             else: 
-                print("unsupported provider in nameservers section {}".format(provider))
+                raise Exception("unsupported provider in nameservers section {}".format(provider))
