@@ -11,6 +11,16 @@ resource "aws_security_group" "allow-ssh" {
   }
 }
 
+resource "aws_security_group" "allow-crdb" {
+  name = "${var.name}-allow-crdb"
+  description = "Allow inbound crdb creation specific traffic"
+  vpc_id = aws_vpc.vpc.id
+
+  tags = {
+    Name = "${var.name}-allow-crdb"
+  }
+}
+
 resource "aws_security_group" "allow-local" {
   name = "${var.name}-allow-local"
   description = "Allow inbound traffic from local VPC"
@@ -126,4 +136,24 @@ resource "aws_security_group_rule" "private_acc" {
   description       = "peer traffic ${var.peer_accept_list[count.index]}"
   security_group_id = aws_security_group.allow-local.id
   count             = length(var.peer_accept_list)
+}
+
+resource "aws_security_group_rule" "public_crdb_creation_api" {
+  type              = "ingress"
+  from_port         = 9443
+  to_port           = 9443
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  description       = "SM GUI connection"
+  security_group_id = aws_security_group.allow-crdb.id
+}
+
+resource "aws_security_group_rule" "public_crdb_syncer_api" {
+  type              = "ingress"
+  from_port         = 12000
+  to_port           = 12000
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  description       = "SM GUI connection"
+  security_group_id = aws_security_group.allow-crdb.id
 }

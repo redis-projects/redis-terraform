@@ -48,6 +48,18 @@ resource "null_resource" "null_provisioner" {
       }
     }
 
+    provisioner "file" {
+      source      = "${var.ssh_private_key_file}"
+      destination = "/home/${var.ssh_user}/.ssh/id_rsa"
+
+      connection {
+        type        = "ssh"
+        user        = var.ssh_user
+        private_key = file(var.ssh_private_key_file)
+        host        = var.host
+      }
+    }
+
     provisioner "remote-exec" {
       inline = [
         "chmod +x /home/${var.ssh_user}/post_provision.sh",

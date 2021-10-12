@@ -225,6 +225,10 @@ The created nodes are in a private subnet so it is necessary to go through the b
   - From bastion: curl -k --fail -u admin@admin.com:admin https://*ip*:9443/v1/nodes.  You can also use the DNS names provided as terraform output
   - From Redis Enterprise node: curl -k --fail -u admin@admin.com:admin https://localhost:9443/v1/nodes
 
+## Creating cross provider CRDB
+When multiple clusters are spanning multiple providers, we create ssh tunnels between the clusters and their respective base_sections
+to be able to create a CRDB that makes use of this ssh tunnels, use the crdb-cli command under `templates/aa-rladmin.tpl`. Before that, you need to make sure that all-nodes proxy policy is applied (rladmin commands are provided in the same tpl file). 
+
 ## Features Coming soon
 
 - Active/Active between zones/cloud providers

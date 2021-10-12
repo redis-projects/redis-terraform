@@ -11,6 +11,9 @@ def generate(config_file):
     fqdn_map = {}
     peer_request_map = {}
     peer_accept_map = {}
+    network_names = {}
+    diff_providers = False
+    last_provider = None
 
     if 'nameservers' in config_file:
         for nameserver in config_file['nameservers']:
@@ -24,6 +27,10 @@ def generate(config_file):
             if "provider" not in network:
                 raise Exception("ERROR: a provider must be specified for each network (google or aws)")
             provider = network["provider"]
+            if not last_provider:
+                last_provider = provider
+            if last_provider != provider:
+                diff_providers = True
             network_map[network["name"]] = provider
             if "peer_with" in network:
                 for vpc_peer in network['peer_with']:
@@ -41,10 +48,15 @@ def generate(config_file):
             if  provider == 'aws': aws_cidr_map[network["name"]] = network['vpc_cidr']
             if  provider == 'gcp': gcp_cidr_map[network["name"]] = [network['public_cidr'], network['private_cidr']]
             region_map[network["name"]] = network['region']
+            network_names[network["name"]] = provider
+        if not diff_providers or 'nameservers' not in config_file:
+            network_names = {}
 
         for network in config_file['networks']:
             provider = network.pop('provider', "gcp")
             network.pop('peer_with','default')
+            network["other_nets"] = network_names
+            network["fqdn_map"] = fqdn_map
             if network["name"] in peer_request_map:
                 network.update(peer_request_list = peer_request_map[network["name"]])
             if network["name"] in peer_accept_map:
