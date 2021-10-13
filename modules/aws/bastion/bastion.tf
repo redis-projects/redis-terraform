@@ -59,18 +59,6 @@ resource "aws_instance" "bastion" {
     network_interface_id = aws_network_interface.nic.id
   }
 
-
-    provisioner "remote-exec" {
-    inline = "${concat(["chmod 400 /home/${var.ssh_user}/.ssh/id_rsa"],local.ssh_tunnels, ["sleep 30"])}"
-
-    connection {
-      type = "ssh"
-      host = self.public_ip
-      user = var.ssh_user
-      private_key = file(var.ssh_private_key)
-    }
-  }
-
   tags = {
     Name = "${var.name}-bastion"
   }

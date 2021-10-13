@@ -2,7 +2,7 @@ from terraformpy import Module, Provider, Data, Output
 from terraformpy.helpers import relative_file
 import os
 import yaml
-from . import PUBLIC_CIDR, PRIVATE_CIDR, REGION, OS, REDIS_DISTRO, BOOT_DISK_SIZE, BASTION_MACHINE_TYPE, SSH_USER, SSH_PUB_KEY_FILE, SSH_PRIVATE_KEY_FILE, REDIS_CLUSTER_NAME, REDIS_PWD, REDIS_EMAIL_FROM, REDIS_SMTP_HOST, ZONE, WORKER_MACHINE_COUNT, WORKER_MACHINE_TYPE, REDIS_USER_NAME, DEPLOYMENT_NAME, AWS_SSH_USER
+from . import PUBLIC_CIDR, PRIVATE_CIDR, REGION, OS, REDIS_DISTRO, BOOT_DISK_SIZE, BASTION_MACHINE_TYPE, SSH_USER, SSH_PUB_KEY_FILE, SSH_PRIVATE_KEY_FILE, REDIS_CLUSTER_NAME, REDIS_PWD, REDIS_EMAIL_FROM, REDIS_SMTP_HOST, ZONE, WORKER_MACHINE_COUNT, WORKER_MACHINE_TYPE, REDIS_USER_NAME, DEPLOYMENT_NAME
 
 
 # TODO: is this needed
@@ -99,14 +99,6 @@ def create_bastion(name, zone, rack_aware, machine_type, machine_image, redis_di
         gce_ssh_pub_key_file = SSH_PUB_KEY_FILE,
         active_active_script = '${data.template_file.aa_db}',
         providers = {"google": "google.%s" % name},
-        cluster_fqdn=[fqdn_map[vpc]
-                    for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'gcp'],
-        other_bastions=['${module.bastion-%s.bastion-public-ip}' %
-                        (vpc) for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'gcp'],
-        other_ssh_users=[
-            SSH_USER for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'gcp'],
-        ssh_keys=[SSH_PRIVATE_KEY_FILE for vpc in other_nets.keys(
-        ) if vpc != name and other_nets[vpc] != 'gcp'],
         zone = zone
     )
 
@@ -120,7 +112,15 @@ def create_bastion(name, zone, rack_aware, machine_type, machine_image, redis_di
         extra_vars = '${data.template_file.extra_vars-%s}' % name,
         ssh_private_key_file = SSH_PRIVATE_KEY_FILE,
         host="${module.bastion-%s.bastion-public-ip.address}" % name,
-        redis_distro = redis_distro
+        redis_distro = redis_distro,
+        cluster_fqdn=[fqdn_map[vpc]
+                        for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'gcp'],
+        other_bastions=['${module.bastion-%s.bastion-public-ip}' %
+                        (vpc) for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'gcp'],
+        other_ssh_users=[SSH_USER 
+                        for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'gcp'],
+        ssh_keys=[SSH_PRIVATE_KEY_FILE for vpc in other_nets.keys(
+        ) if vpc != name and other_nets[vpc] != 'gcp']
     )
 
 def create_re_cluster(worker_count=WORKER_MACHINE_COUNT, 

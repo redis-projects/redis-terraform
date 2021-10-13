@@ -23,18 +23,9 @@ clusters:
     machine_type: n1-standard-4
     machine_image: rhel-8-v20210721
     zones: 
-    - europe-west3-a
-    - europe-west3-b
-    - europe-west3-c
-    expose_ui: True
-  - vpc: vpc-gcp-east1
-    worker_count: 3 
-    machine_type: n1-standard-4
-    machine_image: rhel-8-v20210721
-    zones: 
-    - us-east1-d
-    - us-east1-b
-    - us-east1-c
+    - us-central1-a
+    - us-central1-b
+    - us-central1-c
     expose_ui: True
 networks:
   - name: vpc-aws-us
@@ -70,18 +61,8 @@ networks:
   - name: vpc-gcp
     public_cidr: 10.1.0.0/24
     private_cidr: 10.2.0.0/16 
-    region: europe-west3
-    bastion_zone: europe-west3-b
-    bastion_machine_image: rhel-7-v20210721
-    bastion_machine_type: n1-standard-1
-    rack_aware: True
-    provider: gcp
-    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
-  - name: vpc-gcp-east1
-    public_cidr: 10.3.0.0/24
-    private_cidr: 10.4.0.0/16  
-    region: us-east1
-    bastion_zone: us-east1-b
+    region: us-central1
+    bastion_zone: us-central1-b
     bastion_machine_image: rhel-7-v20210721
     bastion_machine_type: n1-standard-1
     rack_aware: True
@@ -96,9 +77,7 @@ nameservers:
     parent_zone: aws.ps-redislabs.com
     domain: aws.ps-redislabs.com
     provider: aws
-  - vpc: vpc-gcp-east1
-    parent_zone: ps-redislabs
-    domain: ps-redislabs.com
   - vpc: vpc-gcp
     parent_zone: ps-redislabs
     domain: ps-redislabs.com
+    provider: gcp

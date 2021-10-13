@@ -177,20 +177,28 @@
             "source": "./modules/aws/ns"
         },
         "re-provisioner-vpc-aws-europe": {
+            "cluster_fqdn": [],
             "extra_vars": "${data.template_file.extra_vars-vpc-aws-europe}",
             "host": "${module.bastion-vpc-aws-europe.bastion-public-ip}",
             "inventory": "${data.template_file.inventory-vpc-aws-europe}",
+            "other_bastions": [],
+            "other_ssh_users": [],
             "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
             "source": "./modules/ansible/re",
+            "ssh_keys": [],
             "ssh_private_key_file": "~/.ssh/id_rsa",
             "ssh_user": "redislabs"
         },
         "re-provisioner-vpc-aws-us": {
+            "cluster_fqdn": [],
             "extra_vars": "${data.template_file.extra_vars-vpc-aws-us}",
             "host": "${module.bastion-vpc-aws-us.bastion-public-ip}",
             "inventory": "${data.template_file.inventory-vpc-aws-us}",
+            "other_bastions": [],
+            "other_ssh_users": [],
             "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
             "source": "./modules/ansible/re",
+            "ssh_keys": [],
             "ssh_private_key_file": "~/.ssh/id_rsa",
             "ssh_user": "redislabs"
         },

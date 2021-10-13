@@ -88,16 +88,8 @@ def create_bastion(name, zone, rack_aware, machine_type, machine_image, redis_di
         ssh_public_key = SSH_PUB_KEY_FILE,
         ssh_key_name = '${module.keypair-%s.key-name}' % name,
         providers = {"aws": "aws.%s" % name},
-        availability_zone = zone,
-        cluster_fqdn=[fqdn_map[vpc]
-                    for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'aws'],
         security_groups='${module.network-%s.public-security-groups}' % name,
-        other_bastions=['${module.bastion-%s.bastion-public-ip.address}' %
-                        (vpc) for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'aws'],
-        other_ssh_users=[
-            SSH_USER for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'aws'],
-        ssh_keys=[
-            SSH_PRIVATE_KEY_FILE for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'aws']
+        availability_zone = zone
     )
 
     Output("aws-bastion-%s-ip-output" % name,
@@ -110,7 +102,15 @@ def create_bastion(name, zone, rack_aware, machine_type, machine_image, redis_di
         extra_vars = '${data.template_file.extra_vars-%s}' % name,
         ssh_private_key_file = SSH_PRIVATE_KEY_FILE,
         host="${module.bastion-%s.bastion-public-ip}" % name,
-        redis_distro=redis_distro
+        redis_distro=redis_distro,
+        cluster_fqdn=[fqdn_map[vpc]
+                    for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'aws'],
+        other_bastions=['${module.bastion-%s.bastion-public-ip.address}' %
+                        (vpc) for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'aws'],
+        other_ssh_users=[
+            SSH_USER for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'aws'],
+        ssh_keys=[
+            SSH_PRIVATE_KEY_FILE for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'aws']
     )
 
 def create_re_cluster(worker_count=WORKER_MACHINE_COUNT,
