@@ -3,7 +3,7 @@ from terraformpy.helpers import relative_file
 import os
 import yaml
 import sys
-from providers import aws, gcp, REGION, ZONE, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, DEPLOYMENT_NAME
+from providers import aws, gcp, azure, REGION, ZONE, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, DEPLOYMENT_NAME
 
 #gcp_provider = Provider("google", project="redislabs-sa-training-services", region=REGION, zone=ZONE, credentials=relative_file("./terraform_account.json"))
 
@@ -14,6 +14,7 @@ def generate(config_file):
     aws_cidr_map = {}
     gcp_cidr_map = {}
     region_map = {}
+    rg_map = {}
     fqdn_map = {}
     peer_request_map = {}
     peer_accept_map = {}
@@ -31,6 +32,8 @@ def generate(config_file):
                 exit(1)
             provider = network["provider"]
             network_map[network["name"]] = provider
+            if "resource_group" in network and provider == "azure":
+                rg_map[network["name"]] = network['resource_group']
             if "peer_with" in network:
                 for vpc_peer in network['peer_with']:
                     if  not next((item  for item in config_file['networks']  if item['name'] == vpc_peer), False):
@@ -53,6 +56,7 @@ def generate(config_file):
         for network in config_file['networks']:
             provider = network.pop('provider', "gcp")
             network.pop('peer_with','default')
+            clusters = [(cl_dict['vpc'],cl_dict['expose_ui']) for cl_dict in config_file['clusters']]
             if network["name"] in peer_request_map:
                 network.update(peer_request_list = peer_request_map[network["name"]])
             if network["name"] in peer_accept_map:
@@ -66,6 +70,12 @@ def generate(config_file):
                 network.update(cidr_map = aws_cidr_map)
                 network.update(region_map = region_map)
                 aws.create_network(**network)
+            elif provider == "azure":
+                for clu in clusters:
+                    if clu[0] == network["name"]:
+                        expose_ui = clu[1]
+                network.update(expose_ui = expose_ui)
+                azure.create_network(**network)
             else: 
                 print("unsupported provider {}".format(provider))
                 exit(1)
@@ -76,6 +86,10 @@ def generate(config_file):
                 gcp.create_re_cluster(**cluster)
             elif provider == "aws":
                 aws.create_re_cluster(**cluster)
+            elif provider == "azure":
+                cluster.update(region_map = region_map)
+                cluster.update(rg_map = rg_map)
+                azure.create_re_cluster(**cluster)
 
     if 'nameservers' in config_file:
         for nameserver in config_file['nameservers']:
@@ -85,6 +99,9 @@ def generate(config_file):
                 gcp.create_ns_records(**nameserver)
             elif provider == "aws":
                 aws.create_ns_records(**nameserver)
+            elif provider == "azure":
+                nameserver.update(rg_map = rg_map)
+                azure.create_ns_records(**nameserver)
             else: 
                 print("unsupported provider in nameservers section {}".format(provider))
 

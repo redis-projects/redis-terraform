@@ -1,0 +1,64 @@
+---
+clusters:
+  - vpc: vpc-azure-europe
+    worker_count: 3 
+    machine_type: Standard_B2s
+    machine_image: cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810
+    zones: 
+    - 1
+    - 2
+    - 3
+    expose_ui: True
+  - vpc: vpc-azure-us
+    worker_count: 3 
+    machine_type: Standard_B2s
+    machine_image: cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810
+    zones: 
+    - 1
+    - 2
+    - 3
+    expose_ui: True
+networks:
+  - name: vpc-azure-europe
+    vpc_cidr: 10.1.0.0/16
+    public_cidr: 10.1.1.0/24
+    private_cidr: 10.1.2.0/24 
+    region: germanywestcentral
+    bastion_zone: 2
+    bastion_machine_image: cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810
+    bastion_machine_type: Standard_B1s
+    rack_aware: True
+    provider: azure
+    resource_group: terratest-rg
+    subscription_id: ef03f41d-d2bd-4691-b3a0-3aff1c6711f7
+    tenant_id: 1428732f-21cf-469e-ad48-5721f4eac1e2
+    application_id: 801fb60b-0efb-4a9e-aa4a-98f8abff125e
+    client_certificate_path: /Users/audi/Documents/GIT/rl-terraform/terraform_account.pfx
+    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
+    peer_with:
+    - vpc-azure-us
+  - name: vpc-azure-us
+    vpc_cidr: 10.2.0.0/16
+    public_cidr: 10.2.1.0/24
+    private_cidr: 10.2.2.0/24 
+    region: WestUS3
+    bastion_zone: 2
+    bastion_machine_image: cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810
+    bastion_machine_type: Standard_B1s
+    rack_aware: True
+    provider: azure
+    resource_group: terratest-rg
+    subscription_id: ef03f41d-d2bd-4691-b3a0-3aff1c6711f7
+    tenant_id: 1428732f-21cf-469e-ad48-5721f4eac1e2
+    application_id: 801fb60b-0efb-4a9e-aa4a-98f8abff125e
+    client_certificate_path: /Users/audi/Documents/GIT/rl-terraform/terraform_account.pfx
+    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
+nameservers:
+  - vpc: vpc-azure-europe
+    parent_zone: azure.ps-redislabs.com
+    domain: azure.ps-redislabs.com
+    provider: azure
+  - vpc: vpc-azure-us
+    parent_zone: azure.ps-redislabs.com
+    domain: azure.ps-redislabs.com
+    provider: azure

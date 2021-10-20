@@ -37,8 +37,11 @@ if [[ $RELEASE =~ (^[0-9]{1,3}).([0-9]{1,3}) ]]
 then
     OS_MAJOR=${BASH_REMATCH[1]} 
     OS_MINOR=${BASH_REMATCH[2]} 
+elif [[ $RELEASE =~ (^[0-9]{1,3}) ]]
+then
+    OS_MAJOR=${BASH_REMATCH[1]} 
 else
-    echo Release version $RELEASE not in expcted format
+    echo Release version $RELEASE not in expected format
     exit 1
 fi
 
@@ -53,6 +56,9 @@ tar -xf redis-ansible.tar.gz -C redis-ansible/ || exit 1
 mv boa-inventory.ini redis-ansible/inventories/boa-cluster.ini || exit 1
 mv boa-extra-vars.yaml redis-ansible/extra_vars/boa-extra-vars.yaml || exit 1
 export ANSIBLE_HOST_KEY_CHECKING=False
+
+# Let's first stop and disable service systemd-resolved as it hogs port 53 and blocks our pDNS
+ansible --become -i redis-ansible/inventories/boa-cluster.ini -m ansible.builtin.systemd -a 'name=systemd-resolved state=stopped enabled=no' all
 cd redis-ansible
 ansible-playbook -i ./inventories/boa-cluster.ini redislabs-install.yaml \
                  -e @./extra_vars/boa-extra-vars.yaml \
