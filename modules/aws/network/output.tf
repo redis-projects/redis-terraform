@@ -25,7 +25,7 @@ output "private-security-groups" {
 
 output "public-security-groups" {
   description = "The id of the public groups"
-  value       = [aws_security_group.allow-ssh.id]
+  value       = [aws_security_group.allow-ssh.id, aws_security_group.allow-crdb.id]
 }
 
 output "internet-gateway" {

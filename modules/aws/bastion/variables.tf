@@ -42,37 +42,6 @@ variable "ssh_key_name" {
   type        = string
 }
 
-variable "ssh_user" {
-  description = "EC2 user to ssh into"
-  type        = string
-}
-
-variable "ssh_private_key" {
-  description = "Path to SSH private key"
-  type        = string
-  sensitive   = true
-}
-
-variable "inventory" {
-  description = "Redis enterprise inventory"
-  default     = ""
-}
-
-variable "extra_vars" {
-  description = "Redis enterprise extra variables"
-  default     = ""
-}
-
-#variable "worker-host" {
-#  description = "Worker host name"
-#  type        = string
-#}
-
-variable "redis_distro" {
-  description = "Redis distribution"
-  type        = string
-}
-
 variable "redis_user" {
   description = "Redis linux user"
   type        = string
@@ -82,28 +51,3 @@ variable "ssh_public_key" {
   description = "Path to SSH public key"
   type        = string
 }
-
-#variable "redis-cluster-name" {
-#  description = "Redis cluster name"
-#  type        = string
-#}
-
-#variable "redis-username" {
-#  description = "Redis username"
-#  type        = string
-#}
-
-#variable "redis-password" {
-#  description = "Redis password"
-#  type        = string
-#}
-
-#variable "redis-email" {
-#  description = "Redis email from address"
-#  type        = string
-#}
-
-#variable "redis-smtp" {
-#  description = "Redis SMTP host"
-#  type        = string
-#}

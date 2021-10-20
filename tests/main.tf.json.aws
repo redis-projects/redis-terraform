@@ -1,0 +1,300 @@
+{
+    "data": {
+        "template_file": {
+            "extra_vars-vpc-aws-europe": {
+                "template": "${file(\"${path.module}/templates/extra-vars.tpl\")}",
+                "vars": {
+                    "ansible_user": "redislabs",
+                    "redis_cluster_name": "unit-test-name-vpc-aws-europe.aws.ps-redislabs.com",
+                    "redis_email_from": "admin@domain.tld",
+                    "redis_pwd": "admin",
+                    "redis_smtp_host": "smtp.domain.tld",
+                    "redis_user_name": "admin@admin.com"
+                }
+            },
+            "extra_vars-vpc-aws-us": {
+                "template": "${file(\"${path.module}/templates/extra-vars.tpl\")}",
+                "vars": {
+                    "ansible_user": "redislabs",
+                    "redis_cluster_name": "unit-test-name-vpc-aws-us.aws.ps-redislabs.com",
+                    "redis_email_from": "admin@domain.tld",
+                    "redis_pwd": "admin",
+                    "redis_smtp_host": "smtp.domain.tld",
+                    "redis_user_name": "admin@admin.com"
+                }
+            },
+            "inventory-vpc-aws-europe": {
+                "template": "${file(\"${path.module}/templates/inventory.tpl\")}",
+                "vars": {
+                    "ip_addrs": "${join(\",\", module.re-vpc-aws-europe.re-nodes.*.private_ip)}",
+                    "rack_ids": ""
+                }
+            },
+            "inventory-vpc-aws-us": {
+                "template": "${file(\"${path.module}/templates/inventory.tpl\")}",
+                "vars": {
+                    "ip_addrs": "${join(\",\", module.re-vpc-aws-us.re-nodes.*.private_ip)}",
+                    "rack_ids": ""
+                }
+            }
+        }
+    },
+    "module": {
+        "bastion-vpc-aws-europe": {
+            "ami": "ami-02241e4f36e06d650",
+            "availability_zone": "eu-central-1b",
+            "instance_type": "t2.micro",
+            "name": "unit-test-name-vpc-aws-europe",
+            "providers": {
+                "aws": "aws.vpc-aws-europe"
+            },
+            "redis_user": "redislabs",
+            "security_groups": "${module.network-vpc-aws-europe.public-security-groups}",
+            "source": "./modules/aws/bastion",
+            "ssh_key_name": "${module.keypair-vpc-aws-europe.key-name}",
+            "ssh_public_key": "~/.ssh/id_rsa.pub",
+            "subnet": "${module.network-vpc-aws-europe.public-subnet}",
+            "vpc": "${module.network-vpc-aws-europe.vpc}"
+        },
+        "bastion-vpc-aws-us": {
+            "ami": "ami-0b1db37f0fa006678",
+            "availability_zone": "us-east-1c",
+            "instance_type": "t2.micro",
+            "name": "unit-test-name-vpc-aws-us",
+            "providers": {
+                "aws": "aws.vpc-aws-us"
+            },
+            "redis_user": "redislabs",
+            "security_groups": "${module.network-vpc-aws-us.public-security-groups}",
+            "source": "./modules/aws/bastion",
+            "ssh_key_name": "${module.keypair-vpc-aws-us.key-name}",
+            "ssh_public_key": "~/.ssh/id_rsa.pub",
+            "subnet": "${module.network-vpc-aws-us.public-subnet}",
+            "vpc": "${module.network-vpc-aws-us.vpc}"
+        },
+        "keypair-vpc-aws-europe": {
+            "name": "unit-test-name-vpc-aws-europe-keypair",
+            "providers": {
+                "aws": "aws.vpc-aws-europe"
+            },
+            "source": "./modules/aws/keypair",
+            "ssh_public_key": "~/.ssh/id_rsa.pub"
+        },
+        "keypair-vpc-aws-us": {
+            "name": "unit-test-name-vpc-aws-us-keypair",
+            "providers": {
+                "aws": "aws.vpc-aws-us"
+            },
+            "source": "./modules/aws/keypair",
+            "ssh_public_key": "~/.ssh/id_rsa.pub"
+        },
+        "network-vpc-aws-europe": {
+            "availability_zone": "eu-central-1b",
+            "cidr_map": {
+                "vpc-aws-europe": "10.0.0.0/16",
+                "vpc-aws-us": "10.1.0.0/16"
+            },
+            "name": "unit-test-name-vpc-aws-europe",
+            "peer_accept_list": [
+                "vpc-aws-us"
+            ],
+            "peer_request_list": [],
+            "private_subnet_cidr": {
+                "eu-central-1a": "10.0.2.0/24",
+                "eu-central-1b": "10.0.3.0/24",
+                "eu-central-1c": "10.0.4.0/24"
+            },
+            "providers": {
+                "aws": "aws.vpc-aws-europe"
+            },
+            "public_subnet_cidr": "10.0.1.0/24",
+            "region_map": {
+                "vpc-aws-europe": "eu-central-1",
+                "vpc-aws-us": "us-east-1"
+            },
+            "source": "./modules/aws/network",
+            "vpc_accept_list": [
+                "${module.network-vpc-aws-us.vpc}"
+            ],
+            "vpc_cidr": "10.0.0.0/16",
+            "vpc_conn_index": [
+                "${module.network-vpc-aws-us.peering-request-ids[\"vpc-aws-europe\"]}"
+            ],
+            "vpc_name": "vpc-aws-europe",
+            "vpc_request_list": []
+        },
+        "network-vpc-aws-us": {
+            "availability_zone": "us-east-1c",
+            "cidr_map": {
+                "vpc-aws-europe": "10.0.0.0/16",
+                "vpc-aws-us": "10.1.0.0/16"
+            },
+            "name": "unit-test-name-vpc-aws-us",
+            "peer_accept_list": [],
+            "peer_request_list": [
+                "vpc-aws-europe"
+            ],
+            "private_subnet_cidr": {
+                "us-east-1a": "10.1.3.0/24",
+                "us-east-1b": "10.1.2.0/24",
+                "us-east-1c": "10.1.4.0/24"
+            },
+            "providers": {
+                "aws": "aws.vpc-aws-us"
+            },
+            "public_subnet_cidr": "10.1.1.0/24",
+            "region_map": {
+                "vpc-aws-europe": "eu-central-1",
+                "vpc-aws-us": "us-east-1"
+            },
+            "source": "./modules/aws/network",
+            "vpc_accept_list": [],
+            "vpc_cidr": "10.1.0.0/16",
+            "vpc_conn_index": [],
+            "vpc_name": "vpc-aws-us",
+            "vpc_request_list": [
+                "${module.network-vpc-aws-europe.vpc}"
+            ]
+        },
+        "ns-vpc-aws-europe": {
+            "cluster_fqdn": "unit-test-name-vpc-aws-europe.aws.ps-redislabs.com",
+            "ip_addresses": "${module.re-vpc-aws-europe.re-public-ips}",
+            "name": "unit-test-name-vpc-aws-europe",
+            "parent_zone": "aws.ps-redislabs.com",
+            "providers": {
+                "aws": "aws.vpc-aws-europe"
+            },
+            "source": "./modules/aws/ns"
+        },
+        "ns-vpc-aws-us": {
+            "cluster_fqdn": "unit-test-name-vpc-aws-us.aws.ps-redislabs.com",
+            "ip_addresses": "${module.re-vpc-aws-us.re-public-ips}",
+            "name": "unit-test-name-vpc-aws-us",
+            "parent_zone": "aws.ps-redislabs.com",
+            "providers": {
+                "aws": "aws.vpc-aws-us"
+            },
+            "source": "./modules/aws/ns"
+        },
+        "re-provisioner-vpc-aws-europe": {
+            "cluster_fqdn": [],
+            "extra_vars": "${data.template_file.extra_vars-vpc-aws-europe}",
+            "host": "${module.bastion-vpc-aws-europe.bastion-public-ip}",
+            "inventory": "${data.template_file.inventory-vpc-aws-europe}",
+            "other_bastions": [],
+            "other_ssh_users": [],
+            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
+            "source": "./modules/ansible/re",
+            "ssh_keys": [],
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "ssh_user": "redislabs"
+        },
+        "re-provisioner-vpc-aws-us": {
+            "cluster_fqdn": [],
+            "extra_vars": "${data.template_file.extra_vars-vpc-aws-us}",
+            "host": "${module.bastion-vpc-aws-us.bastion-public-ip}",
+            "inventory": "${data.template_file.inventory-vpc-aws-us}",
+            "other_bastions": [],
+            "other_ssh_users": [],
+            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
+            "source": "./modules/ansible/re",
+            "ssh_keys": [],
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "ssh_user": "redislabs"
+        },
+        "re-ui-vpc-aws-europe": {
+            "ips": "${module.re-vpc-aws-europe.re-nodes.*.private_ip}",
+            "name": "unit-test-name-vpc-aws-europe",
+            "providers": {
+                "aws": "aws.vpc-aws-europe"
+            },
+            "source": "./modules/aws/re-ui",
+            "subnets": "${module.network-vpc-aws-europe.private-subnet.*.id}",
+            "vpc": "${module.network-vpc-aws-europe.vpc}"
+        },
+        "re-ui-vpc-aws-us": {
+            "ips": "${module.re-vpc-aws-us.re-nodes.*.private_ip}",
+            "name": "unit-test-name-vpc-aws-us",
+            "providers": {
+                "aws": "aws.vpc-aws-us"
+            },
+            "source": "./modules/aws/re-ui",
+            "subnets": "${module.network-vpc-aws-us.private-subnet.*.id}",
+            "vpc": "${module.network-vpc-aws-us.vpc}"
+        },
+        "re-vpc-aws-europe": {
+            "ami": "ami-01f6fd1863750f580",
+            "instance_type": "t2.xlarge",
+            "name": "unit-test-name-vpc-aws-europe",
+            "providers": {
+                "aws": "aws.vpc-aws-europe"
+            },
+            "redis_user": "redislabs",
+            "security_groups": "${module.network-vpc-aws-europe.private-security-groups}",
+            "source": "./modules/aws/re",
+            "ssh_key_name": "${module.keypair-vpc-aws-europe.key-name}",
+            "ssh_public_key": "~/.ssh/id_rsa.pub",
+            "subnet": "${module.network-vpc-aws-europe.private-subnet}",
+            "worker_count": 3,
+            "zones": [
+                "eu-central-1c",
+                "eu-central-1b",
+                "eu-central-1a"
+            ]
+        },
+        "re-vpc-aws-us": {
+            "ami": "ami-05f238ddab9a512be",
+            "instance_type": "t2.xlarge",
+            "name": "unit-test-name-vpc-aws-us",
+            "providers": {
+                "aws": "aws.vpc-aws-us"
+            },
+            "redis_user": "redislabs",
+            "security_groups": "${module.network-vpc-aws-us.private-security-groups}",
+            "source": "./modules/aws/re",
+            "ssh_key_name": "${module.keypair-vpc-aws-us.key-name}",
+            "ssh_public_key": "~/.ssh/id_rsa.pub",
+            "subnet": "${module.network-vpc-aws-us.private-subnet}",
+            "worker_count": 3,
+            "zones": [
+                "us-east-1a",
+                "us-east-1b",
+                "us-east-1c"
+            ]
+        }
+    },
+    "output": {
+        "aws-bastion-vpc-aws-europe-ip-output": {
+            "value": "${module.bastion-vpc-aws-europe}"
+        },
+        "aws-bastion-vpc-aws-us-ip-output": {
+            "value": "${module.bastion-vpc-aws-us}"
+        },
+        "vpc-aws-europe-dns-name": {
+            "value": "unit-test-name-vpc-aws-europe.aws.ps-redislabs.com"
+        },
+        "vpc-aws-europe-ui-endpoint": {
+            "value": "${module.re-ui-vpc-aws-europe.ui-ip}"
+        },
+        "vpc-aws-us-dns-name": {
+            "value": "unit-test-name-vpc-aws-us.aws.ps-redislabs.com"
+        },
+        "vpc-aws-us-ui-endpoint": {
+            "value": "${module.re-ui-vpc-aws-us.ui-ip}"
+        }
+    },
+    "provider": {
+        "aws": {
+            "access_key": "",
+            "alias": "vpc-aws-europe",
+            "region": "eu-central-1",
+            "secret_key": ""
+        },
+        "aws": {
+            "access_key": "",
+            "alias": "vpc-aws-us",
+            "region": "us-east-1",
+            "secret_key": ""
+        }
+    }
+}

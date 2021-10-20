@@ -103,7 +103,7 @@ resource "google_compute_firewall" "public-firewall" {
 
   allow {
     protocol = "tcp"
-    ports    = ["22", "80", "443", "9443"]
+    ports    = ["22", "80", "443", "9443", "12000"]
   }
 
   source_ranges = ["0.0.0.0/0"]

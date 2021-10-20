@@ -58,56 +58,6 @@ resource "aws_instance" "bastion" {
     device_index = 0
     network_interface_id = aws_network_interface.nic.id
   }
-  provisioner "file" {
-   content = var.inventory.rendered 
-   #content = templatefile("templates/inventory.tpl", { worker_host_name: var.worker-host })
-   destination = "/home/${var.ssh_user}/boa-inventory.ini"
-
-    connection {
-      type = "ssh"
-      host = self.public_ip
-      user = var.ssh_user
-      private_key = file(var.ssh_private_key)
-    }
-  }
-
-  provisioner "file" {
-   content  = var.extra_vars.rendered 
-   destination = "/home/${var.ssh_user}/boa-extra-vars.yaml"
-
-    connection {
-      type = "ssh"
-      host = self.public_ip
-      user = var.ssh_user
-      private_key = file(var.ssh_private_key)
-    }
-  }
-
-  provisioner "file" {
-    source      = "./bin/post_provision.sh"
-    destination = "/home/${var.ssh_user}/post_provision.sh"
-
-    connection {
-      type = "ssh"
-      host = self.public_ip
-      user = var.ssh_user
-      private_key = file(var.ssh_private_key)
-    }
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "chmod +x /home/${var.ssh_user}/post_provision.sh",
-      "/home/${var.ssh_user}/post_provision.sh ${var.redis_distro} | tee  post_provision.out 2>&1",
-    ]
-
-    connection {
-      type = "ssh"
-      host = self.public_ip
-      user = var.ssh_user
-      private_key = file(var.ssh_private_key)
-    }
-  }
 
   tags = {
     Name = "${var.name}-bastion"
