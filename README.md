@@ -118,6 +118,33 @@ redis_distro contains the URL for the Redis distribution (tar ball) that should 
 Only required for AWS if more than one region is used. The value is a ist of network names to which
 peering should be requested
 
+#resource_group
+
+The resource_group applies to Azure only! The infrastructure will be deployed in the specified
+resource group. The resource group is expected to exist and will neither be created nor deleted.
+The service principal needs to have adequate privileges (e.g. contributor) to build infrastructure
+in the specified resource group
+
+#### subscription_id
+
+The subscription_id applies to Azure only! It specifies the subscription which should be used 
+to create/deploy the infrastructure. The service principal must have sufficient rights
+(e.g. contributor) within the subscription
+
+#### tenant_id
+
+The tenant_id applies to Azure only! it lists the Tenant ID, which describes the Active
+Directory hosting the service principal
+
+#### application_id
+
+The application_id applies to Azure only! The Application ID is part of the service principal
+identification
+
+#### client_certificate_path: /Users/audi/Documents/GIT/rl-terraform/terraform_account.pfx
+The client_certificate_path applies to Azure only! It points to a file (PFX format) containing
+the credentials of the service princpal
+
 #### clusters
 
 Defines the clusters to be deployed

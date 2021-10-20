@@ -3,6 +3,14 @@
 Tracking all changes for the "Terraform" project building Redis-Enterprise
 clusters on a public clould infrastructure.
 
+## [0.9.0] - Unreleased
+### Added
+- Support for Azure was added, including DNS, rack awareness, exporting the GUI
+  through a load balancer and peering the VNETs.
+- A new config.yaml.azure file has been added as an example for Azure deployments
+- The code has been restructured
+- Unit tests have been added
+
 ## [0.8.4] - Unreleased
 ### Added
 - VPC peering has been added to GCP. Although GCP is able to span a single VPC across

@@ -20,7 +20,7 @@ def create_network(name=None, region=REGION, public_cidr=PUBLIC_CIDR, private_ci
                   redis_cluster_name=REDIS_CLUSTER_NAME, resource_group=None,
                   subscription_id=None, tenant_id=None, application_id=None,
                   client_certificate_path=None, vpc_cidr=None, expose_ui=False,
-                  peer_request_list=None, peer_accept_list=None):
+                  peer_request_list=None, peer_accept_list=None, other_nets=None, fqdn_map=None):
     """
     create_network calls the Terraform 'network' module which is creating the VNETs and their
     subnets. The security groups are generated for the private and public subnets and finally
