@@ -55,7 +55,6 @@ def generate(config_file):
         if not diff_providers or 'nameservers' not in config_file:
             network_names = {}
 
-        clusters = [(cl_dict['vpc'],cl_dict['expose_ui']) for cl_dict in config_file['clusters']]
         for network in config_file['networks']:
             provider = network.pop('provider', "gcp")
             network.pop('peer_with','default')
@@ -75,6 +74,7 @@ def generate(config_file):
                 network.update(region_map = region_map)
                 aws.create_network(**network)
             elif provider == "azure":
+                clusters = [(cl_dict['vpc'],cl_dict['expose_ui']) for cl_dict in config_file['clusters']]
                 for clu in clusters:
                     if clu[0] == network["name"]:
                         expose_ui = clu[1]
@@ -82,6 +82,7 @@ def generate(config_file):
                 azure.create_network(**network)
             else: 
                 raise Exception("unsupported provider {}".format(provider))
+
     if 'clusters' in config_file:
         for cluster in config_file['clusters']:
             provider = network_map[cluster["vpc"]]

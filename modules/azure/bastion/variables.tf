@@ -41,30 +41,3 @@ variable "ssh_pub_key_file" {
   type        = string
 }
 
-variable "zone" {
-  description = "Availability zone"
-  type        = string
-}
-
-variable "inventory" {
-  description = "Inventory file of Redis Cluster nods for Ansibleplaybooks"
-}
-
-variable "extra_vars" {
-  description = "Extra variables set for Ansible playbooks"
-}
-
-variable "active_active_script" {
-  description = "Content of the script to setup n active-active cluster"
-}
-
-variable "ssh_private_key_file" {
-  description = "Private SSH key for transferring files to the bastion"
-  type        = string
-}
-
-variable "redis_distro" {
-  description = "URL for the redis enterprise tarball to download from"
-  type        = string    
-}
-

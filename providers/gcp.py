@@ -103,7 +103,7 @@ def create_bastion(name, zone, rack_aware, machine_type, machine_image, redis_di
     )
 
     Output("gcp-bastion-%s-ip-output" % name,
-            value = "${module.bastion-%s.bastion-public-ip.address}" % name)
+            value = "${module.bastion-%s.bastion-public-ip}" % name)
 
     provisioner = Module("re-provisioner-%s" % name, 
         source = "./modules/ansible/re",
@@ -111,7 +111,7 @@ def create_bastion(name, zone, rack_aware, machine_type, machine_image, redis_di
         inventory = '${data.template_file.inventory-%s}' % name,
         extra_vars = '${data.template_file.extra_vars-%s}' % name,
         ssh_private_key_file = SSH_PRIVATE_KEY_FILE,
-        host="${module.bastion-%s.bastion-public-ip.address}" % name,
+        host="${module.bastion-%s.bastion-public-ip}" % name,
         redis_distro = redis_distro,
         cluster_fqdn=[fqdn_map[vpc]
                         for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'gcp'],

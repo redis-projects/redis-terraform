@@ -265,10 +265,10 @@
     },
     "output": {
         "aws-bastion-vpc-aws-europe-ip-output": {
-            "value": "${module.bastion-vpc-aws-europe}"
+            "value": "${module.bastion-vpc-aws-europe.bastion-public-ip}"
         },
         "aws-bastion-vpc-aws-us-ip-output": {
-            "value": "${module.bastion-vpc-aws-us}"
+            "value": "${module.bastion-vpc-aws-us.bastion-public-ip}"
         },
         "vpc-aws-europe-dns-name": {
             "value": "unit-test-name-vpc-aws-europe.aws.ps-redislabs.com"

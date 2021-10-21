@@ -143,7 +143,7 @@ identification
 
 #### client_certificate_path: /Users/audi/Documents/GIT/rl-terraform/terraform_account.pfx
 The client_certificate_path applies to Azure only! It points to a file (PFX format) containing
-the credentials of the service princpal
+the credentials of the service principal
 
 #### clusters
 

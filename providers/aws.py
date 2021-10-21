@@ -54,7 +54,8 @@ def create_keypair(name):
            source="./modules/aws/keypair", ssh_public_key=SSH_PUB_KEY_FILE, providers={"aws": "aws.%s" % name},)
 
 
-def create_bastion(name, zone, rack_aware, machine_type, machine_image, redis_distro, redis_cluster_name, other_nets, fqdn_map):
+def create_bastion(name, zone, rack_aware, machine_type, machine_image, 
+                    redis_distro, redis_cluster_name, other_nets, fqdn_map):
     create_keypair(name)
 
     inventory = Data("template_file", "inventory-%s" % name,
@@ -93,7 +94,7 @@ def create_bastion(name, zone, rack_aware, machine_type, machine_image, redis_di
     )
 
     Output("aws-bastion-%s-ip-output" % name,
-           value="${module.bastion-%s}" % name)
+           value="${module.bastion-%s.bastion-public-ip}" % name)
 
     provisioner = Module("re-provisioner-%s" % name, 
         source = "./modules/ansible/re",
@@ -105,7 +106,7 @@ def create_bastion(name, zone, rack_aware, machine_type, machine_image, redis_di
         redis_distro=redis_distro,
         cluster_fqdn=[fqdn_map[vpc]
                     for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'aws'],
-        other_bastions=['${module.bastion-%s.bastion-public-ip.address}' %
+        other_bastions=['${module.bastion-%s.bastion-public-ip}' %
                         (vpc) for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'aws'],
         other_ssh_users=[
             SSH_USER for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'aws'],

@@ -145,7 +145,7 @@
         "re-provisioner-vpc-gcp-east1": {
             "cluster_fqdn": [],
             "extra_vars": "${data.template_file.extra_vars-vpc-gcp-east1}",
-            "host": "${module.bastion-vpc-gcp-east1.bastion-public-ip.address}",
+            "host": "${module.bastion-vpc-gcp-east1.bastion-public-ip}",
             "inventory": "${data.template_file.inventory-vpc-gcp-east1}",
             "other_bastions": [],
             "other_ssh_users": [],
@@ -158,7 +158,7 @@
         "re-provisioner-vpc-gcp-us": {
             "cluster_fqdn": [],
             "extra_vars": "${data.template_file.extra_vars-vpc-gcp-us}",
-            "host": "${module.bastion-vpc-gcp-us.bastion-public-ip.address}",
+            "host": "${module.bastion-vpc-gcp-us.bastion-public-ip}",
             "inventory": "${data.template_file.inventory-vpc-gcp-us}",
             "other_bastions": [],
             "other_ssh_users": [],
@@ -227,10 +227,10 @@
     },
     "output": {
         "gcp-bastion-vpc-gcp-east1-ip-output": {
-            "value": "${module.bastion-vpc-gcp-east1.bastion-public-ip.address}"
+            "value": "${module.bastion-vpc-gcp-east1.bastion-public-ip}"
         },
         "gcp-bastion-vpc-gcp-us-ip-output": {
-            "value": "${module.bastion-vpc-gcp-us.bastion-public-ip.address}"
+            "value": "${module.bastion-vpc-gcp-us.bastion-public-ip}"
         },
         "gcp-re-ui-vpc-gcp-east1-ip-output": {
             "value": "${module.re-ui-vpc-gcp-east1.ui-ip.address}"
