@@ -1,0 +1,266 @@
+{
+    "data": {
+        "template_file": {
+            "inventory-vpc-azure-europe": {
+                "template": "${file(\"${path.module}/templates/inventory.tpl\")}",
+                "vars": {
+                    "ip_addrs": "${join(\",\", module.re-vpc-azure-europe.re-nodes.*.private_ip_address)}",
+                    "rack_ids": "${join(\",\", module.re-vpc-azure-europe.re-nodes.*.zone)}"
+                }
+            },
+            "aa_db": {
+                "template": "${file(\"${path.module}/templates/create_aa_db.tpl\")}",
+                "vars": {
+                    "redis_user_name": "admin@admin.com",
+                    "redis_pwd": "admin",
+                    "redis_cluster_name": "dtest.rlabs.org",
+                    "FQDN1": "domain1.test.net",
+                    "FQDN2": "domain2.test.net"
+                }
+            },
+            "extra_vars-vpc-azure-europe": {
+                "template": "${file(\"${path.module}/templates/extra-vars.tpl\")}",
+                "vars": {
+                    "ansible_user": "redislabs",
+                    "redis_cluster_name": "unit-test-name-vpc-azure-europe.azure.ps-redislabs.com",
+                    "redis_user_name": "admin@admin.com",
+                    "redis_pwd": "admin",
+                    "redis_email_from": "admin@domain.tld",
+                    "redis_smtp_host": "smtp.domain.tld"
+                }
+            },
+            "inventory-vpc-azure-us": {
+                "template": "${file(\"${path.module}/templates/inventory.tpl\")}",
+                "vars": {
+                    "ip_addrs": "${join(\",\", module.re-vpc-azure-us.re-nodes.*.private_ip_address)}",
+                    "rack_ids": "${join(\",\", module.re-vpc-azure-us.re-nodes.*.zone)}"
+                }
+            },
+            "extra_vars-vpc-azure-us": {
+                "template": "${file(\"${path.module}/templates/extra-vars.tpl\")}",
+                "vars": {
+                    "ansible_user": "redislabs",
+                    "redis_cluster_name": "unit-test-name-vpc-azure-us.azure.ps-redislabs.com",
+                    "redis_user_name": "admin@admin.com",
+                    "redis_pwd": "admin",
+                    "redis_email_from": "admin@domain.tld",
+                    "redis_smtp_host": "smtp.domain.tld"
+                }
+            }
+        }
+    },
+    "provider": {
+        "azurerm": {
+            "features": {},
+            "client_id": "801fb60b-0efb-4a9e-aa4a-98f8abff125e",
+            "tenant_id": "1428732f-21cf-469e-ad48-5721f4eac1e2",
+            "subscription_id": "ef03f41d-d2bd-4691-b3a0-3aff1c6711f7",
+            "client_certificate_path": "/Users/audi/Documents/GIT/rl-terraform/terraform_account.pfx",
+            "alias": "vpc-azure-europe"
+        },
+        "azurerm": {
+            "features": {},
+            "client_id": "801fb60b-0efb-4a9e-aa4a-98f8abff125e",
+            "tenant_id": "1428732f-21cf-469e-ad48-5721f4eac1e2",
+            "subscription_id": "ef03f41d-d2bd-4691-b3a0-3aff1c6711f7",
+            "client_certificate_path": "/Users/audi/Documents/GIT/rl-terraform/terraform_account.pfx",
+            "alias": "vpc-azure-us"
+        }
+    },
+    "output": {
+        "Azure-bastion-vpc-azure-europe-ip-output": {
+            "value": "${module.bastion-vpc-azure-europe.bastion-public-ip}"
+        },
+        "Azure-bastion-vpc-azure-us-ip-output": {
+            "value": "${module.bastion-vpc-azure-us.bastion-public-ip}"
+        },
+        "re-ui-vpc-azure-europe-ip-output": {
+            "value": "${module.re-ui-vpc-azure-europe.ui-ip}"
+        },
+        "re-ui-vpc-azure-us-ip-output": {
+            "value": "${module.re-ui-vpc-azure-us.ui-ip}"
+        },
+        "vpc-azure-europe-dns-name": {
+            "value": "unit-test-name-vpc-azure-europe.azure.ps-redislabs.com"
+        },
+        "vpc-azure-us-dns-name": {
+            "value": "unit-test-name-vpc-azure-us.azure.ps-redislabs.com"
+        }
+    },
+    "module": {
+        "network-vpc-azure-europe": {
+            "source": "./modules/azure/network",
+            "name": "unit-test-name-vpc-azure-europe",
+            "vpc_cidr": "10.1.0.0/16",
+            "public_subnet_cidr": "10.1.1.0/24",
+            "private_subnet_cidr": "10.1.2.0/24",
+            "region": "germanywestcentral",
+            "resource_group": "terratest-rg",
+            "expose_ui": true,
+            "vpc_request_list": [
+                "${module.network-vpc-azure-us.vpc}"
+            ],
+            "vpc_accept_list": [],
+            "providers": {
+                "azurerm": "azurerm.vpc-azure-europe"
+            }
+        },
+        "bastion-vpc-azure-europe": {
+            "source": "./modules/azure/bastion",
+            "name": "unit-test-name-vpc-azure-europe",
+            "region": "germanywestcentral",
+            "resource_group": "terratest-rg",
+            "public_subnet_id": "${module.network-vpc-azure-europe.public-subnet}",
+            "public_secgroup": "${module.network-vpc-azure-europe.public-security-groups}",
+            "os": "cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810",
+            "bastion_machine_type": "Standard_B1s",
+            "ssh_user": "redislabs",
+            "ssh_pub_key_file": "~/.ssh/id_rsa.pub",
+            "providers": {
+                "azurerm": "azurerm.vpc-azure-europe"
+            }
+        },
+        "re-provisioner-vpc-azure-europe": {
+            "source": "./modules/ansible/re",
+            "ssh_user": "redislabs",
+            "inventory": "${data.template_file.inventory-vpc-azure-europe}",
+            "extra_vars": "${data.template_file.extra_vars-vpc-azure-europe}",
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "host": "${module.bastion-vpc-azure-europe.bastion-public-ip}",
+            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
+            "cluster_fqdn": [],
+            "other_bastions": [],
+            "other_ssh_users": [],
+            "ssh_keys": []
+        },
+        "network-vpc-azure-us": {
+            "source": "./modules/azure/network",
+            "name": "unit-test-name-vpc-azure-us",
+            "vpc_cidr": "10.2.0.0/16",
+            "public_subnet_cidr": "10.2.1.0/24",
+            "private_subnet_cidr": "10.2.2.0/24",
+            "region": "WestUS3",
+            "resource_group": "terratest-rg",
+            "expose_ui": true,
+            "vpc_request_list": [],
+            "vpc_accept_list": [
+                "${module.network-vpc-azure-europe.vpc}"
+            ],
+            "providers": {
+                "azurerm": "azurerm.vpc-azure-us"
+            }
+        },
+        "bastion-vpc-azure-us": {
+            "source": "./modules/azure/bastion",
+            "name": "unit-test-name-vpc-azure-us",
+            "region": "WestUS3",
+            "resource_group": "terratest-rg",
+            "public_subnet_id": "${module.network-vpc-azure-us.public-subnet}",
+            "public_secgroup": "${module.network-vpc-azure-us.public-security-groups}",
+            "os": "cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810",
+            "bastion_machine_type": "Standard_B1s",
+            "ssh_user": "redislabs",
+            "ssh_pub_key_file": "~/.ssh/id_rsa.pub",
+            "providers": {
+                "azurerm": "azurerm.vpc-azure-us"
+            }
+        },
+        "re-provisioner-vpc-azure-us": {
+            "source": "./modules/ansible/re",
+            "ssh_user": "redislabs",
+            "inventory": "${data.template_file.inventory-vpc-azure-us}",
+            "extra_vars": "${data.template_file.extra_vars-vpc-azure-us}",
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "host": "${module.bastion-vpc-azure-us.bastion-public-ip}",
+            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
+            "cluster_fqdn": [],
+            "other_bastions": [],
+            "other_ssh_users": [],
+            "ssh_keys": []
+        },
+        "re-vpc-azure-europe": {
+            "source": "./modules/azure/re",
+            "name": "unit-test-name-vpc-azure-europe",
+            "machine_count": 3,
+            "machine_type": "Standard_B2s",
+            "os": "cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810",
+            "private_subnet_id": "${module.network-vpc-azure-europe.private-subnet}",
+            "private_secgroup": "${module.network-vpc-azure-europe.private-security-groups}",
+            "ssh_user": "redislabs",
+            "ssh_pub_key_file": "~/.ssh/id_rsa.pub",
+            "providers": {
+                "azurerm": "azurerm.vpc-azure-europe"
+            },
+            "zones": [
+                1,
+                2,
+                3
+            ],
+            "region": "germanywestcentral",
+            "resource_group": "terratest-rg"
+        },
+        "re-ui-vpc-azure-europe": {
+            "source": "./modules/azure/re-ui",
+            "name": "unit-test-name-vpc-azure-europe",
+            "instances": "${module.re-vpc-azure-europe.re-nodes.*.private_ip_address}",
+            "providers": {
+                "azurerm": "azurerm.vpc-azure-europe"
+            },
+            "vnet": "${module.network-vpc-azure-europe.vpc}",
+            "region": "germanywestcentral",
+            "resource_group": "terratest-rg"
+        },
+        "re-vpc-azure-us": {
+            "source": "./modules/azure/re",
+            "name": "unit-test-name-vpc-azure-us",
+            "machine_count": 3,
+            "machine_type": "Standard_B2s",
+            "os": "cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810",
+            "private_subnet_id": "${module.network-vpc-azure-us.private-subnet}",
+            "private_secgroup": "${module.network-vpc-azure-us.private-security-groups}",
+            "ssh_user": "redislabs",
+            "ssh_pub_key_file": "~/.ssh/id_rsa.pub",
+            "providers": {
+                "azurerm": "azurerm.vpc-azure-us"
+            },
+            "zones": [
+                1,
+                2,
+                3
+            ],
+            "region": "WestUS3",
+            "resource_group": "terratest-rg"
+        },
+        "re-ui-vpc-azure-us": {
+            "source": "./modules/azure/re-ui",
+            "name": "unit-test-name-vpc-azure-us",
+            "instances": "${module.re-vpc-azure-us.re-nodes.*.private_ip_address}",
+            "providers": {
+                "azurerm": "azurerm.vpc-azure-us"
+            },
+            "vnet": "${module.network-vpc-azure-us.vpc}",
+            "region": "WestUS3",
+            "resource_group": "terratest-rg"
+        },
+        "ns-vpc-azure-europe": {
+            "source": "./modules/azure/ns",
+            "providers": {
+                "azurerm": "azurerm.vpc-azure-europe"
+            },
+            "cluster_fqdn": "unit-test-name-vpc-azure-europe.azure.ps-redislabs.com",
+            "parent_zone": "azure.ps-redislabs.com",
+            "ip_addresses": "${module.re-vpc-azure-europe.re-public-ips}",
+            "resource_group": "terratest-rg"
+        },
+        "ns-vpc-azure-us": {
+            "source": "./modules/azure/ns",
+            "providers": {
+                "azurerm": "azurerm.vpc-azure-us"
+            },
+            "cluster_fqdn": "unit-test-name-vpc-azure-us.azure.ps-redislabs.com",
+            "parent_zone": "azure.ps-redislabs.com",
+            "ip_addresses": "${module.re-vpc-azure-us.re-public-ips}",
+            "resource_group": "terratest-rg"
+        }
+    }
+}

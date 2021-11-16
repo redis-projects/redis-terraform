@@ -125,22 +125,18 @@ def create_bastion(name, zone, rack_aware, machine_type, machine_image,
     Output("Azure-bastion-%s-ip-output" % name,
         value = "${module.bastion-%s.bastion-public-ip}" % name)
 
-    provisioner = Module("re-provisioner-%s" % name, 
-        source = "./modules/ansible/re",
-        ssh_user = SSH_USER,
-        inventory = '${data.template_file.inventory-%s}' % name,
-        extra_vars = '${data.template_file.extra_vars-%s}' % name,
+    Module("re-provisioner-%s" % name, 
+        source               = "./modules/ansible/re",
+        ssh_user             = SSH_USER,
+        inventory            = '${data.template_file.inventory-%s}' % name,
+        extra_vars           = '${data.template_file.extra_vars-%s}' % name,
         ssh_private_key_file = SSH_PRIVATE_KEY_FILE,
-        host="${module.bastion-%s.bastion-public-ip}" % name,
-        redis_distro=redis_distro,
-        cluster_fqdn=[fqdn_map[vpc]
-                    for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'azure'],
-        other_bastions=['${module.bastion-%s.bastion-public-ip}' %
-                        (vpc) for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'azure'],
-        other_ssh_users=[
-            SSH_USER for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'azure'],
-        ssh_keys=[
-            SSH_PRIVATE_KEY_FILE for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'azure']
+        host                 = "${module.bastion-%s.bastion-public-ip}" % name,
+        redis_distro         = redis_distro,
+        cluster_fqdn         = [fqdn_map[vpc] for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'azure'],
+        other_bastions       = ['${module.bastion-%s.bastion-public-ip}' % (vpc) for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'azure'],
+        other_ssh_users      = [ SSH_USER for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'azure'],
+        ssh_keys             = [ SSH_PRIVATE_KEY_FILE for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'azure']
     )
 
 def create_re_cluster(worker_count=WORKER_MACHINE_COUNT,
