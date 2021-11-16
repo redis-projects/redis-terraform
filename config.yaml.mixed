@@ -18,7 +18,7 @@ clusters:
     - 2
     - 3
     expose_ui: True
-  - vpc: vpc-gcp
+  - vpc: vpc-gcp-us
     worker_count: 3 
     machine_type: n1-standard-4
     machine_image: rhel-8-v20210721
@@ -36,7 +36,7 @@ networks:
       us-east-1b: 10.1.2.0/24
       us-east-1c: 10.1.4.0/24
     region: us-east-1
-    rack_aware: False
+    rack_aware: True
     bastion_zone: us-east-1c
     bastion_machine_image: ami-0b1db37f0fa006678
     bastion_machine_type: t2.micro
@@ -58,9 +58,9 @@ networks:
     application_id: 801fb60b-0efb-4a9e-aa4a-98f8abff125e
     client_certificate_path: ./terraform_account.pfx
     redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
-  - name: vpc-gcp
-    public_cidr: 10.1.0.0/24
-    private_cidr: 10.2.0.0/16 
+  - name: vpc-gcp-us
+    public_cidr: 10.3.1.0/24
+    private_cidr: 10.3.2.0/16 
     region: us-central1
     bastion_zone: us-central1-b
     bastion_machine_image: rhel-7-v20210721
@@ -77,7 +77,7 @@ nameservers:
     parent_zone: azure.ps-redislabs.com
     domain: azure.ps-redislabs.com
     provider: azure
-  - vpc: vpc-gcp
+  - vpc: vpc-gcp-us
     parent_zone: ps-redislabs
     domain: ps-redislabs.com
     provider: gcp
