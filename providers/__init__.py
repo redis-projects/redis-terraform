@@ -28,3 +28,6 @@ AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "")
 AWS_REGION = os.getenv("AWS_DEFAULT_REGION", "")
 AWS_REDIS_DISTRO = 'https://s3.amazonaws.com/redis-enterprise-software-downloads/6.0.8/redislabs-6.0.8-28-bionic-amd64.tar'
+
+#strange import but allows up to mock since these are now properties on the module we can change whenever
+from . import aws, azure, gcp

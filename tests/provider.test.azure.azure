@@ -1,0 +1,102 @@
+[
+	["create_network", [], {
+		"name": "vpc-azure-europe",
+		"vpc_cidr": "10.1.0.0/16",
+		"public_cidr": "10.1.1.0/24",
+		"private_cidr": "10.1.2.0/24",
+		"region": "germanywestcentral",
+		"bastion_zone": 2,
+		"bastion_machine_image": "cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810",
+		"bastion_machine_type": "Standard_B1s",
+		"rack_aware": true,
+		"resource_group": "terratest-rg",
+		"subscription_id": "ef03f41d-d2bd-4691-b3a0-3aff1c6711f7",
+		"tenant_id": "1428732f-21cf-469e-ad48-5721f4eac1e2",
+		"application_id": "801fb60b-0efb-4a9e-aa4a-98f8abff125e",
+		"client_certificate_path": "/Users/audi/Documents/GIT/rl-terraform/terraform_account.pfx",
+		"redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
+		"other_nets": {},
+		"fqdn_map": {
+			"vpc-azure-europe": "unit-test-name-vpc-azure-europe.azure.ps-redislabs.com",
+			"vpc-azure-us": "unit-test-name-vpc-azure-us.azure.ps-redislabs.com"
+		},
+		"peer_request_list": ["vpc-azure-us"],
+		"redis_cluster_name": "unit-test-name-vpc-azure-europe.azure.ps-redislabs.com",
+		"expose_ui": true
+	}],
+	["create_network", [], {
+		"name": "vpc-azure-us",
+		"vpc_cidr": "10.2.0.0/16",
+		"public_cidr": "10.2.1.0/24",
+		"private_cidr": "10.2.2.0/24",
+		"region": "WestUS3",
+		"bastion_zone": 2,
+		"bastion_machine_image": "cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810",
+		"bastion_machine_type": "Standard_B1s",
+		"rack_aware": true,
+		"resource_group": "terratest-rg",
+		"subscription_id": "ef03f41d-d2bd-4691-b3a0-3aff1c6711f7",
+		"tenant_id": "1428732f-21cf-469e-ad48-5721f4eac1e2",
+		"application_id": "801fb60b-0efb-4a9e-aa4a-98f8abff125e",
+		"client_certificate_path": "/Users/audi/Documents/GIT/rl-terraform/terraform_account.pfx",
+		"redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
+		"other_nets": {},
+		"fqdn_map": {
+			"vpc-azure-europe": "unit-test-name-vpc-azure-europe.azure.ps-redislabs.com",
+			"vpc-azure-us": "unit-test-name-vpc-azure-us.azure.ps-redislabs.com"
+		},
+		"peer_accept_list": ["vpc-azure-europe"],
+		"redis_cluster_name": "unit-test-name-vpc-azure-us.azure.ps-redislabs.com",
+		"expose_ui": true
+	}],
+	["create_re_cluster", [], {
+		"vpc": "vpc-azure-europe",
+		"worker_count": 3,
+		"machine_type": "Standard_B2s",
+		"machine_image": "cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810",
+		"zones": [1, 2, 3],
+		"expose_ui": true,
+		"region_map": {
+			"vpc-azure-europe": "germanywestcentral",
+			"vpc-azure-us": "WestUS3"
+		},
+		"rg_map": {
+			"vpc-azure-europe": "terratest-rg",
+			"vpc-azure-us": "terratest-rg"
+		}
+	}],
+	["create_re_cluster", [], {
+		"vpc": "vpc-azure-us",
+		"worker_count": 3,
+		"machine_type": "Standard_B2s",
+		"machine_image": "cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810",
+		"zones": [1, 2, 3],
+		"expose_ui": true,
+		"region_map": {
+			"vpc-azure-europe": "germanywestcentral",
+			"vpc-azure-us": "WestUS3"
+		},
+		"rg_map": {
+			"vpc-azure-europe": "terratest-rg",
+			"vpc-azure-us": "terratest-rg"
+		}
+	}],
+	["create_ns_records", [], {
+		"vpc": "vpc-azure-europe",
+		"parent_zone": "azure.ps-redislabs.com",
+		"cluster_fqdn": "unit-test-name-vpc-azure-europe.azure.ps-redislabs.com",
+		"rg_map": {
+			"vpc-azure-europe": "terratest-rg",
+			"vpc-azure-us": "terratest-rg"
+		}
+	}],
+	["create_ns_records", [], {
+		"vpc": "vpc-azure-us",
+		"parent_zone": "azure.ps-redislabs.com",
+		"cluster_fqdn": "unit-test-name-vpc-azure-us.azure.ps-redislabs.com",
+		"rg_map": {
+			"vpc-azure-europe": "terratest-rg",
+			"vpc-azure-us": "terratest-rg"
+		}
+	}]
+]

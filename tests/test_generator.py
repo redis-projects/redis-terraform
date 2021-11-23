@@ -25,5 +25,12 @@ def test_exceptions(monkeypatch, getenv, test_input, expected_exception):
         generator.generate(test_input)
     assert expected_exception == str(excinfo.value)
 
-def test_peering():
-    pass
+#Just a safe guard to ensure we are not testing with a mock since test_provider
+#uses Mock and we don't want a leak
+def test_providers_not_mock(monkeypatch, getenv):
+    [monkeypatch.setenv(x, getenv[x]) for x in getenv]
+    import providers
+    from unittest.mock import Mock
+    assert not isinstance(providers.aws, Mock)
+    assert not isinstance(providers.azure, Mock)
+    assert not isinstance(providers.gcp, Mock)
