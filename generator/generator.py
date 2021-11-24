@@ -52,20 +52,17 @@ def generate(config_file):
             if  provider == 'gcp': gcp_cidr_map[network["name"]] = [network['public_cidr'], network['private_cidr']]
             region_map[network["name"]] = network['region']
             network_names[network["name"]] = provider
+
         if not diff_providers or 'nameservers' not in config_file:
             network_names = {}
 
         for network in config_file['networks']:
             provider = network.pop('provider', "gcp")
             network.pop('peer_with','default')
-            network["other_nets"] = network_names
-            network["fqdn_map"] = fqdn_map
             if network["name"] in peer_request_map:
                 network.update(peer_request_list = peer_request_map[network["name"]])
             if network["name"] in peer_accept_map:
                 network.update(peer_accept_list = peer_accept_map[network["name"]])
-            if network["name"] in fqdn_map:
-                network.update(redis_cluster_name = fqdn_map[network["name"]])
             if provider == "gcp":
                 network.update(cidr_map = gcp_cidr_map)
                 gcp.create_network(**network)
@@ -86,6 +83,12 @@ def generate(config_file):
     if 'clusters' in config_file:
         for cluster in config_file['clusters']:
             provider = network_map[cluster["vpc"]]
+            cluster["other_nets"] = network_names
+            cluster["fqdn_map"] = fqdn_map
+
+            if cluster["vpc"] in fqdn_map:
+                cluster.update(redis_cluster_name = fqdn_map[cluster["vpc"]])
+
             if provider == "gcp":
                 gcp.create_re_cluster(**cluster)
             elif provider == "aws":

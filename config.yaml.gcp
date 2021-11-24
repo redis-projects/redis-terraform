@@ -9,6 +9,8 @@ clusters:
     - us-east1-c
     - us-east1-d
     expose_ui: True
+    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
+    rack_aware: True
   - vpc: vpc-gcp-us
     worker_count: 3
     machine_type: n1-standard-4
@@ -18,6 +20,8 @@ clusters:
     - us-central1-b
     - us-central1-c
     expose_ui: True
+    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
+    rack_aware: True
 networks:
   - name: vpc-gcp-east1
     public_cidr: 10.1.0.0/24
@@ -26,12 +30,10 @@ networks:
     bastion_zone: us-east1-b
     bastion_machine_image: rhel-7-v20210721
     bastion_machine_type: n1-standard-1
-    rack_aware: True
     provider: gcp
     peer_with:
     - vpc-gcp-us
     project: redislabs-sa-training-services
-    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
   - name: vpc-gcp-us
     public_cidr: 10.3.0.0/24
     private_cidr: 10.4.0.0/16 
@@ -39,10 +41,8 @@ networks:
     bastion_zone: us-central1-b
     bastion_machine_image: rhel-7-v20210721
     bastion_machine_type: n1-standard-1
-    rack_aware: True
     provider: gcp
     project: redislabs-sa-training-services
-    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
 nameservers:
   - vpc: vpc-gcp-east1
     parent_zone: ps-redislabs

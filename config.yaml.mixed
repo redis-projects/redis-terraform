@@ -9,6 +9,8 @@ clusters:
     - us-east-1b
     - us-east-1c
     expose_ui: True
+    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
+    rack_aware: True
   - vpc: vpc-azure-us
     worker_count: 3 
     machine_type: Standard_B2s
@@ -18,6 +20,8 @@ clusters:
     - 2
     - 3
     expose_ui: True
+    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
+    rack_aware: True
   - vpc: vpc-gcp-us
     worker_count: 3 
     machine_type: n1-standard-4
@@ -27,6 +31,8 @@ clusters:
     - us-central1-b
     - us-central1-c
     expose_ui: True
+    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
+    rack_aware: True
 networks:
   - name: vpc-aws-us
     vpc_cidr: 10.1.0.0/16
@@ -36,12 +42,10 @@ networks:
       us-east-1b: 10.1.2.0/24
       us-east-1c: 10.1.4.0/24
     region: us-east-1
-    rack_aware: True
     bastion_zone: us-east-1c
     bastion_machine_image: ami-0b1db37f0fa006678
     bastion_machine_type: t2.micro
     provider: aws
-    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
   - name: vpc-azure-us
     vpc_cidr: 10.2.0.0/16
     public_cidr: 10.2.1.0/24
@@ -50,14 +54,13 @@ networks:
     bastion_zone: 2
     bastion_machine_image: cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810
     bastion_machine_type: Standard_B1s
-    rack_aware: True
     provider: azure
     resource_group: terratest-rg
     subscription_id: ef03f41d-d2bd-4691-b3a0-3aff1c6711f7
     tenant_id: 1428732f-21cf-469e-ad48-5721f4eac1e2
     application_id: 801fb60b-0efb-4a9e-aa4a-98f8abff125e
     client_certificate_path: ./terraform_account.pfx
-    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
+    rack_aware: True
   - name: vpc-gcp-us
     public_cidr: 10.3.1.0/24
     private_cidr: 10.3.2.0/16 
@@ -65,9 +68,7 @@ networks:
     bastion_zone: us-central1-b
     bastion_machine_image: rhel-7-v20210721
     bastion_machine_type: n1-standard-1
-    rack_aware: True
     provider: gcp
-    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
 nameservers:
   - vpc: vpc-aws-us
     parent_zone: aws.ps-redislabs.com

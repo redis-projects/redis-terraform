@@ -15,12 +15,11 @@ from . import PUBLIC_CIDR, PRIVATE_CIDR, REGION, OS, REDIS_DISTRO, \
               WORKER_MACHINE_COUNT, WORKER_MACHINE_TYPE, REDIS_USER_NAME, DEPLOYMENT_NAME
 
 def create_network(name=None, region=REGION, public_cidr=PUBLIC_CIDR, private_cidr=PRIVATE_CIDR,
-                  bastion_zone=ZONE, bastion_machine_image=OS, redis_distro=REDIS_DISTRO,
-                  bastion_machine_type=BASTION_MACHINE_TYPE, rack_aware=False,
-                  redis_cluster_name=REDIS_CLUSTER_NAME, resource_group=None,
+                  bastion_zone=ZONE, bastion_machine_image=OS,
+                  bastion_machine_type=BASTION_MACHINE_TYPE, resource_group=None,
                   subscription_id=None, tenant_id=None, application_id=None,
-                  client_certificate_path=None, vpc_cidr=None, expose_ui=False,
-                  peer_request_list=None, peer_accept_list=None, other_nets=None, fqdn_map=None):
+                  client_certificate_path=None, vpc_cidr=None, expose_ui=False, rack_aware=False,
+                  peer_request_list=None, peer_accept_list=None):
     """
     create_network calls the Terraform 'network' module which is creating the VNETs and their
     subnets. The security groups are generated for the private and public subnets and finally
@@ -67,46 +66,14 @@ def create_network(name=None, region=REGION, public_cidr=PUBLIC_CIDR, private_ci
         vpc_accept_list         = vpc_accept_list,
         providers               = {"azurerm": "azurerm.%s" % name})
 
-    create_bastion(name, bastion_zone, rack_aware, bastion_machine_type,bastion_machine_image,
-                   redis_distro,redis_cluster_name, region, resource_group, other_nets, fqdn_map)
+    create_bastion(name, bastion_zone, bastion_machine_type,bastion_machine_image,
+                   region, resource_group)
 
-def create_bastion(name, zone, rack_aware, machine_type, machine_image,
-                   redis_distro, redis_cluster_name, region, resource_group, other_nets, fqdn_map):
+def create_bastion(name, zone, machine_type, machine_image, region, resource_group):
     """
     create_bastion is setting up the bastion node in the public subnet. It also creates the
     files used by Ansible runs like the inventory and the extra variables
     """
-
-    Data("template_file", "inventory-%s" % name,
-        template = relative_file("../templates/inventory.tpl"),
-        vars = {
-            'ip_addrs': "${join(\",\", module.re-%s.re-nodes.*.private_ip_address)}" % name,
-            'rack_ids': "${join(\",\", module.re-%s.re-nodes.*.zone)}" % name if rack_aware else ""
-        }
-    )
-
-    Data("template_file", "aa_db",
-        template = relative_file("../templates/create_aa_db.tpl"),
-        vars = {
-            'redis_user_name': REDIS_USER_NAME,
-            'redis_pwd': REDIS_PWD,
-            'redis_cluster_name': REDIS_CLUSTER_NAME,
-            'FQDN1': 'domain1.test.net',
-            'FQDN2': 'domain2.test.net'
-        }
-    )
-
-    Data("template_file", "extra_vars-"+name,
-        template = relative_file("../templates/extra-vars.tpl"),
-        vars = {
-            'ansible_user': SSH_USER,
-            'redis_cluster_name': redis_cluster_name,
-            'redis_user_name': REDIS_USER_NAME,
-            'redis_pwd': REDIS_PWD,
-            'redis_email_from': REDIS_EMAIL_FROM,
-            'redis_smtp_host': REDIS_SMTP_HOST
-        }
-    )
 
     Module("bastion-%s" % name,
         source                   = "./modules/azure/bastion",
@@ -125,25 +92,17 @@ def create_bastion(name, zone, rack_aware, machine_type, machine_image,
     Output("Azure-bastion-%s-ip-output" % name,
         value = "${module.bastion-%s.bastion-public-ip}" % name)
 
-    Module("re-provisioner-%s" % name, 
-        source               = "./modules/ansible/re",
-        ssh_user             = SSH_USER,
-        inventory            = '${data.template_file.inventory-%s}' % name,
-        extra_vars           = '${data.template_file.extra_vars-%s}' % name,
-        ssh_private_key_file = SSH_PRIVATE_KEY_FILE,
-        host                 = "${module.bastion-%s.bastion-public-ip}" % name,
-        redis_distro         = redis_distro,
-        cluster_fqdn         = [fqdn_map[vpc] for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'azure'],
-        other_bastions       = ['${module.bastion-%s.bastion-public-ip}' % (vpc) for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'azure'],
-        other_ssh_users      = [ SSH_USER for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'azure'],
-        ssh_keys             = [ SSH_PRIVATE_KEY_FILE for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'azure']
-    )
 
 def create_re_cluster(worker_count=WORKER_MACHINE_COUNT,
                       machine_type=WORKER_MACHINE_TYPE,
                       machine_image=OS,vpc=None,
                       zones=None, region_map=None, rg_map=None,
-                      expose_ui=False):
+                      expose_ui=False,
+                      other_nets=None,
+                      redis_distro=REDIS_DISTRO,
+                      fqdn_map=None, 
+                      rack_aware=False,
+                      redis_cluster_name=REDIS_CLUSTER_NAME):
     """
     create_re_cluster sets up the Redis Enterprise cluster. Those nodes are created in the
     private subnet
@@ -174,6 +133,53 @@ def create_re_cluster(worker_count=WORKER_MACHINE_COUNT,
 
     if expose_ui:
         create_re_ui(vpc, region_map[vpc], rg_map[vpc])
+
+    name = vpc
+
+    Data("template_file", "inventory-%s" % name,
+        template = relative_file("../templates/inventory.tpl"),
+        vars = {
+            'ip_addrs': "${join(\",\", module.re-%s.re-nodes.*.private_ip_address)}" % name,
+            'rack_ids': "${join(\",\", module.re-%s.re-nodes.*.zone)}" % name if rack_aware else ""
+        }
+    )
+
+    Data("template_file", "aa_db",
+        template = relative_file("../templates/create_aa_db.tpl"),
+        vars = {
+            'redis_user_name': REDIS_USER_NAME,
+            'redis_pwd': REDIS_PWD,
+            'redis_cluster_name': redis_cluster_name,
+            'FQDN1': 'domain1.test.net',
+            'FQDN2': 'domain2.test.net'
+        }
+    )
+
+    Data("template_file", "extra_vars-"+name,
+        template = relative_file("../templates/extra-vars.tpl"),
+        vars = {
+            'ansible_user': SSH_USER,
+            'redis_cluster_name': redis_cluster_name,
+            'redis_user_name': REDIS_USER_NAME,
+            'redis_pwd': REDIS_PWD,
+            'redis_email_from': REDIS_EMAIL_FROM,
+            'redis_smtp_host': REDIS_SMTP_HOST
+        }
+    )
+
+    Module("re-provisioner-%s" % name, 
+        source               = "./modules/ansible/re",
+        ssh_user             = SSH_USER,
+        inventory            = '${data.template_file.inventory-%s}' % name,
+        extra_vars           = '${data.template_file.extra_vars-%s}' % name,
+        ssh_private_key_file = SSH_PRIVATE_KEY_FILE,
+        host                 = "${module.bastion-%s.bastion-public-ip}" % name,
+        redis_distro         = redis_distro,
+        cluster_fqdn         = [fqdn_map[vpc] for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'azure'],
+        other_bastions       = ['${module.bastion-%s.bastion-public-ip}' % (vpc) for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'azure'],
+        other_ssh_users      = [ SSH_USER for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'azure'],
+        ssh_keys             = [ SSH_PRIVATE_KEY_FILE for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'azure']
+    )
 
 def create_re_ui(vpc, region, resource_group):
     """

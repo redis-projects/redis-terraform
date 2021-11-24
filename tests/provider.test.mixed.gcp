@@ -7,19 +7,6 @@
 		"bastion_zone": "us-central1-b",
 		"bastion_machine_image": "rhel-7-v20210721",
 		"bastion_machine_type": "n1-standard-1",
-		"rack_aware": true,
-		"redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
-		"other_nets": {
-			"vpc-aws-us": "aws",
-			"vpc-azure-us": "azure",
-			"vpc-gcp-us": "gcp"
-		},
-		"fqdn_map": {
-			"vpc-aws-us": "unit-test-name-vpc-aws-us.aws.ps-redislabs.com",
-			"vpc-azure-us": "unit-test-name-vpc-azure-us.azure.ps-redislabs.com",
-			"vpc-gcp-us": "unit-test-name-vpc-gcp-us.ps-redislabs.com"
-		},
-		"redis_cluster_name": "unit-test-name-vpc-gcp-us.ps-redislabs.com",
 		"cidr_map": {
 			"vpc-gcp-us": ["10.3.1.0/24", "10.3.2.0/16"]
 		}
@@ -30,7 +17,20 @@
 		"machine_type": "n1-standard-4",
 		"machine_image": "rhel-8-v20210721",
 		"zones": ["us-central1-a", "us-central1-b", "us-central1-c"],
-		"expose_ui": true
+		"expose_ui": true,
+		"redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
+		"rack_aware": true,		
+		"other_nets": {
+			"vpc-aws-us": "aws",
+			"vpc-azure-us": "azure",
+			"vpc-gcp-us": "gcp"
+		},
+		"fqdn_map": {
+			"vpc-aws-us": "unit-test-name-vpc-aws-us.aws.ps-redislabs.com",
+			"vpc-azure-us": "unit-test-name-vpc-azure-us.azure.ps-redislabs.com",
+			"vpc-gcp-us": "unit-test-name-vpc-gcp-us.ps-redislabs.com"
+		},
+		"redis_cluster_name": "unit-test-name-vpc-gcp-us.ps-redislabs.com"
 	}],
 	["create_ns_records", [], {
 		"vpc": "vpc-gcp-us",

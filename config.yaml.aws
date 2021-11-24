@@ -9,6 +9,8 @@ clusters:
     - us-east-1b
     - us-east-1c
     expose_ui: True
+    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
+    rack_aware: False
   - vpc: vpc-aws-europe
     worker_count: 3
     machine_type: t2.xlarge
@@ -18,6 +20,8 @@ clusters:
     - eu-central-1b
     - eu-central-1a
     expose_ui: True
+    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
+    rack_aware: False
 networks:
   - name: vpc-aws-us
     vpc_cidr: 10.1.0.0/16
@@ -27,14 +31,12 @@ networks:
       us-east-1b: 10.1.2.0/24
       us-east-1c: 10.1.4.0/24
     region: us-east-1
-    rack_aware: False
     bastion_zone: us-east-1c
     bastion_machine_image: ami-0b1db37f0fa006678
     bastion_machine_type: t2.micro
     provider: aws
     peer_with:
     - vpc-aws-europe
-    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
   - name: vpc-aws-europe
     vpc_cidr: 10.0.0.0/16
     public_cidr: 10.0.1.0/24
@@ -43,12 +45,10 @@ networks:
       eu-central-1a: 10.0.2.0/24
       eu-central-1c: 10.0.4.0/24
     region: eu-central-1
-    rack_aware: False
     bastion_zone: eu-central-1b
     bastion_machine_image: ami-02241e4f36e06d650
     bastion_machine_type: t2.micro
     provider: aws
-    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
 nameservers:
   - vpc: vpc-aws-us
     parent_zone: aws.ps-redislabs.com

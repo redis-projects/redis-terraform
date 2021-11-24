@@ -7,9 +7,8 @@ from . import PUBLIC_CIDR, PRIVATE_CIDR, REGION, OS, AWS_REDIS_DISTRO, BOOT_DISK
 
 def create_network(name=None, region=REGION, vpc_cidr=AWS_VPC_CIDR, public_cidr=PUBLIC_CIDR,
                    private_cidr=PRIVATE_CIDR, bastion_zone=ZONE, bastion_machine_image=AWS_OS,
-                   bastion_machine_type=AWS_BASTION_MACHINE_TYPE, rack_aware=False,
-                   redis_distro=AWS_REDIS_DISTRO, redis_cluster_name=REDIS_CLUSTER_NAME,
-                   peer_request_list=[], peer_accept_list=[], region_map={}, cidr_map={}, other_nets=None, fqdn_map=None):
+                   bastion_machine_type=AWS_BASTION_MACHINE_TYPE,
+                   peer_request_list=[], peer_accept_list=[], region_map={}, cidr_map={}):
     if name is None:
         print("name cannot be None")
         exit(1)
@@ -45,8 +44,7 @@ def create_network(name=None, region=REGION, vpc_cidr=AWS_VPC_CIDR, public_cidr=
                          vpc_conn_index=vpc_conn_index,
                          private_subnet_cidr=private_cidr)
 
-    create_bastion(name, bastion_zone, rack_aware, bastion_machine_type, bastion_machine_image, redis_distro,
-                   redis_cluster_name, other_nets, fqdn_map)
+    create_bastion(name, bastion_zone, bastion_machine_type, bastion_machine_image)
 
 
 def create_keypair(name):
@@ -54,29 +52,8 @@ def create_keypair(name):
            source="./modules/aws/keypair", ssh_public_key=SSH_PUB_KEY_FILE, providers={"aws": "aws.%s" % name},)
 
 
-def create_bastion(name, zone, rack_aware, machine_type, machine_image, 
-                    redis_distro, redis_cluster_name, other_nets, fqdn_map):
+def create_bastion(name, zone, machine_type, machine_image):
     create_keypair(name)
-
-    inventory = Data("template_file", "inventory-%s" % name,
-                     template=relative_file("../templates/inventory.tpl"),
-                     vars={
-                         'ip_addrs': "${join(\",\", module.re-%s.re-nodes.*.private_ip)}" % name,
-                         'rack_ids': "${join(\",\", module.re-%s.re-nodes.*.availability_zone)}" % name if rack_aware else ""
-                     }
-                     )
-
-    extra_vars = Data("template_file", "extra_vars-"+name,
-        template = relative_file("../templates/extra-vars.tpl"),
-        vars = {
-          'ansible_user': REDIS_USER,
-          'redis_cluster_name': redis_cluster_name,
-          'redis_user_name': REDIS_USER_NAME,
-          'redis_pwd': REDIS_PWD,
-          'redis_email_from': REDIS_EMAIL_FROM,
-          'redis_smtp_host': REDIS_SMTP_HOST
-        }
-    )   
 
     bastion_mod = Module("bastion-%s" % name, 
         source = "./modules/aws/bastion",
@@ -96,30 +73,17 @@ def create_bastion(name, zone, rack_aware, machine_type, machine_image,
     Output("aws-bastion-%s-ip-output" % name,
            value="${module.bastion-%s.bastion-public-ip}" % name)
 
-    provisioner = Module("re-provisioner-%s" % name, 
-        source = "./modules/ansible/re",
-        ssh_user = AWS_SSH_USER,
-        inventory = '${data.template_file.inventory-%s}' % name,
-        extra_vars = '${data.template_file.extra_vars-%s}' % name,
-        ssh_private_key_file = SSH_PRIVATE_KEY_FILE,
-        host="${module.bastion-%s.bastion-public-ip}" % name,
-        redis_distro=redis_distro,
-        cluster_fqdn=[fqdn_map[vpc]
-                    for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'aws'],
-        other_bastions=['${module.bastion-%s.bastion-public-ip}' %
-                        (vpc) for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'aws'],
-        other_ssh_users=[
-            SSH_USER for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'aws'],
-        ssh_keys=[
-            SSH_PRIVATE_KEY_FILE for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'aws']
-    )
-
 def create_re_cluster(worker_count=WORKER_MACHINE_COUNT,
                       machine_type=WORKER_MACHINE_TYPE,
                       machine_image=AWS_OS,
                       vpc=None,
                       zones=None,
-                      expose_ui=False):
+                      expose_ui=False,
+                      other_nets=None,
+                      redis_distro=AWS_REDIS_DISTRO,
+                      fqdn_map=None, 
+                      rack_aware=False,
+                      redis_cluster_name=REDIS_CLUSTER_NAME):
     if zones is None:
         print("zones cannot be None")
         exit(1)
@@ -147,6 +111,45 @@ def create_re_cluster(worker_count=WORKER_MACHINE_COUNT,
     if expose_ui:
         create_re_ui(vpc)
 
+    name = vpc
+
+    inventory = Data("template_file", "inventory-%s" % name,
+                     template=relative_file("../templates/inventory.tpl"),
+                     vars={
+                         'ip_addrs': "${join(\",\", module.re-%s.re-nodes.*.private_ip)}" % name,
+                         'rack_ids': "${join(\",\", module.re-%s.re-nodes.*.availability_zone)}" % name if rack_aware else ""
+                     }
+                     )
+
+    extra_vars = Data("template_file", "extra_vars-"+name,
+        template = relative_file("../templates/extra-vars.tpl"),
+        vars = {
+          'ansible_user': REDIS_USER,
+          'redis_cluster_name': redis_cluster_name,
+          'redis_user_name': REDIS_USER_NAME,
+          'redis_pwd': REDIS_PWD,
+          'redis_email_from': REDIS_EMAIL_FROM,
+          'redis_smtp_host': REDIS_SMTP_HOST
+        }
+    )   
+
+    provisioner = Module("re-provisioner-%s" % name, 
+        source = "./modules/ansible/re",
+        ssh_user = AWS_SSH_USER,
+        inventory = '${data.template_file.inventory-%s}' % name,
+        extra_vars = '${data.template_file.extra_vars-%s}' % name,
+        ssh_private_key_file = SSH_PRIVATE_KEY_FILE,
+        host="${module.bastion-%s.bastion-public-ip}" % name,
+        redis_distro=redis_distro,
+        cluster_fqdn=[fqdn_map[vpc]
+                    for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'aws'],
+        other_bastions=['${module.bastion-%s.bastion-public-ip}' %
+                        (vpc) for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'aws'],
+        other_ssh_users=[
+            SSH_USER for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'aws'],
+        ssh_keys=[
+            SSH_PRIVATE_KEY_FILE for vpc in other_nets.keys() if vpc != name and other_nets[vpc] != 'aws']
+    )
 
 def create_re_ui(vpc):
 
