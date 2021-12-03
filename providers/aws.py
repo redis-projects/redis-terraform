@@ -2,7 +2,7 @@ from terraformpy import Module, Provider, Data, Output
 from terraformpy.helpers import relative_file
 import os
 import yaml
-from . import PUBLIC_CIDR, PRIVATE_CIDR, REGION, OS, AWS_REDIS_DISTRO, BOOT_DISK_SIZE, BASTION_MACHINE_TYPE, SSH_USER, SSH_PUB_KEY_FILE, SSH_PRIVATE_KEY_FILE, REDIS_CLUSTER_NAME, REDIS_PWD, REDIS_EMAIL_FROM, REDIS_SMTP_HOST, ZONE, WORKER_MACHINE_COUNT, WORKER_MACHINE_TYPE, REDIS_USER_NAME, DEPLOYMENT_NAME, AWS_VPC_CIDR, AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_OS, REDIS_USER, AWS_SSH_USER, AWS_BASTION_MACHINE_TYPE
+from . import PUBLIC_CIDR, PRIVATE_CIDR, REGION, OS, AWS_REDIS_DISTRO, BOOT_DISK_SIZE, BASTION_MACHINE_TYPE, SSH_USER, SSH_PUB_KEY_FILE, SSH_PRIVATE_KEY_FILE, REDIS_CLUSTER_NAME, REDIS_PWD, REDIS_EMAIL_FROM, REDIS_SMTP_HOST, ZONE, WORKER_MACHINE_COUNT, WORKER_MACHINE_TYPE, REDIS_USER_NAME, DEPLOYMENT_NAME, AWS_VPC_CIDR, AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_OS, REDIS_USER, AWS_BASTION_MACHINE_TYPE
 
 
 def create_network(name=None, region=REGION, vpc_cidr=AWS_VPC_CIDR, public_cidr=PUBLIC_CIDR,
@@ -135,7 +135,7 @@ def create_re_cluster(worker_count=WORKER_MACHINE_COUNT,
 
     provisioner = Module("re-provisioner-%s" % name, 
         source = "./modules/ansible/re",
-        ssh_user = AWS_SSH_USER,
+        ssh_user = SSH_USER,
         inventory = '${data.template_file.inventory-%s}' % name,
         extra_vars = '${data.template_file.extra_vars-%s}' % name,
         ssh_private_key_file = SSH_PRIVATE_KEY_FILE,

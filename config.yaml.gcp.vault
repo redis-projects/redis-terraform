@@ -1,0 +1,27 @@
+networks:
+  - name: vpc-gcp-us
+    public_cidr: 10.1.0.0/24
+    private_cidr: 10.2.0.0/16 
+    region: us-east1
+    bastion_zone: us-east1-b
+    bastion_machine_image: rhel-7-v20210721
+    bastion_machine_type: n1-standard-1
+    provider: gcp
+    project: redislabs-sa-training-services
+clusters:
+  - vpc: vpc-gcp-us
+    worker_count: 3 
+    machine_type: n1-standard-4
+    machine_image: rhel-8-v20210721
+    zones: 
+    - us-east1-b
+    - us-east1-c
+    - us-east1-d
+    expose_ui: True
+    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
+    rack_aware: True
+services:
+  - type: docker
+    name: vault-server
+    contents: vault
+    vpc: vpc-gcp-us

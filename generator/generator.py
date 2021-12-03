@@ -2,6 +2,7 @@ from terraformpy import Module, Provider, Data
 from terraformpy.helpers import relative_file
 import sys
 from providers import aws, gcp, azure, REGION, ZONE, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, DEPLOYMENT_NAME
+from providers import SSH_PRIVATE_KEY_FILE, SSH_USER
 
 def generate(config_file):
     network_map = {}
@@ -111,3 +112,35 @@ def generate(config_file):
                 azure.create_ns_records(**nameserver)
             else: 
                 raise Exception("unsupported provider in nameservers section {}".format(provider))
+
+    if 'services' in config_file:
+        docker_created = False
+        for service in config_file['services']:
+            if 'type' not in service:
+                raise Exception("Please specify type for all services")   
+            svctype = service.pop('type')
+            if svctype == 'docker':
+                if not docker_created:
+                    provision_docker(service["vpc"])
+                    docker_created = True
+                create_docker_service(service["name"], service["contents"], service["vpc"])
+
+def provision_docker(vpc):
+    provisioner = Module("docker-provisioner-%s" % vpc, 
+            source = "./modules/docker/create",
+            depends_on = ["module.re-provisioner-vpc-gcp-us"], #TODO Remove
+            ssh_user = SSH_USER,
+            ssh_private_key_file = SSH_PRIVATE_KEY_FILE,
+            host="${module.bastion-%s.bastion-public-ip}" % vpc
+        )
+
+def create_docker_service(name, contents, vpc):
+    provisioner = Module("docker-service-%s" % name, 
+            source = "./modules/docker/services",
+            depends_on = ["module.docker-provisioner-%s" % vpc],
+            ssh_user = SSH_USER,
+            contents = contents,
+            start_script = "start.sh",
+            ssh_private_key_file = SSH_PRIVATE_KEY_FILE,
+            host="${module.bastion-%s.bastion-public-ip}" % vpc
+        )

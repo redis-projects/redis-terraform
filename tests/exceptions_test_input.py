@@ -28,6 +28,7 @@ nameserver_no_domain = ({
         }
     ]
     }, "Please supply domain for all nameservers")
+
 nameserver_unsupported_provider = ({"networks": [{
     "provider": "utprov",
     "name": "vpc-1",

@@ -62,6 +62,7 @@ resource "null_resource" "null_provisioner" {
 
     provisioner "remote-exec" {
       inline = [
+        "chmod 400 /home/${var.ssh_user}/.ssh/id_rsa",
         "chmod +x /home/${var.ssh_user}/post_provision.sh",
         "/home/${var.ssh_user}/post_provision.sh ${var.redis_distro} | tee  post_provision.out 2>&1",
       ]

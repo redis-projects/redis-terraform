@@ -1,0 +1,22 @@
+version: '3'
+services: 
+     vault:
+        container_name: vault
+        image: vault:1.9.0
+        ports:
+        - 8200:8200
+        volumes:
+        - ./:/content
+        cap_add:
+        - IPC_LOCK
+        restart: always
+networks:
+    default:
+        driver: bridge
+        driver_opts:
+            com.docker.network.enable_ipv6: "true"
+        ipam:
+            driver: default
+            config:
+                - subnet: 172.16.21.0/24
+                  gateway: 172.16.21.1
