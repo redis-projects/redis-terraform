@@ -128,7 +128,6 @@ def generate(config_file):
 def provision_docker(vpc):
     provisioner = Module("docker-provisioner-%s" % vpc, 
             source = "./modules/docker/create",
-            depends_on = ["module.re-provisioner-vpc-gcp-us"], #TODO Remove
             ssh_user = SSH_USER,
             ssh_private_key_file = SSH_PRIVATE_KEY_FILE,
             host="${module.bastion-%s.bastion-public-ip}" % vpc

@@ -4,10 +4,6 @@ import os
 import yaml
 from . import PUBLIC_CIDR, PRIVATE_CIDR, REGION, OS, REDIS_DISTRO, BOOT_DISK_SIZE, BASTION_MACHINE_TYPE, SSH_USER, SSH_PUB_KEY_FILE, SSH_PRIVATE_KEY_FILE, REDIS_CLUSTER_NAME, REDIS_PWD, REDIS_EMAIL_FROM, REDIS_SMTP_HOST, ZONE, WORKER_MACHINE_COUNT, WORKER_MACHINE_TYPE, REDIS_USER_NAME, DEPLOYMENT_NAME
 
-
-# TODO: is this needed
-#random_id = Module("random_id", source="./modules/random_id")
-
 def create_vault(name):
     Module(name, source="terraform-google-modules/vault/google//modules/cluster")
 
