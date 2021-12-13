@@ -70,7 +70,7 @@ def test_register(monkeypatch, getenv, readconfigs, readexpected, config_file):
     assert(exp_azure == json.loads(json.dumps(providers.azure.mock_calls)))
     assert(exp_gcp == json.loads(json.dumps(providers.gcp.mock_calls)))
 
-#Just a safe guard to ensure we are not testing with a mock since test_provider
+#Just a safe guard to ensure we are testing with a mock since only test_provider
 #uses Mock and we don't want a leak
 def test_providers_are_mock(monkeypatch, getenv):
     [monkeypatch.setenv(x, getenv[x]) for x in getenv]

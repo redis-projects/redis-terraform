@@ -82,3 +82,8 @@ nameservers:
     parent_zone: ps-redislabs
     domain: ps-redislabs.com
     provider: gcp
+services:
+  - type: docker
+    name: vault-server
+    contents: vault
+    vpc: vpc-azure-us

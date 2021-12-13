@@ -178,31 +178,6 @@
             "security_groups": "${module.network-vpc-aws-us.public-security-groups}",
             "availability_zone": "us-east-1c"
         },
-        "re-provisioner-vpc-aws-us": {
-            "source": "./modules/ansible/re",
-            "ssh_user": "redislabs",
-            "inventory": "${data.template_file.inventory-vpc-aws-us}",
-            "extra_vars": "${data.template_file.extra_vars-vpc-aws-us}",
-            "ssh_private_key_file": "~/.ssh/id_rsa",
-            "host": "${module.bastion-vpc-aws-us.bastion-public-ip}",
-            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
-            "cluster_fqdn": [
-                "unit-test-name-vpc-azure-us.azure.ps-redislabs.com",
-                "unit-test-name-vpc-gcp-us.ps-redislabs.com"
-            ],
-            "other_bastions": [
-                "${module.bastion-vpc-azure-us.bastion-public-ip}",
-                "${module.bastion-vpc-gcp-us.bastion-public-ip}"
-            ],
-            "other_ssh_users": [
-                "redislabs",
-                "redislabs"
-            ],
-            "ssh_keys": [
-                "~/.ssh/id_rsa",
-                "~/.ssh/id_rsa"
-            ]
-        },
         "network-vpc-azure-us": {
             "source": "./modules/azure/network",
             "name": "unit-test-name-vpc-azure-us",
@@ -232,31 +207,6 @@
             "providers": {
                 "azurerm": "azurerm.vpc-azure-us"
             }
-        },
-        "re-provisioner-vpc-azure-us": {
-            "source": "./modules/ansible/re",
-            "ssh_user": "redislabs",
-            "inventory": "${data.template_file.inventory-vpc-azure-us}",
-            "extra_vars": "${data.template_file.extra_vars-vpc-azure-us}",
-            "ssh_private_key_file": "~/.ssh/id_rsa",
-            "host": "${module.bastion-vpc-azure-us.bastion-public-ip}",
-            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
-            "cluster_fqdn": [
-                "unit-test-name-vpc-aws-us.aws.ps-redislabs.com",
-                "unit-test-name-vpc-gcp-us.ps-redislabs.com"
-            ],
-            "other_bastions": [
-                "${module.bastion-vpc-aws-us.bastion-public-ip}",
-                "${module.bastion-vpc-gcp-us.bastion-public-ip}"
-            ],
-            "other_ssh_users": [
-                "redislabs",
-                "redislabs"
-            ],
-            "ssh_keys": [
-                "~/.ssh/id_rsa",
-                "~/.ssh/id_rsa"
-            ]
         },
         "network-vpc-gcp-us": {
             "source": "./modules/gcp/network",
@@ -289,31 +239,6 @@
             },
             "zone": "us-central1-b"
         },
-        "re-provisioner-vpc-gcp-us": {
-            "source": "./modules/ansible/re",
-            "ssh_user": "redislabs",
-            "inventory": "${data.template_file.inventory-vpc-gcp-us}",
-            "extra_vars": "${data.template_file.extra_vars-vpc-gcp-us}",
-            "ssh_private_key_file": "~/.ssh/id_rsa",
-            "host": "${module.bastion-vpc-gcp-us.bastion-public-ip}",
-            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
-            "cluster_fqdn": [
-                "unit-test-name-vpc-aws-us.aws.ps-redislabs.com",
-                "unit-test-name-vpc-azure-us.azure.ps-redislabs.com"
-            ],
-            "other_bastions": [
-                "${module.bastion-vpc-aws-us.bastion-public-ip}",
-                "${module.bastion-vpc-azure-us.bastion-public-ip}"
-            ],
-            "other_ssh_users": [
-                "redislabs",
-                "redislabs"
-            ],
-            "ssh_keys": [
-                "~/.ssh/id_rsa",
-                "~/.ssh/id_rsa"
-            ]
-        },
         "re-vpc-aws-us": {
             "source": "./modules/aws/re",
             "name": "unit-test-name-vpc-aws-us",
@@ -343,6 +268,31 @@
             "providers": {
                 "aws": "aws.vpc-aws-us"
             }
+        },
+        "re-provisioner-vpc-aws-us": {
+            "source": "./modules/ansible/re",
+            "ssh_user": "redislabs",
+            "inventory": "${data.template_file.inventory-vpc-aws-us}",
+            "extra_vars": "${data.template_file.extra_vars-vpc-aws-us}",
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "host": "${module.bastion-vpc-aws-us.bastion-public-ip}",
+            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
+            "cluster_fqdn": [
+                "unit-test-name-vpc-azure-us.azure.ps-redislabs.com",
+                "unit-test-name-vpc-gcp-us.ps-redislabs.com"
+            ],
+            "other_bastions": [
+                "${module.bastion-vpc-azure-us.bastion-public-ip}",
+                "${module.bastion-vpc-gcp-us.bastion-public-ip}"
+            ],
+            "other_ssh_users": [
+                "redislabs",
+                "redislabs"
+            ],
+            "ssh_keys": [
+                "~/.ssh/id_rsa",
+                "~/.ssh/id_rsa"
+            ]
         },
         "re-vpc-azure-us": {
             "source": "./modules/azure/re",
@@ -376,6 +326,31 @@
             "region": "WestUS3",
             "resource_group": "terratest-rg"
         },
+        "re-provisioner-vpc-azure-us": {
+            "source": "./modules/ansible/re",
+            "ssh_user": "redislabs",
+            "inventory": "${data.template_file.inventory-vpc-azure-us}",
+            "extra_vars": "${data.template_file.extra_vars-vpc-azure-us}",
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "host": "${module.bastion-vpc-azure-us.bastion-public-ip}",
+            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
+            "cluster_fqdn": [
+                "unit-test-name-vpc-aws-us.aws.ps-redislabs.com",
+                "unit-test-name-vpc-gcp-us.ps-redislabs.com"
+            ],
+            "other_bastions": [
+                "${module.bastion-vpc-aws-us.bastion-public-ip}",
+                "${module.bastion-vpc-gcp-us.bastion-public-ip}"
+            ],
+            "other_ssh_users": [
+                "redislabs",
+                "redislabs"
+            ],
+            "ssh_keys": [
+                "~/.ssh/id_rsa",
+                "~/.ssh/id_rsa"
+            ]
+        },
         "re-vpc-gcp-us": {
             "source": "./modules/gcp/re",
             "name": "unit-test-name-vpc-gcp-us",
@@ -403,6 +378,31 @@
                 "google": "google.vpc-gcp-us"
             },
             "zones": "${module.re-vpc-gcp-us.re-nodes.*.zone}"
+        },
+        "re-provisioner-vpc-gcp-us": {
+            "source": "./modules/ansible/re",
+            "ssh_user": "redislabs",
+            "inventory": "${data.template_file.inventory-vpc-gcp-us}",
+            "extra_vars": "${data.template_file.extra_vars-vpc-gcp-us}",
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "host": "${module.bastion-vpc-gcp-us.bastion-public-ip}",
+            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
+            "cluster_fqdn": [
+                "unit-test-name-vpc-aws-us.aws.ps-redislabs.com",
+                "unit-test-name-vpc-azure-us.azure.ps-redislabs.com"
+            ],
+            "other_bastions": [
+                "${module.bastion-vpc-aws-us.bastion-public-ip}",
+                "${module.bastion-vpc-azure-us.bastion-public-ip}"
+            ],
+            "other_ssh_users": [
+                "redislabs",
+                "redislabs"
+            ],
+            "ssh_keys": [
+                "~/.ssh/id_rsa",
+                "~/.ssh/id_rsa"
+            ]
         },
         "ns-vpc-aws-us": {
             "source": "./modules/aws/ns",
@@ -433,6 +433,23 @@
             "cluster_fqdn": "unit-test-name-vpc-gcp-us.ps-redislabs.com",
             "parent_zone": "ps-redislabs",
             "ip_addresses": "${module.re-vpc-gcp-us.re-public-ips}"
+        },
+        "docker-provisioner-vpc-azure-us": {
+            "source": "./modules/docker/create",
+            "ssh_user": "redislabs",
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "host": "${module.bastion-vpc-azure-us.bastion-public-ip}"
+        },
+        "docker-service-vault-server": {
+            "source": "./modules/docker/services",
+            "depends_on": [
+                "module.docker-provisioner-vpc-azure-us"
+            ],
+            "ssh_user": "redislabs",
+            "contents": "vault",
+            "start_script": "start.sh",
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "host": "${module.bastion-vpc-azure-us.bastion-public-ip}"
         }
     }
 }

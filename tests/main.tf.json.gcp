@@ -272,9 +272,6 @@
         },
         "docker-provisioner-vpc-gcp-us": {
             "source": "./modules/docker/create",
-            "depends_on": [
-                "module.re-provisioner-vpc-gcp-us"
-            ],
             "ssh_user": "redislabs",
             "ssh_private_key_file": "~/.ssh/id_rsa",
             "host": "${module.bastion-vpc-gcp-us.bastion-public-ip}"
