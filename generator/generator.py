@@ -1,145 +1,97 @@
-from terraformpy import Module, Provider, Data
-from terraformpy.helpers import relative_file
+""" This file defines the generate function which parses the config file in a python dictionary form
+"""
 import sys
-from providers import aws, gcp, azure, REGION, ZONE, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, DEPLOYMENT_NAME
-from providers import SSH_PRIVATE_KEY_FILE, SSH_USER
+import os
+import logging
+import generator.VNET_Azure 
+import generator.VPC_GCP 
+import generator.VPC_AWS
+import generator.Cluster
+import generator.Nameserver_Entries
+import generator.Service
+import generator.Databases
 
 def generate(config_file):
-    network_map = {}
-    aws_cidr_map = {}
-    gcp_cidr_map = {}
-    region_map = {}
-    fqdn_map = {}
-    peer_request_map = {}
-    peer_accept_map = {}
-    network_names = {}
-    rg_map = {}
-    diff_providers = False
-    last_provider = None
+    """ this generate function parses the config file and creates all objects """
 
-    if 'nameservers' in config_file:
-        for nameserver in config_file['nameservers']:
-            if "domain" not in nameserver or nameserver["domain"] is None:
-                raise Exception ("Please supply domain for all nameservers")
-            fqdn_map[nameserver["vpc"]] = "%s-%s.%s" % (DEPLOYMENT_NAME, nameserver["vpc"], nameserver["domain"])
-            nameserver["cluster_fqdn"] = fqdn_map[nameserver["vpc"]]
+    # Configure the Logging
+    logging.basicConfig(level=logging.INFO)
 
+    # Dictionary of all VPCs and VNETs
+    global vpc 
+    vpc = {}
+    # Disctionary for all redis clusters
+    global re_cluster
+    re_cluster = {}
+    # Disctionary for all nameserver entries
+    global ns_entry
+    ns_entry = {}
+    # Disctionary for all services
+    service = {}
+    # Disctionary for all databases
+    database = {}
+
+    # Go through all top level nodes in the YAML file
     if 'networks' in config_file:
         for network in config_file['networks']:
-            if "provider" not in network:
-                raise Exception("ERROR: a provider must be specified for each network (google or aws)")
-            provider = network["provider"]
-            if not last_provider:
-                last_provider = provider
-            if last_provider != provider:
-                diff_providers = True
-            network_map[network["name"]] = provider
-            if "resource_group" in network and provider == "azure":
-                rg_map[network["name"]] = network['resource_group']
-            if "peer_with" in network:
-                for vpc_peer in network['peer_with']:
-                    if  not next((item  for item in config_file['networks']  if item['name'] == vpc_peer), False):
-                        raise Exception(f'ERROR: Requested peering vpc {vpc_peer} not found in config file')
-                    vpc_provider = next(item['provider']  for item in config_file['networks']  if item['name'] == vpc_peer)
-                    if  provider != vpc_provider:
-                        raise Exception(f'ERROR: Peering network {vpc_peer} uses different provider ({vpc_provider}) than requester vpc ({provider})')
-                    if network['name'] not in peer_request_map:
-                        peer_request_map[network['name']] = []
-                    if vpc_peer not in peer_accept_map:
-                        peer_accept_map[vpc_peer] = []
-                    peer_request_map[network['name']].append(vpc_peer)
-                    peer_accept_map[vpc_peer].append(network["name"])
-            if  provider == 'aws': aws_cidr_map[network["name"]] = network['vpc_cidr']
-            if  provider == 'gcp': gcp_cidr_map[network["name"]] = [network['public_cidr'], network['private_cidr']]
-            region_map[network["name"]] = network['region']
-            network_names[network["name"]] = provider
-
-        if not diff_providers or 'nameservers' not in config_file:
-            network_names = {}
-
-        for network in config_file['networks']:
-            provider = network.pop('provider', "gcp")
-            network.pop('peer_with','default')
-            if network["name"] in peer_request_map:
-                network.update(peer_request_list = peer_request_map[network["name"]])
-            if network["name"] in peer_accept_map:
-                network.update(peer_accept_list = peer_accept_map[network["name"]])
-            if provider == "gcp":
-                network.update(cidr_map = gcp_cidr_map)
-                gcp.create_network(**network)
-            elif provider == "aws":
-                network.update(cidr_map = aws_cidr_map)
-                network.update(region_map = region_map)
-                aws.create_network(**network)
-            elif provider == "azure":
-                clusters = [(cl_dict['vpc'],cl_dict['expose_ui']) for cl_dict in config_file['clusters']]
-                for clu in clusters:
-                    if clu[0] == network["name"]:
-                        expose_ui = clu[1]
-                network.update(expose_ui = expose_ui)
-                azure.create_network(**network)
-            else: 
-                raise Exception("unsupported provider {}".format(provider))
-
+            if 'provider' not in network:
+                vpc[network["name"]] = generator.VPC_GCP.VPC_GCP(**network)
+            elif network["provider"] == "aws":
+                vpc[network["name"]] = generator.VPC_AWS.VPC_AWS(**network)
+            elif network["provider"] == "gcp":
+                vpc[network["name"]] = generator.VPC_GCP.VPC_GCP(**network)
+            elif network["provider"] == "azure":
+                vpc[network["name"]] = generator.VNET_Azure.VNET_Azure(**network)
+            else:
+                logging.error(f"network {network['name']} has an unsupported provider {network['provider']}")
+            logging.debug(f"A new network vpc {network['name']} has been added with the arguments {network}")
+    else:
+        logging.error("No section called network in the config file, but this is a requirement")
+        sys.exit(1)
+   
+    if 'nameservers' in config_file:
+        for ns_data in config_file['nameservers']:
+            ns_entry[ns_data["vpc"]] = generator.Nameserver_Entries.Nameserver_Entries(**ns_data)
+            logging.debug(f"A new nameserver entry for VPC/VNET {ns_data['vpc']} has been added with the arguments {ns_data}")
+    
     if 'clusters' in config_file:
         for cluster in config_file['clusters']:
-            provider = network_map[cluster["vpc"]]
-            cluster["other_nets"] = network_names
-            cluster["fqdn_map"] = fqdn_map
-
-            if cluster["vpc"] in fqdn_map:
-                cluster.update(redis_cluster_name = fqdn_map[cluster["vpc"]])
-
-            if provider == "gcp":
-                gcp.create_re_cluster(**cluster)
-            elif provider == "aws":
-                aws.create_re_cluster(**cluster)
-            elif provider == "azure":
-                cluster.update(region_map = region_map)
-                cluster.update(rg_map = rg_map)
-                azure.create_re_cluster(**cluster)
-
-    if 'nameservers' in config_file:
-        for nameserver in config_file['nameservers']:
-            provider = nameserver.pop('provider', network_map[nameserver["vpc"]])
-            nameserver.pop('domain')
-            if provider == "gcp":
-                gcp.create_ns_records(**nameserver)
-            elif provider == "aws":
-                aws.create_ns_records(**nameserver)
-            elif provider == "azure":
-                nameserver.update(rg_map = rg_map)
-                azure.create_ns_records(**nameserver)
-            else: 
-                raise Exception("unsupported provider in nameservers section {}".format(provider))
+            re_cluster[cluster["vpc"]] = generator.Cluster.Cluster(**cluster)
+            logging.debug(f"A new cluster for VPC/VNET {cluster['vpc']} has been added with the arguments {cluster}")
 
     if 'services' in config_file:
-        docker_created = False
-        for service in config_file['services']:
-            if 'type' not in service:
-                raise Exception("Please specify type for all services")   
-            svctype = service.pop('type')
-            if svctype == 'docker':
-                if not docker_created:
-                    provision_docker(service["vpc"])
-                    docker_created = True
-                create_docker_service(service["name"], service["contents"], service["vpc"])
+        for svc in config_file['services']:
+            service[svc["vpc"]] = generator.Service.Service(**svc)
+            logging.debug(f"A new service for VPC/VNET {svc['vpc']} has been added with the arguments {svc}")
 
-def provision_docker(vpc):
-    provisioner = Module("docker-provisioner-%s" % vpc, 
-            source = "./modules/docker/create",
-            ssh_user = SSH_USER,
-            ssh_private_key_file = SSH_PRIVATE_KEY_FILE,
-            host="${module.bastion-%s.bastion-public-ip}" % vpc
-        )
+    if 'databases' in config_file:
+        for re_db in config_file['databases']:
+            service[svc["vpc"]] = generator.Databases.Databases(**re_db)
+            logging.debug(f"A new database for cluster(s) {database['clusters']} has been added with the arguments {re_db}")
 
-def create_docker_service(name, contents, vpc):
-    provisioner = Module("docker-service-%s" % name, 
-            source = "./modules/docker/services",
-            depends_on = ["module.docker-provisioner-%s" % vpc],
-            ssh_user = SSH_USER,
-            contents = contents,
-            start_script = "start.sh",
-            ssh_private_key_file = SSH_PRIVATE_KEY_FILE,
-            host="${module.bastion-%s.bastion-public-ip}" % vpc
-        )
+    # By now we have thefile mapped and crated all objects.
+    # Next step is o model the network relationship (VPC Peering/VPN).
+    for network in config_file['networks']:
+        if "peer_with" in network:
+            vpc[network['name']].add_peers(network['peer_with'])
+    # Create the VPCs/VNETs and the UI Loadbalancer
+    for name in vpc :
+        vpc[name].create_network()
+        vpc[name].create_re_ui()
+    # Create the Bastion hosts
+    for name in vpc :
+        vpc[name].create_bastion()
+    # Create the nameserver entries
+    for ns_data in ns_entry :
+        ns_entry[ns_data].create_ns_records()
+    # Create the Clusters
+    for cluster in re_cluster :
+        re_cluster[cluster].create_re_cluster()
+    # Create Services
+    for svc in service :
+        service[svc].provision_docker()
+        service[svc].create_docker_service()
+
+
+def deployment_name():
+    return(os.getenv('name'))
