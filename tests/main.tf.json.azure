@@ -13,7 +13,7 @@
                 "vars": {
                     "redis_user_name": "admin@admin.com",
                     "redis_pwd": "admin",
-                    "redis_cluster_name": "dtest.rlabs.org",
+                    "redis_cluster_name": "unit-test-name-vpc-azure-us.azure.ps-redislabs.com",
                     "FQDN1": "domain1.test.net",
                     "FQDN2": "domain2.test.net"
                 }
@@ -120,19 +120,6 @@
                 "azurerm": "azurerm.vpc-azure-europe"
             }
         },
-        "re-provisioner-vpc-azure-europe": {
-            "source": "./modules/ansible/re",
-            "ssh_user": "redislabs",
-            "inventory": "${data.template_file.inventory-vpc-azure-europe}",
-            "extra_vars": "${data.template_file.extra_vars-vpc-azure-europe}",
-            "ssh_private_key_file": "~/.ssh/id_rsa",
-            "host": "${module.bastion-vpc-azure-europe.bastion-public-ip}",
-            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
-            "cluster_fqdn": [],
-            "other_bastions": [],
-            "other_ssh_users": [],
-            "ssh_keys": []
-        },
         "network-vpc-azure-us": {
             "source": "./modules/azure/network",
             "name": "unit-test-name-vpc-azure-us",
@@ -164,19 +151,6 @@
             "providers": {
                 "azurerm": "azurerm.vpc-azure-us"
             }
-        },
-        "re-provisioner-vpc-azure-us": {
-            "source": "./modules/ansible/re",
-            "ssh_user": "redislabs",
-            "inventory": "${data.template_file.inventory-vpc-azure-us}",
-            "extra_vars": "${data.template_file.extra_vars-vpc-azure-us}",
-            "ssh_private_key_file": "~/.ssh/id_rsa",
-            "host": "${module.bastion-vpc-azure-us.bastion-public-ip}",
-            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
-            "cluster_fqdn": [],
-            "other_bastions": [],
-            "other_ssh_users": [],
-            "ssh_keys": []
         },
         "re-vpc-azure-europe": {
             "source": "./modules/azure/re",
@@ -210,6 +184,19 @@
             "region": "germanywestcentral",
             "resource_group": "terratest-rg"
         },
+        "re-provisioner-vpc-azure-europe": {
+            "source": "./modules/ansible/re",
+            "ssh_user": "redislabs",
+            "inventory": "${data.template_file.inventory-vpc-azure-europe}",
+            "extra_vars": "${data.template_file.extra_vars-vpc-azure-europe}",
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "host": "${module.bastion-vpc-azure-europe.bastion-public-ip}",
+            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
+            "cluster_fqdn": [],
+            "other_bastions": [],
+            "other_ssh_users": [],
+            "ssh_keys": []
+        },
         "re-vpc-azure-us": {
             "source": "./modules/azure/re",
             "name": "unit-test-name-vpc-azure-us",
@@ -241,6 +228,19 @@
             "vnet": "${module.network-vpc-azure-us.vpc}",
             "region": "WestUS3",
             "resource_group": "terratest-rg"
+        },
+        "re-provisioner-vpc-azure-us": {
+            "source": "./modules/ansible/re",
+            "ssh_user": "redislabs",
+            "inventory": "${data.template_file.inventory-vpc-azure-us}",
+            "extra_vars": "${data.template_file.extra_vars-vpc-azure-us}",
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "host": "${module.bastion-vpc-azure-us.bastion-public-ip}",
+            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
+            "cluster_fqdn": [],
+            "other_bastions": [],
+            "other_ssh_users": [],
+            "ssh_keys": []
         },
         "ns-vpc-azure-europe": {
             "source": "./modules/azure/ns",

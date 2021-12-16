@@ -57,6 +57,10 @@ mv boa-inventory.ini redis-ansible/inventories/boa-cluster.ini || exit 1
 mv boa-extra-vars.yaml redis-ansible/extra_vars/boa-extra-vars.yaml || exit 1
 export ANSIBLE_HOST_KEY_CHECKING=False
 
+# Let's reboot server to alleviate yum db version error 
+ansible -i redis-ansible/inventories/boa-cluster.ini -a "/sbin/reboot" --become all
+ansible -i redis-ansible/inventories/boa-cluster.ini -m "ansible.builtin.wait_for_connection" --become all
+
 # Let's first stop and disable service systemd-resolved as it hogs port 53 and blocks our pDNS
 ansible --become -i redis-ansible/inventories/boa-cluster.ini -m ansible.builtin.systemd -a 'name=systemd-resolved state=stopped enabled=no' all
 cd redis-ansible
