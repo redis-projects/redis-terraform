@@ -21,7 +21,5 @@ class Databases(object):
         self._oss_sharding : bool = True
         self._oss_cluster : bool = True
         self._port : int = 12000
-        self._runs_on = []
-        """# @AssociationMultiplicity 1..*"""
         logging.debug("Creating Object of class "+self.__class__.__name__+" with class arguments "+str(kwargs))
 

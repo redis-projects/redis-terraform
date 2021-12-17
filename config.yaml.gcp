@@ -1,6 +1,7 @@
 ---
 clusters:
-  - vpc: vpc-gcp-east1
+  - name: cluster1
+    vpc: vpc-gcp-east1
     worker_count: 3 
     machine_type: n1-standard-4
     machine_image: rhel-8-v20210721
@@ -11,7 +12,8 @@ clusters:
     expose_ui: True
     redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
     rack_aware: True
-  - vpc: vpc-gcp-us
+  - name: cluster1
+    vpc: vpc-gcp-us
     worker_count: 3
     machine_type: n1-standard-4
     machine_image: rhel-8-v20210721
@@ -44,10 +46,12 @@ networks:
     provider: gcp
     project: redislabs-sa-training-services
 nameservers:
-  - vpc: vpc-gcp-east1
+  - cluster: cluster1
+    vpc: vpc-gcp-east1
     parent_zone: ps-redislabs
     domain: ps-redislabs.com
-  - vpc: vpc-gcp-us
+  - cluster: cluster1
+    vpc: vpc-gcp-us
     parent_zone: ps-redislabs
     domain: ps-redislabs.com
 services:

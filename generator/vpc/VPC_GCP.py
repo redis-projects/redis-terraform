@@ -3,28 +3,25 @@
 import os
 import itertools
 import logging
-import generator.generator
-import generator.Cloud_Provider_VPC_VNET
+from generator.vpc.Cloud_Provider_VPC_VNET import Cloud_Provider_VPC_VNET
 from terraformpy import Module, Provider, Data, Output
 from terraformpy.helpers import relative_file
 from typing import List
 
-class VPC_GCP(generator.Cloud_Provider_VPC_VNET.Cloud_Provider_VPC_VNET):
+class VPC_GCP(Cloud_Provider_VPC_VNET):
 
     def create_network(self) -> int:
-        
-        deployment_name = os.getenv('name')
-
+        from generator.generator import deployment_name, vpc
         vpc_request_list = [f'${{module.network-{s}.vpc}}' for s in self._peer_request_list]
         vpc_accept_list  = [f'${{module.network-{s}.vpc}}' for s in self._peer_accept_list]
-        cidr_list = [generator.generator.vpc[cidr].get_public_cidr() for cidr in self._peer_request_list]
-        cidr_list = cidr_list + [generator.generator.vpc[cidr].get_private_cidr() for cidr in self._peer_request_list]
-        cidr_list = cidr_list + [generator.generator.vpc[cidr].get_public_cidr() for cidr in self._peer_accept_list]
-        cidr_list = cidr_list + [generator.generator.vpc[cidr].get_private_cidr() for cidr in self._peer_accept_list]
+        cidr_list = [vpc[cidr].get_public_cidr() for cidr in self._peer_request_list]
+        cidr_list = cidr_list + [vpc[cidr].get_private_cidr() for cidr in self._peer_request_list]
+        cidr_list = cidr_list + [vpc[cidr].get_public_cidr() for cidr in self._peer_accept_list]
+        cidr_list = cidr_list + [vpc[cidr].get_private_cidr() for cidr in self._peer_accept_list]
 
-        network_mod = Module(f"network-{self._name}", 
+        Module(f"network-{self._name}", 
             source                  = f"./modules/{self._provider}/network",
-            name                    = f"{deployment_name}-{self._name}",
+            name                    = f"{deployment_name()}-{self._name}",
             gce_public_subnet_cidr  = self._public_cidr,
             region                  = self._region,
             providers               = {"google": f"google.{self._name}"},
@@ -34,10 +31,10 @@ class VPC_GCP(generator.Cloud_Provider_VPC_VNET.Cloud_Provider_VPC_VNET):
             gce_private_subnet_cidr = self._private_cidr)
 
     def create_bastion(self) -> int:
-        deployment_name = os.getenv('name')
-        bastion_mod = Module(f"bastion-{self._name}",
+        from generator.generator import deployment_name, vpc
+        Module(f"bastion-{self._name}",
             source                  = f"./modules/{self._provider}/bastion",
-            name                    = f"{deployment_name}-{self._name}",
+            name                    = f"{deployment_name()}-{self._name}",
             gce_public_subnet_cidr  = self._public_cidr,
             gce_private_subnet_cidr = self._private_cidr,
             region                  = self._region,
@@ -116,7 +113,7 @@ class VPC_GCP(generator.Cloud_Provider_VPC_VNET.Cloud_Provider_VPC_VNET):
                 logging.warn(f"Key {key} is being ignored ")
 
         Provider("google", project=self._project, region=self._region,
-             credentials=relative_file("../terraform_account.json"), alias=self._name)
+             credentials=relative_file("../../terraform_account.json"), alias=self._name)
         Provider("google-beta", project=self._project, region=self._region,
-             credentials=relative_file("../terraform_account.json"), alias=self._name)
+             credentials=relative_file("../../terraform_account.json"), alias=self._name)
 

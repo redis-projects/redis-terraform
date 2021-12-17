@@ -3,24 +3,21 @@
 import os
 import itertools
 import logging
-import generator.generator
-import generator.Cloud_Provider_VPC_VNET
+from generator.vpc.Cloud_Provider_VPC_VNET import Cloud_Provider_VPC_VNET
 from terraformpy import Module, Provider, Data, Output
-from terraformpy.helpers import relative_file
 from typing import List
 
-class VPC_AWS(generator.Cloud_Provider_VPC_VNET.Cloud_Provider_VPC_VNET):
+class VPC_AWS(Cloud_Provider_VPC_VNET):
 
     def create_network(self) -> int:
-        
-        deployment_name = os.getenv('name')
+        from generator.generator import vpc, deployment_name
         region_map = {}
         cidr_map = {}
         cidr_map[self._name] = self._vpc_cidr
         for vpc_iter in itertools.chain(self._peer_accept_list, self._peer_request_list):
-            cidr_map[vpc_iter] = generator.generator.vpc[vpc_iter].get_vpc_cidr()
-        for vpc_iter in generator.generator.vpc:
-            region_map[vpc_iter] = generator.generator.vpc[vpc_iter].get_region()
+            cidr_map[vpc_iter] = vpc[vpc_iter].get_vpc_cidr()
+        for vpc_iter in vpc:
+            region_map[vpc_iter] = vpc[vpc_iter].get_region()
 
 
         vpc_request_list = [f'${{module.network-{s}.vpc}}' for s in self._peer_request_list]
@@ -29,7 +26,7 @@ class VPC_AWS(generator.Cloud_Provider_VPC_VNET.Cloud_Provider_VPC_VNET):
 
         Module(f"network-{self._name}", 
             source              = f"./modules/{self._provider}/network",
-            name                = f"{deployment_name}-{self._name}",
+            name                = f"{deployment_name()}-{self._name}",
             vpc_name            = self._name,
             vpc_cidr            = self._vpc_cidr,
             availability_zone   = self._bastion_zone,
@@ -46,10 +43,9 @@ class VPC_AWS(generator.Cloud_Provider_VPC_VNET.Cloud_Provider_VPC_VNET):
         return(0)
 
     def create_bastion(self) -> int:
-        deployment_name = os.getenv('name')
-
+        from generator.generator import vpc, deployment_name
         Module(f"keypair-{self._name}",
-            name           = f"{deployment_name}-{self._name}-keypair",
+            name           = f"{deployment_name()}-{self._name}-keypair",
             source         = f"./modules/{self._provider}/keypair",
             ssh_public_key = self._ssh_public_key,
             providers      = {"aws": f"aws.{self._name}"},
@@ -58,7 +54,7 @@ class VPC_AWS(generator.Cloud_Provider_VPC_VNET.Cloud_Provider_VPC_VNET):
         bastion_mod = Module(f"bastion-{self._name}",
             source            = f"./modules/{self._provider}/bastion",
             vpc               = f'${{module.network-{self._name}.vpc}}',
-            name              = f"{deployment_name}-{self._name}",
+            name              = f"{deployment_name()}-{self._name}",
             subnet            = f'${{module.network-{self._name}.public-subnet}}',
             ami               = self._bastion_machine_image,
             instance_type     = self._bastion_machine_type,
@@ -74,10 +70,10 @@ class VPC_AWS(generator.Cloud_Provider_VPC_VNET.Cloud_Provider_VPC_VNET):
             value=f"${{module.bastion-{self._name}.bastion-public-ip}}")
 
     def create_re_ui(self) -> int:
-        deployment_name = os.getenv('name')
+        from generator.generator import vpc, deployment_name
         Module(f"re-ui-{self._name}",
             source    = f"./modules/{self._provider}/re-ui",
-            name      = f'{deployment_name}-{self._name}',
+            name      = f'{deployment_name()}-{self._name}',
             vpc       = f'${{module.network-{self._name}.vpc}}',
             ips       = f'${{module.re-{self._name}.re-nodes.*.private_ip}}',
             subnets   = f'${{module.network-{self._name}.private-subnet.*.id}}',

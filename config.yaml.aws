@@ -1,6 +1,7 @@
 ---
 clusters:
-  - vpc: vpc-aws-us
+  - name: clusterA
+    vpc: vpc-aws-us
     worker_count: 3 
     machine_type: t2.xlarge
     machine_image: ami-05f238ddab9a512be
@@ -11,7 +12,8 @@ clusters:
     expose_ui: True
     redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
     rack_aware: False
-  - vpc: vpc-aws-europe
+  - name: clusterB
+    vpc: vpc-aws-europe
     worker_count: 3
     machine_type: t2.xlarge
     machine_image: ami-01f6fd1863750f580
@@ -50,11 +52,13 @@ networks:
     bastion_machine_type: t2.micro
     provider: aws
 nameservers:
-  - vpc: vpc-aws-us
+  - cluster: clusterA
+    vpc: vpc-aws-us
     parent_zone: aws.ps-redislabs.com
     domain: aws.ps-redislabs.com
     provider: aws
-  - vpc: vpc-aws-europe
+  - cluster: clusterB
+    vpc: vpc-aws-europe
     parent_zone: aws.ps-redislabs.com
     domain: aws.ps-redislabs.com
     provider: aws

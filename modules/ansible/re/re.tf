@@ -75,8 +75,8 @@ resource "null_resource" "null_provisioner" {
       }
     }
 
-    provisioner "remote-exec" {
-      inline = "${concat(["chmod 400 /home/${var.ssh_user}/.ssh/id_rsa"],local.ssh_tunnels, ["sleep 30"])}"
+    #provisioner "remote-exec" {
+    #  inline = "${concat(["chmod 400 /home/${var.ssh_user}/.ssh/id_rsa"],local.ssh_tunnels, ["sleep 30"])}"
 
       connection {
         type = "ssh"

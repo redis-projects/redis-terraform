@@ -2,10 +2,6 @@
 # -*- coding: UTF-8 -*-
 from abc import ABCMeta, abstractmethod
 import sys
-import generator.generator
-import generator.Cluster
-import generator.Host
-import generator.Nameserver_Entries
 import logging
 from typing import List
 
@@ -45,12 +41,13 @@ class Cloud_Provider_VPC_VNET(object):
         return(self._public_cidr)
 
     def add_peers(self,peer_list) -> int:
+        from generator.generator import vpc
         for peer in peer_list:
-            if peer not in self._peer_request_list and self._name not in generator.generator.vpc[peer].get_peer_request_list():
+            if peer not in self._peer_request_list and self._name not in vpc[peer].get_peer_request_list():
                 # Same provider, go for VPC/VNET peering
-                if self._provider == generator.generator.vpc[peer]._provider:
+                if self._provider == vpc[peer]._provider:
                     self._peer_request_list.append(peer)
-                    generator.generator.vpc[peer].add_to_peer_accept_list(self._name)
+                    vpc[peer].add_to_peer_accept_list(self._name)
         return(0)
 
     def add_to_peer_accept_list(self,peer) -> int:
@@ -78,15 +75,7 @@ class Cloud_Provider_VPC_VNET(object):
         self._vpc_request_list = []
         self._vpn_accept_list = []
         self._vpn_request_list = []
-        """# @AssociationMultiplicity *"""
-        self._contains : generator.Cluster.Cluster = None
-        """# @AssociationMultiplicity 1
-        # @AssociationKind Composition"""
-        self._contains_bastion : generator.Host.Host = None
-        """# @AssociationMultiplicity 1
-        # @AssociationKind Composition"""
-        self._unnamed_Nameserver_Entries_ : generator.Nameserver_Entries.Nameserver_Entries = None
-        """# @AssociationKind Composition"""
+ 
         if "name" not in kwargs:
             logging.error("The VPC/VNET must have an attribute called name")
             sys.exit(1)

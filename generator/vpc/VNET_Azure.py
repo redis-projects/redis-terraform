@@ -2,12 +2,12 @@
 # -*- coding: UTF-8 -*-
 import os
 import logging
-import generator.Cloud_Provider_VPC_VNET
+from generator.vpc.Cloud_Provider_VPC_VNET import Cloud_Provider_VPC_VNET
+
 from terraformpy import Module, Provider, Data, Output
-from terraformpy.helpers import relative_file
 from typing import List
 
-class VNET_Azure(generator.Cloud_Provider_VPC_VNET.Cloud_Provider_VPC_VNET):
+class VNET_Azure(Cloud_Provider_VPC_VNET):
     def create_network(self) -> int:
 
         vpc_request_list = [f'${{module.network-{s}.vpc}}' for s in self._peer_request_list]
@@ -27,10 +27,10 @@ class VNET_Azure(generator.Cloud_Provider_VPC_VNET.Cloud_Provider_VPC_VNET):
 
 
     def create_bastion(self) -> int:
-        deployment_name = os.getenv('name')
+        from generator.generator import deployment_name
         Module(f"bastion-{self._name}",
             source                   = f"./modules/{self._provider}/bastion",
-            name                     = f'{deployment_name}-{self._name}',
+            name                     = f'{deployment_name()}-{self._name}',
             region                   = self._region,
             resource_group           = self._resource_group,
             public_subnet_id         = f'${{module.network-{self._name}.public-subnet}}',
@@ -46,10 +46,10 @@ class VNET_Azure(generator.Cloud_Provider_VPC_VNET.Cloud_Provider_VPC_VNET):
              value = f"${{module.bastion-{self._name}.bastion-public-ip}}")
 
     def create_re_ui(self) -> int:
-        deployment_name = os.getenv('name')
+        from generator.generator import deployment_name
         Module(f"re-ui-{self._name}",
             source            = f"./modules/{self._provider}/re-ui",
-            name              = f'{deployment_name}-{self._name}',
+            name              = f'{deployment_name()}-{self._name}',
             instances         = f'${{module.re-{self._name}.re-nodes.*.private_ip_address}}',
             providers         = {"azurerm": f"azurerm.{self._name}"},
             vnet              = f'${{module.network-{self._name}.vpc}}',

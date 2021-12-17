@@ -12,8 +12,3 @@ variable "ip_addresses" {
   description = "List of Public (!) IP addresses for each cluster node"
   type        = list
 }
-
-variable "name" {
-  description = "Name of the entry"
-  type        = string
-}

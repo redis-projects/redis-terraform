@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-import generator.Cluster
-import generator.Cloud_Provider_VPC_VNET
-import generator.Service
 from typing import List
 
 class Host(object):
@@ -27,10 +24,4 @@ class Host(object):
         self._availability_zone : str = None
         self._public_ip : str = None
         self._private_ip : str = None
-        self._contains : generator.Cluster.Cluster = None
-        """# @AssociationMultiplicity 1"""
-        self._contains_bastion : generator.Cloud_Provider_VPC_VNET.Cloud_Provider_VPC_VNET = None
-        """# @AssociationMultiplicity 1"""
-        self._runs_on : generator.Service.Service = None
-        """# @AssociationMultiplicity 1"""
 

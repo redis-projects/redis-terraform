@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 import logging
-import generator.Host
 from terraformpy import Module, Provider, Data, Output
 from typing import List
 
@@ -33,12 +32,9 @@ class Service(object):
         self._type : str = None
         self._contents : str = None
         self._vpc : str = None
-        self._runs_on : generator.Host.Host = None
         self._docker_provisioned = False
         self._ssh_user = "redislabs"
         self._ssh_private_key_file = '~/.ssh/id_rsa'
-
-        """# @AssociationMultiplicity 1"""
         logging.debug("Creating Object of class "+self.__class__.__name__+" with class arguments "+str(kwargs))
 
         for key, value in kwargs.items():
