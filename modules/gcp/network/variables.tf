@@ -16,3 +16,7 @@ variable "vpc_accept_list" {
   description = "List of VPC IDs which we want to accept the peering for"
   type        = list
 }
+
+variable "resource_tags" {
+  description = "hash with tags for all resources"
+}

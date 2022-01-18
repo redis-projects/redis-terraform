@@ -18,14 +18,14 @@ resource "google_compute_subnetwork" "public-subnet" {
   name          = "${var.name}-public-subnet"
   network       = google_compute_network.vpc.name
   ip_cidr_range = var.gce_public_subnet_cidr
-  region = var.region
+  region        = var.region
 }
 
 resource "google_compute_subnetwork" "private-subnet" {
   name          = "${var.name}-private-subnet"
   network       = google_compute_network.vpc.name
   ip_cidr_range = var.gce_private_subnet_cidr
-  region = var.region
+  region        = var.region
 }
 
 resource "google_compute_router" "router" {

@@ -17,3 +17,7 @@ variable "vpc" {
   description = "ID of the VPC"
   type        = string
 }
+
+variable "resource_tags" {
+  description = "hash with tags for all resources"
+}

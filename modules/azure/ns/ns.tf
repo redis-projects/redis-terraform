@@ -20,6 +20,7 @@ resource "azurerm_dns_a_record" "A-records" {
   ttl                 = 60
   records             = [ tostring(var.ip_addresses[count.index].ip_address) ]
   count               = length(var.ip_addresses)
+  tags                = "${var.resource_tags}"
 }
 
 resource "azurerm_dns_ns_record" "NS-record" {
@@ -28,4 +29,5 @@ resource "azurerm_dns_ns_record" "NS-record" {
   resource_group_name = var.resource_group
   ttl                 = 60
   records             = formatlist("%s.%s",tolist(azurerm_dns_a_record.A-records.*.name),"${data.azurerm_dns_zone.parent.name}")
+  tags                = "${var.resource_tags}"
 }

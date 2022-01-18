@@ -64,7 +64,7 @@ resource "null_resource" "null_provisioner" {
       inline = [
         "chmod 400 /home/${var.ssh_user}/.ssh/id_rsa",
         "chmod +x /home/${var.ssh_user}/post_provision.sh",
-        "/home/${var.ssh_user}/post_provision.sh ${var.redis_distro} | tee  post_provision.out 2>&1",
+        "/home/${var.ssh_user}/post_provision.sh ${var.redis_distro}  2>&1 | tee  post_provision.out",
       ]
 
       connection {
@@ -78,12 +78,12 @@ resource "null_resource" "null_provisioner" {
     #provisioner "remote-exec" {
     #  inline = "${concat(["chmod 400 /home/${var.ssh_user}/.ssh/id_rsa"],local.ssh_tunnels, ["sleep 30"])}"
 
-      connection {
-        type = "ssh"
-        host = var.host
-        user = var.ssh_user
-        private_key = file(var.ssh_private_key_file)
-      }
-    }
+    #  connection {
+    #    type = "ssh"
+    #    host = var.host
+    #    user = var.ssh_user
+    #    private_key = file(var.ssh_private_key_file)
+    #  }
+    #}
 
 }

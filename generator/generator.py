@@ -12,6 +12,7 @@ from generator.cluster.Cluster_AWS import Cluster_AWS
 from generator.nameserver.Nameserver_Entries import Nameserver_Entries
 from generator.service.Service import Service
 from generator.database.Databases import Databases
+from terraformpy import Module
 
 def generate(config_file):
     """ this generate function parses the config file and creates all objects """
@@ -19,6 +20,9 @@ def generate(config_file):
     # Configure the Logging
     logging.basicConfig(level=logging.INFO)
 
+    # Global settings in the config file
+    global global_config
+    global_config = {}
     # Dictionary of all VPCs and VNETs
     global vpc 
     vpc = {}
@@ -34,6 +38,8 @@ def generate(config_file):
     database = {}
 
     # Go through all top level nodes in the YAML file
+    if 'global' in config_file:
+        global_config = config_file["global"]
     if 'networks' in config_file:
         for network in config_file['networks']:
             if 'provider' not in network:
@@ -59,12 +65,15 @@ def generate(config_file):
     if 'clusters' in config_file:
         for cluster in config_file['clusters']:
             provider = vpc[cluster["vpc"]].get_provider()
+            if cluster["name"] in re_cluster:
+                logging.error(f"Cluster name {cluster['name']} is not unique but this is a requirement")
+                sys.exit(1)
             if provider == "aws":
-                re_cluster[f'{cluster["name"]}-{cluster["vpc"]}'] = Cluster_AWS(**cluster)
+                re_cluster[f'{cluster["name"]}'] = Cluster_AWS(**cluster)
             elif provider == "azure":
-                re_cluster[f'{cluster["name"]}-{cluster["vpc"]}'] = Cluster_Azure(**cluster)
+                re_cluster[f'{cluster["name"]}'] = Cluster_Azure(**cluster)
             elif provider == "gcp":
-                re_cluster[f'{cluster["name"]}-{cluster["vpc"]}'] = Cluster_GCP(**cluster)
+                re_cluster[f'{cluster["name"]}'] = Cluster_GCP(**cluster)
             logging.debug(f"A new cluster for VPC/VNET {cluster['vpc']} has been added with the arguments {cluster}")
 
     if 'services' in config_file:
@@ -103,7 +112,6 @@ def generate(config_file):
         service[vpc][0].provision_docker()
         for svc in service[vpc]:
             svc.create_docker_service()
-
 
 def deployment_name():
     return(os.getenv('name'))

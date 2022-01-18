@@ -32,7 +32,12 @@ class Cluster(object):
         )
 
     def __init__(self):
-        pass
+        from generator.generator import global_config
+        self._global_config = {}
+        if "resource_tags" in global_config:
+            self._global_config["resource_tags"] = global_config["resource_tags"]
+        else:
+            self._global_config["resource_tags"] = {}
  
 
 

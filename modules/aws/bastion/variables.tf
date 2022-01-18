@@ -8,6 +8,10 @@ variable "vpc" {
   type        = string
 }
 
+variable "resource_tags" {
+  description = "hash with tags for all resources"
+}
+
 variable "availability_zone" {
   description = "Default availability zone"
   type        = string

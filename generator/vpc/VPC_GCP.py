@@ -3,6 +3,7 @@
 import os
 import itertools
 import logging
+from generator import SSH_USER, SSH_PUBLIC_KEY
 from generator.vpc.Cloud_Provider_VPC_VNET import Cloud_Provider_VPC_VNET
 from terraformpy import Module, Provider, Data, Output
 from terraformpy.helpers import relative_file
@@ -22,6 +23,7 @@ class VPC_GCP(Cloud_Provider_VPC_VNET):
         Module(f"network-{self._name}", 
             source                  = f"./modules/{self._provider}/network",
             name                    = f"{deployment_name()}-{self._name}",
+            resource_tags           = self._global_config["resource_tags"],
             gce_public_subnet_cidr  = self._public_cidr,
             region                  = self._region,
             providers               = {"google": f"google.{self._name}"},
@@ -35,6 +37,7 @@ class VPC_GCP(Cloud_Provider_VPC_VNET):
         Module(f"bastion-{self._name}",
             source                  = f"./modules/{self._provider}/bastion",
             name                    = f"{deployment_name()}-{self._name}",
+            resource_tags           = self._global_config["resource_tags"],
             gce_public_subnet_cidr  = self._public_cidr,
             gce_private_subnet_cidr = self._private_cidr,
             region                  = self._region,
@@ -55,11 +58,12 @@ class VPC_GCP(Cloud_Provider_VPC_VNET):
     def create_re_ui(self) -> int:
         deployment_name = os.getenv('name')
         Module(f"re-ui-{self._name}",
-            source    = f"./modules/{self._provider}/re-ui",
-            name      = f'{deployment_name}-{self._name}',
-            instances = f'${{module.re-{self._name}.re-nodes.*.name}}',
-            providers = {"google": f"google.{self._name}"},
-            zones     = f'${{module.re-{self._name}.re-nodes.*.zone}}'
+            source        = f"./modules/{self._provider}/re-ui",
+            name          = f'{deployment_name}-{self._name}',
+            resource_tags = self._global_config["resource_tags"],
+            instances     = f'${{module.re-{self._name}.re-nodes.*.name}}',
+            providers     = {"google": f"google.{self._name}"},
+            zones         = f'${{module.re-{self._name}.re-nodes.*.zone}}'
         )
 
         Output(f"gcp-re-ui-{self._name}-ip-output",
@@ -84,15 +88,14 @@ class VPC_GCP(Cloud_Provider_VPC_VNET):
         self._public_cidr : str = "10.0.1.0/24"
         self._region : str = "us-central1"
         self._worker_machine_image : str = "rhel-7-v20210721"
-        self._redis_user = 'redislabs'
-        self._ssh_public_key = '~/.ssh/id_rsa.pub'
+        self._redis_user = SSH_USER
+        self._ssh_public_key = SSH_PUBLIC_KEY
         self._expose_ui = False
         self._peer_accept_list = []
         self._peer_request_list = []
         self._vpc_accept_list = []
         self._vpc_request_list = []
-        self._vpn_accept_list = []
-        self._vpn_request_list = []
+        self._vpn_set = set()
         self._boot_disk_size = 50
         logging.debug("Creating Object of class "+self.__class__.__name__+" with class arguments "+str(kwargs))
 

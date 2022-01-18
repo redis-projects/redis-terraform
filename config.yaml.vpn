@@ -1,0 +1,96 @@
+---
+global:
+  resource_tags:
+    Owner: Michael Ehrig
+    Organization: Redis Professional Services
+clusters:
+  - name: cluster1
+    vpc: vpc-aws-europe
+    worker_count: 3
+    machine_type: t2.xlarge
+    machine_image: ami-01f6fd1863750f580
+    zones:
+    - eu-central-1c
+    - eu-central-1b
+    - eu-central-1a
+    expose_ui: True
+    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
+    rack_aware: True
+  - name: cluster2
+    vpc: vpc-azure-us
+    worker_count: 3 
+    machine_type: Standard_B2s
+    machine_image: cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810
+    zones: 
+    - 1
+    - 2
+    - 3
+    expose_ui: True
+    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
+    rack_aware: True
+  - name: cluster3
+    vpc: vpc-gcp-us
+    worker_count: 3
+    machine_type: n1-standard-4
+    machine_image: rhel-8-v20210721
+    zones:
+    - us-central1-a
+    - us-central1-b
+    - us-central1-c
+    expose_ui: True
+    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
+    rack_aware: True
+networks:
+  - name: vpc-aws-europe
+    vpc_cidr: 10.1.0.0/16
+    public_cidr: 10.1.1.0/24
+    private_cidr:
+      eu-central-1b: 10.1.3.0/24
+      eu-central-1a: 10.1.2.0/24
+      eu-central-1c: 10.1.4.0/24
+    region: eu-central-1
+    bastion_zone: eu-central-1b
+    bastion_machine_image: ami-02241e4f36e06d650
+    bastion_machine_type: t2.micro
+    provider: aws
+    peer_with:
+    - vpc-azure-us
+  - name: vpc-azure-us
+    vpc_cidr: 10.2.0.0/16
+    public_cidr: 10.2.1.0/24
+    private_cidr: 10.2.2.0/24
+    gateway_cidr: 10.2.3.0/27 
+    region: WestUS3
+    bastion_zone: 2
+    bastion_machine_image: cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810
+    bastion_machine_type: Standard_B1s
+    provider: azure
+    resource_group: terratest-rg
+    subscription_id: ef03f41d-d2bd-4691-b3a0-3aff1c6711f7
+    tenant_id: 1428732f-21cf-469e-ad48-5721f4eac1e2
+    application_id: 801fb60b-0efb-4a9e-aa4a-98f8abff125e
+    client_certificate_path: ./terraform_account.pfx
+  - name: vpc-gcp-us
+    public_cidr: 10.3.1.0/24
+    private_cidr: 10.3.2.0/24
+    region: us-central1
+    bastion_zone: us-central1-b
+    bastion_machine_image: rhel-7-v20210721
+    bastion_machine_type: n1-standard-1
+    provider: gcp
+nameservers:
+  - cluster: cluster1
+    vpc: vpc-aws-europe
+    parent_zone: aws.ps-redislabs.com
+    domain: aws.ps-redislabs.com
+    provider: aws
+  - cluster: cluster2
+    vpc: vpc-azure-us
+    parent_zone: azure.ps-redislabs.com
+    domain: azure.ps-redislabs.com
+    provider: azure
+  - cluster: cluster3
+    vpc: vpc-gcp-us
+    parent_zone: ps-redislabs
+    domain: ps-redislabs.com
+    provider: gcp

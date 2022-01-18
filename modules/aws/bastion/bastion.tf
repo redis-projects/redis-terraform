@@ -15,9 +15,9 @@ resource "aws_network_interface" "nic" {
   subnet_id = var.subnet
   security_groups = var.security_groups
 
-  tags = {
+  tags = merge("${var.resource_tags}",{
     Name = "${var.vpc}-${var.name}-nic"
-  }
+  })
 }
 
 
@@ -27,9 +27,9 @@ resource "aws_eip" "eip" {
   network_interface = aws_network_interface.nic.id
   associate_with_private_ip = aws_network_interface.nic.private_ip
 
-  tags = {
+  tags = merge("${var.resource_tags}",{
     Name = "${var.name}-eip"
-  }
+  })
 }
 
 
@@ -41,6 +41,9 @@ resource "aws_instance" "bastion" {
   instance_type = var.instance_type
   availability_zone = var.availability_zone
   key_name = var.ssh_key_name
+  tags = merge("${var.resource_tags}",{
+    Name = "${var.name}-bastion"
+  })
   user_data = <<-EOF
     #cloud-config
     cloud_final_modules:
@@ -57,10 +60,6 @@ resource "aws_instance" "bastion" {
   network_interface {
     device_index = 0
     network_interface_id = aws_network_interface.nic.id
-  }
-
-  tags = {
-    Name = "${var.name}-bastion"
   }
 }
 

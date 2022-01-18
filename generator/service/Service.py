@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 import logging
+from generator import SSH_USER, SSH_PRIVATE_KEY
 from terraformpy import Module, Provider, Data, Output
 from typing import List
 
@@ -33,8 +34,8 @@ class Service(object):
         self._contents : str = None
         self._vpc : str = None
         self._docker_provisioned = False
-        self._ssh_user = "redislabs"
-        self._ssh_private_key_file = '~/.ssh/id_rsa'
+        self._ssh_user = SSH_USER
+        self._ssh_private_key_file = SSH_PRIVATE_KEY
         logging.debug("Creating Object of class "+self.__class__.__name__+" with class arguments "+str(kwargs))
 
         for key, value in kwargs.items():

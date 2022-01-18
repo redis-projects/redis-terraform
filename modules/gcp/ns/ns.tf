@@ -13,7 +13,7 @@ resource "google_dns_record_set" "A-records" {
   type         = "A"
   rrdatas      = [ tostring(var.ip_addresses[count.index].address) ]
   ttl          = 60
-  count = length(var.ip_addresses)
+  count        = length(var.ip_addresses)
 }
 
 resource "google_dns_record_set" "NS-record" {

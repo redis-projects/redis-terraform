@@ -3,8 +3,9 @@
 import os
 import itertools
 import logging
+from generator import SSH_USER, SSH_PUBLIC_KEY
 from generator.vpc.Cloud_Provider_VPC_VNET import Cloud_Provider_VPC_VNET
-from terraformpy import Module, Provider, Data, Output
+from terraformpy import Module, Provider, Output
 from typing import List
 
 class VPC_AWS(Cloud_Provider_VPC_VNET):
@@ -13,20 +14,24 @@ class VPC_AWS(Cloud_Provider_VPC_VNET):
         from generator.generator import vpc, deployment_name
         region_map = {}
         cidr_map = {}
+        vpn_list = list(self._vpn_set)
         cidr_map[self._name] = self._vpc_cidr
         for vpc_iter in itertools.chain(self._peer_accept_list, self._peer_request_list):
             cidr_map[vpc_iter] = vpc[vpc_iter].get_vpc_cidr()
         for vpc_iter in vpc:
             region_map[vpc_iter] = vpc[vpc_iter].get_region()
 
-
-        vpc_request_list = [f'${{module.network-{s}.vpc}}' for s in self._peer_request_list]
-        vpc_accept_list  = [f'${{module.network-{s}.vpc}}' for s in self._peer_accept_list]
-        vpc_conn_index   = [f'${{module.network-{s}.peering-request-ids["{self._name}"]}}' for s in self._peer_accept_list]
+        vpc_request_list    = [f'${{module.network-{s}.vpc}}' for s in self._peer_request_list]
+        vpc_accept_list     = [f'${{module.network-{s}.vpc}}' for s in self._peer_accept_list]
+        vpc_conn_index      = [f'${{module.network-{s}.peering-request-ids["{self._name}"]}}' for s in self._peer_accept_list]
+        vpn_connections     = [f'${{module.network-{s}.vpc}}' for s in vpn_list]
+        vpn_external_ips    = [f'${{module.network-{s}.vpn_external_ip}}' for s in vpn_list]
+        private_subnet_list = [f'${{module.network-{s}.private_subnet_address_prefix}}' for s in vpn_list]
 
         Module(f"network-{self._name}", 
             source              = f"./modules/{self._provider}/network",
             name                = f"{deployment_name()}-{self._name}",
+            resource_tags       = self._global_config["resource_tags"],
             vpc_name            = self._name,
             vpc_cidr            = self._vpc_cidr,
             availability_zone   = self._bastion_zone,
@@ -36,9 +41,13 @@ class VPC_AWS(Cloud_Provider_VPC_VNET):
             peer_accept_list    = self._peer_accept_list,
             vpc_request_list    = vpc_request_list,
             vpc_accept_list     = vpc_accept_list,
+            vpn_list            = vpn_list,
+            vpn_connections     = vpn_connections,
+            vpn_external_ips    = vpn_external_ips,
             region_map          = region_map,
             cidr_map            = cidr_map,
             vpc_conn_index      = vpc_conn_index,
+            private_subnet_list = private_subnet_list,
             private_subnet_cidr = self._private_cidr)
         return(0)
 
@@ -48,13 +57,15 @@ class VPC_AWS(Cloud_Provider_VPC_VNET):
             name           = f"{deployment_name()}-{self._name}-keypair",
             source         = f"./modules/{self._provider}/keypair",
             ssh_public_key = self._ssh_public_key,
+            resource_tags  = self._global_config["resource_tags"],
             providers      = {"aws": f"aws.{self._name}"},
         )
 
-        bastion_mod = Module(f"bastion-{self._name}",
+        Module(f"bastion-{self._name}",
             source            = f"./modules/{self._provider}/bastion",
             vpc               = f'${{module.network-{self._name}.vpc}}',
             name              = f"{deployment_name()}-{self._name}",
+            resource_tags     = self._global_config["resource_tags"],
             subnet            = f'${{module.network-{self._name}.public-subnet}}',
             ami               = self._bastion_machine_image,
             instance_type     = self._bastion_machine_type,
@@ -72,12 +83,13 @@ class VPC_AWS(Cloud_Provider_VPC_VNET):
     def create_re_ui(self) -> int:
         from generator.generator import vpc, deployment_name
         Module(f"re-ui-{self._name}",
-            source    = f"./modules/{self._provider}/re-ui",
-            name      = f'{deployment_name()}-{self._name}',
-            vpc       = f'${{module.network-{self._name}.vpc}}',
-            ips       = f'${{module.re-{self._name}.re-nodes.*.private_ip}}',
-            subnets   = f'${{module.network-{self._name}.private-subnet.*.id}}',
-            providers = {"aws": f"aws.{self._name}"}
+            source         = f"./modules/{self._provider}/re-ui",
+            name           = f'{deployment_name()}-{self._name}',
+            vpc            = f'${{module.network-{self._name}.vpc}}',
+            resource_tags  = self._global_config["resource_tags"],
+            ips            = f'${{module.re-{self._name}.re-nodes.*.private_ip}}',
+            subnets        = f'${{module.network-{self._name}.private-subnet.*.id}}',
+            providers      = {"aws": f"aws.{self._name}"}
         )
 
         Output(f"{self._name}-ui-endpoint",
@@ -97,15 +109,14 @@ class VPC_AWS(Cloud_Provider_VPC_VNET):
         self._region : str = "us-east-1"
         self._vpc_cidr : str = "10.1.0.0/16"
         self._worker_machine_image : str = "ami-0b1db37f0fa006678"
-        self._redis_user = 'redislabs'
-        self._ssh_public_key = '~/.ssh/id_rsa.pub'
+        self._redis_user = SSH_USER
+        self._ssh_public_key = SSH_PUBLIC_KEY
         self._expose_ui = False
         self._peer_accept_list = []
         self._peer_request_list = []
         self._vpc_accept_list = []
         self._vpc_request_list = []
-        self._vpn_accept_list = []
-        self._vpn_request_list = []
+        self._vpn_set = set()
         logging.debug("Creating Object of class "+self.__class__.__name__+" with class arguments "+str(kwargs))
 
         for key, value in kwargs.items():

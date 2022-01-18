@@ -6,9 +6,9 @@ resource "aws_vpc_peering_connection" "peer" {
   auto_accept   = false
   count         = length(var.vpc_request_list)
 
-  tags = {
-    Side = "Peering Requester"
-  }
+  tags = merge("${var.resource_tags}",{
+    Side = "Peering Requestor"
+  })
 }
 
 # Accepter's side of the connection.
@@ -17,7 +17,7 @@ resource "aws_vpc_peering_connection_accepter" "peer" {
   auto_accept               = true
   count                     = length(var.vpc_conn_index)
 
-  tags = {
+  tags = merge("${var.resource_tags}",{
     Side = "Peering Accepter"
-  }
+  })
 }

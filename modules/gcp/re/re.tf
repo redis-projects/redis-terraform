@@ -12,14 +12,12 @@ resource "google_compute_address" "cluster-ip-address" {
 }
 
 resource "google_compute_instance" "node" {
-  count        = var.kube_worker_machine_count
-  name         = "${var.name}-node-${count.index}"
-  machine_type = var.kube_worker_machine_type
-  zone = var.zones[count.index % length(var.zones)]
-
+  count           = var.kube_worker_machine_count
+  name            = "${var.name}-node-${count.index}"
+  machine_type    = var.kube_worker_machine_type
+  zone            = var.zones[count.index % length(var.zones)]
+  #tags            = values(var.resource_tags)
   can_ip_forward  = true
-
-  tags = ["re-node"]
 
   boot_disk {
     initialize_params {

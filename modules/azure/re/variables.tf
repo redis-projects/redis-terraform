@@ -6,6 +6,11 @@ variable "region" {
   description = "Region for the VCP/VNET deployment"
   type        = string
 }
+
+variable "resource_tags" {
+  description = "hash with tags for all resources"
+}
+
 variable "resource_group" {
   description = "Azure resourcegroup for the deployment"
   type        = string

@@ -8,6 +8,11 @@ output "private-subnet" {
   value       = azurerm_subnet.private-subnet.id
 }
 
+output "private_subnet_address_prefix" {
+  description = "The address prefix of the private subnet"
+  value       = azurerm_subnet.private-subnet.address_prefix
+}
+
 output "public-security-groups" {
   description = "The id of the public groups"
   value       = [azurerm_network_security_group.allow-ssh.id]
@@ -21,4 +26,14 @@ output "private-security-groups" {
 output "vpc" {
   description = "The id of the Azure virtual network"
   value       = azurerm_virtual_network.vpc.id
+}
+
+output "raw_vnet" {
+  description = "The Azure virtual network"
+  value       = azurerm_virtual_network.vpc
+}
+
+output "vpn_external_ip" {
+  description = "External IP object of the Gateway Subnet for VPN traffic"
+  value       = azurerm_public_ip.gwpip
 }

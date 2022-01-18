@@ -19,6 +19,7 @@ resource "aws_route53_record" "A-records" {
   ttl     = "60"
   records = [ tostring(var.ip_addresses[count.index].public_ip) ]
   count   = length(var.ip_addresses)
+  #tags    = "${var.resource_tags}"
 }
 
 resource "aws_route53_record" "NS-record" {
@@ -27,4 +28,5 @@ resource "aws_route53_record" "NS-record" {
   type    = "NS"
   ttl     = "60"
   records = formatlist("%s.%s.",tolist(aws_route53_record.A-records.*.name),"${data.aws_route53_zone.parent.name}")
+  #tags    = "${var.resource_tags}"
 }

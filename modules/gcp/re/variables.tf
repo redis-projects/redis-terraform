@@ -7,3 +7,6 @@ variable "gce_ssh_pub_key_file" {}
 variable "boot_disk_size" {}
 variable "name" {}
 variable "zones" {}
+variable "resource_tags" {
+  description = "hash with tags for all resources"
+}

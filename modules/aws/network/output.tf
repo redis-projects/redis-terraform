@@ -3,6 +3,11 @@ output "vpc" {
   value       = aws_vpc.vpc.id 
 }
 
+output "raw_vpc" {
+  description = "The raw VPC object"
+  value       = aws_vpc.vpc 
+}
+
 output "private-subnet" {
   description = "The id of the private subnets"
   value       = aws_subnet.private-subnet-1
@@ -36,4 +41,9 @@ output "internet-gateway" {
 output "peering-request-ids" {
   description = "map of Peering request IDs"
   value       = zipmap(var.peer_request_list, aws_vpc_peering_connection.peer.*.id)
+}
+
+output "vpn_connection" {
+  description = "AWS VPN connection"
+  value       = aws_vpn_connection.main 
 }

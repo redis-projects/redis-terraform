@@ -17,3 +17,7 @@ variable "resource_group" {
   description = "Azure resource Group for DNS hosting"
   type        = string
 }
+
+variable "resource_tags" {
+  description = "hash with tags for all resources"
+}

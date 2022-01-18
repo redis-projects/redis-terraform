@@ -14,7 +14,7 @@ resource "aws_lb_target_group" "re-ui" {
   protocol    = "TCP"
   target_type = "ip"
   vpc_id      = var.vpc
-  tags        = {}
+  tags        = "${var.resource_tags}"
 }
 
 # Attach all nodes to the target group
@@ -32,7 +32,7 @@ resource "aws_lb" "re-gui" {
   load_balancer_type         = "network"
   subnets                    = var.subnets
   enable_deletion_protection = false
-  tags                       = {}
+  tags                       = "${var.resource_tags}"
 }
 
 # Crete Listener
@@ -45,5 +45,5 @@ resource "aws_lb_listener" "front_end" {
     type             = "forward"
     target_group_arn = aws_lb_target_group.re-ui.arn
   }
-  tags        = {}
+  tags        = "${var.resource_tags}"
 }

@@ -8,6 +8,10 @@ variable "vpc_name" {
   type        = string
 }
 
+variable "resource_tags" {
+  description = "hash with tags for all resources"
+}
+
 variable "vpc_cidr" {
   description = "CIDR block for the VPC"
   type        = string
@@ -58,7 +62,27 @@ variable "cidr_map" {
   type        = map
 }
 
+variable "vpn_list" {
+  description = "List of VPC/VNETs which are connected via VPN"
+  type        = list
+}
+
+variable "private_subnet_list" {
+  description = "List of private subnet CIDRs of VPN networks"
+  type        = list
+}
+
 variable "vpc_conn_index" {
   description = "List of connection indexes to be accepted"
+  type        = list
+}
+
+variable "vpn_connections" {
+  description = "List of connection indexes to be accepted"
+  type        = list
+}
+
+variable "vpn_external_ips" {
+  description = "List of external IP addresses for the VPN tunnels"
   type        = list
 }

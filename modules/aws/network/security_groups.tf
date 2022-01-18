@@ -6,9 +6,9 @@ resource "aws_security_group" "allow-ssh" {
   description = "Allow inbound traffic"
   vpc_id = aws_vpc.vpc.id
 
-  tags = {
+  tags = merge("${var.resource_tags}",{
     Name = "${var.name}-allow-ssh"
-  }
+  })
 }
 
 resource "aws_security_group" "allow-crdb" {
@@ -16,9 +16,9 @@ resource "aws_security_group" "allow-crdb" {
   description = "Allow inbound crdb creation specific traffic"
   vpc_id = aws_vpc.vpc.id
 
-  tags = {
+  tags = merge("${var.resource_tags}",{
     Name = "${var.name}-allow-crdb"
-  }
+  })
 }
 
 resource "aws_security_group" "allow-local" {
@@ -26,9 +26,9 @@ resource "aws_security_group" "allow-local" {
   description = "Allow inbound traffic from local VPC"
   vpc_id = aws_vpc.vpc.id
 
-  tags = {
+  tags = merge("${var.resource_tags}",{
     Name = "${var.name}-allow-local"
-  }
+  })
 }
 
 ############################################################
@@ -72,6 +72,17 @@ resource "aws_security_group_rule" "local_private_traffic" {
   cidr_blocks       = [var.vpc_cidr]
   description       = "Local traffic"
   security_group_id = aws_security_group.allow-local.id
+}
+
+resource "aws_security_group_rule" "vpn_traffic" {
+  type              = "ingress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["${var.private_subnet_list[count.index]}"]
+  description       = "VPN traffic from ${var.private_subnet_list[count.index]}"
+  security_group_id = aws_security_group.allow-local.id
+  count             = length(var.vpn_list)
 }
 
 resource "aws_security_group_rule" "private_am_gui" {

@@ -15,9 +15,9 @@ resource "aws_network_interface" "cluster_nic" {
   security_groups = var.security_groups
   count           = length(var.subnet)
 
-  tags = {
+  tags = merge("${var.resource_tags}",{
     Name = "${var.name}-cluster-nic-${count.index}"
-  }
+  })
 }
 
 
@@ -29,9 +29,9 @@ resource "aws_eip" "eip" {
   associate_with_private_ip = aws_network_interface.cluster_nic[count.index].private_ip
   depends_on                = [aws_instance.node]
 
-  tags = {
+  tags = merge("${var.resource_tags}",{
     Name = "${var.name}-cluster-eip-${count.index}"
-  }
+  })
 }
 
 ###########################################################
@@ -62,8 +62,8 @@ resource "aws_instance" "node" {
         - ${file(var.ssh_public_key)}
 	EOF
 
-  tags = {
+  tags = merge("${var.resource_tags}",{
     Name = "${var.name}-node-${count.index}"
-  }
+  })
 }
 

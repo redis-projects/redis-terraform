@@ -18,9 +18,9 @@ resource "azurerm_public_ip" "redis-public-ip" {
     availability_zone   = sort(var.zones)[count.index % length(var.zones)]
     count               = var.machine_count
 
-    tags = {
+    tags = merge("${var.resource_tags}",{
         environment = "${var.name}"
-    }
+    })
 }
 
 # Create network interface for Redis nodes
@@ -37,9 +37,9 @@ resource "azurerm_network_interface" "redis-nic" {
         public_ip_address_id          = azurerm_public_ip.redis-public-ip[count.index].id
     }
 
-    tags = {
+    tags = merge("${var.resource_tags}",{
         environment = "${var.name}"
-    }
+    })
 }
 
 # Connect the security group to the network interface
@@ -67,9 +67,9 @@ resource "azurerm_storage_account" "mystorageaccount" {
     account_tier                = "Standard"
     account_replication_type    = "LRS"
 
-    tags = {
+    tags = merge("${var.resource_tags}",{
         environment = "${var.name}"
-    }
+    })
 }
 
 # Create Redis nodes
@@ -114,7 +114,7 @@ resource "azurerm_linux_virtual_machine" "redis" {
         storage_account_uri = azurerm_storage_account.mystorageaccount.primary_blob_endpoint
     }
 
-    tags = {
+    tags = merge("${var.resource_tags}",{
         environment = "${var.name}"
-    }
+    })
 }

@@ -45,4 +45,8 @@ variable "redis_user" {
 
 variable "worker_count" {}
 
+variable "resource_tags" {
+  description = "hash with tags for all resources"
+}
+
 

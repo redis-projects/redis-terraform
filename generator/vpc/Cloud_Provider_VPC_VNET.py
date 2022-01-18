@@ -48,14 +48,29 @@ class Cloud_Provider_VPC_VNET(object):
                 if self._provider == vpc[peer]._provider:
                     self._peer_request_list.append(peer)
                     vpc[peer].add_to_peer_accept_list(self._name)
+                # Different provider, go for VPN
+                else:
+                    self._vpn_set.add(peer)
+                    vpc[peer].add_to_vpn_set(self._name)
         return(0)
 
     def add_to_peer_accept_list(self,peer) -> int:
         self._peer_accept_list.append(peer)
         return(0)
 
+    def add_to_vpn_set(self,peer) -> int:
+        self._vpn_set.add(peer)
+        return(0)
+
     @classmethod
     def __init__(self, **kwargs):
+        from generator.generator import global_config
+        self._global_config = {}
+        if "resource_tags" in global_config:
+            self._global_config["resource_tags"] = global_config["resource_tags"]
+        else:
+            self._global_config["resource_tags"] = {}
+
         self._name : str = None
         self._region : str = None
         self._vpc_cidr = None,
@@ -73,8 +88,7 @@ class Cloud_Provider_VPC_VNET(object):
         self._peer_request_list = []
         self._vpc_accept_list = []
         self._vpc_request_list = []
-        self._vpn_accept_list = []
-        self._vpn_request_list = []
+        self._vpn_set = set()
  
         if "name" not in kwargs:
             logging.error("The VPC/VNET must have an attribute called name")

@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 import os
 import logging
+from generator import SSH_USER, SSH_PUBLIC_KEY, SSH_PRIVATE_KEY
 from generator.cluster.Cluster import Cluster
 from terraformpy.helpers import relative_file
 from terraformpy import Module, Provider, Data, Output
@@ -36,6 +37,7 @@ class Cluster_AWS(Cluster):
         Module(f"re-{self._vpc}", 
             source          = f"./modules/{self._provider}/re",
             name            = f"{os.getenv('name')}-{self._vpc}",
+            resource_tags   = self._global_config["resource_tags"],
             worker_count    = self._worker_count,
             instance_type   = self._machine_type,
             ami             = self._machine_image,
@@ -52,6 +54,7 @@ class Cluster_AWS(Cluster):
 
     def __init__(self, **kwargs):
         from generator.generator import vpc
+        super().__init__()
         self._name : str = None
         self._vpc : str = None
         self._worker_count : int = 3
@@ -61,9 +64,9 @@ class Cluster_AWS(Cluster):
         self._zones = None
         self._machine_image = None
         self._machine_type = None
-        self._redis_user = 'redislabs'
-        self._ssh_public_key = '~/.ssh/id_rsa.pub'
-        self._ssh_private_key =  '~/.ssh/id_rsa'
+        self._redis_user = SSH_USER
+        self._ssh_public_key = SSH_PUBLIC_KEY
+        self._ssh_private_key =  SSH_PRIVATE_KEY
         self._redis_cluster_name = 'dtest.rlabs.org'
         self._redis_user_name =  'admin@admin.com'
         self._redis_pwd = 'admin'

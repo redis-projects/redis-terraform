@@ -17,30 +17,33 @@ class Nameserver_Entries(object):
                 cluster_fqdn   = self._cluster_fqdn,
                 parent_zone    = self._parent_zone,
                 ip_addresses   = f'${{module.re-{self._vpc}.re-public-ips}}',
+                resource_tags  = self._global_config["resource_tags"],
                 resource_group = vpc[self._vpc].get_resource_group()
             )
         elif self._provider== "aws":
             Module(f"ns-{self._vpc}",
-                source       = f"./modules/{self._provider}/ns",
-                providers    = {"aws": f"aws.{self._vpc}"},
-                cluster_fqdn = self._cluster_fqdn,
-                parent_zone  = self._parent_zone,
-                ip_addresses = f'${{module.re-{self._vpc}.re-public-ips}}'
+                source        = f"./modules/{self._provider}/ns",
+                providers     = {"aws": f"aws.{self._vpc}"},
+                cluster_fqdn  = self._cluster_fqdn,
+                parent_zone   = self._parent_zone,
+                resource_tags = self._global_config["resource_tags"],
+                ip_addresses  = f'${{module.re-{self._vpc}.re-public-ips}}'
             )
         elif self._provider== "gcp":
             Module(f"ns-{self._vpc}",
-                source       = f"./modules/{self._provider}/ns",
-                providers    = {"google-beta": f"google-beta.{self._vpc}"},
-                cluster_fqdn = self._cluster_fqdn,
-                parent_zone  = self._parent_zone,
-                ip_addresses = f'${{module.re-{self._vpc}.re-public-ips}}'
+                source        = f"./modules/{self._provider}/ns",
+                providers     = {"google-beta": f"google-beta.{self._vpc}"},
+                cluster_fqdn  = self._cluster_fqdn,
+                parent_zone   = self._parent_zone,
+                resource_tags = self._global_config["resource_tags"],
+                ip_addresses  = f'${{module.re-{self._vpc}.re-public-ips}}'
             )
 
         Output(f"{self._vpc}-dns-name", value = self._cluster_fqdn)
-        if f"{self._cluster}-{self._vpc}" not in re_cluster:
-            logging.error(f"The specified cluster ({self._cluster}) / VPC ({self._vpc}) combination is not found in the 'clusters' section")
+        if self._cluster not in re_cluster:
+            logging.error(f"The specified cluster ({self._cluster}) is not found in the 'clusters' section")
             sys.exit(1)
-        re_cluster[f"{self._cluster}-{self._vpc}"].set_cluster_name(self._cluster_fqdn)
+        re_cluster[f"{self._cluster}"].set_cluster_name(self._cluster_fqdn)
 
     def get_domain(self):
         return(self._domain)
@@ -49,7 +52,12 @@ class Nameserver_Entries(object):
         return(self._cluster)
 
     def __init__(self, **kwargs):
-        from generator.generator import deployment_name, vpc
+        from generator.generator import deployment_name, vpc, global_config
+        self._global_config = {}
+        if "resource_tags" in global_config:
+            self._global_config["resource_tags"] = global_config["resource_tags"]
+        else:
+            self._global_config["resource_tags"] = {}
         self._domain : str = None
         self._parent_zone : str = None
         self._vpc : str = None
@@ -83,6 +91,6 @@ class Nameserver_Entries(object):
             logging.error(f"Property 'parent_zone' required for each entry of 'nameservers'")
             sys.exit(1)
 
-        self._cluster_fqdn = f"{deployment_name()}-{self._cluster}-{self._vpc}.{self._domain}"
+        self._cluster_fqdn = f"{deployment_name()}-{self._cluster}.{self._domain}"
         
 
