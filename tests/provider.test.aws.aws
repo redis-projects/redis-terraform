@@ -1,5 +1,5 @@
 [
-	["create_network", [], {
+	["", [], {
 		"name": "vpc-aws-us",
 		"vpc_cidr": "10.1.0.0/16",
 		"public_cidr": "10.1.1.0/24",
@@ -12,17 +12,10 @@
 		"bastion_zone": "us-east-1c",
 		"bastion_machine_image": "ami-0b1db37f0fa006678",
 		"bastion_machine_type": "t2.micro",
-		"peer_request_list": ["vpc-aws-europe"],
-		"cidr_map": {
-			"vpc-aws-us": "10.1.0.0/16",
-			"vpc-aws-europe": "10.0.0.0/16"
-		},
-		"region_map": {
-			"vpc-aws-us": "us-east-1",
-			"vpc-aws-europe": "eu-central-1"
-		}
+		"provider": "aws",
+		"peer_with": ["vpc-aws-europe"]
 	}],
-	["create_network", [], {
+	["", [], {
 		"name": "vpc-aws-europe",
 		"vpc_cidr": "10.0.0.0/16",
 		"public_cidr": "10.0.1.0/24",
@@ -35,56 +28,23 @@
 		"bastion_zone": "eu-central-1b",
 		"bastion_machine_image": "ami-02241e4f36e06d650",
 		"bastion_machine_type": "t2.micro",
-		"peer_accept_list": ["vpc-aws-us"],
-		"cidr_map": {
-			"vpc-aws-us": "10.1.0.0/16",
-			"vpc-aws-europe": "10.0.0.0/16"
-		},
-		"region_map": {
-			"vpc-aws-us": "us-east-1",
-			"vpc-aws-europe": "eu-central-1"
-		}
+		"provider": "aws"
 	}],
-	["create_re_cluster", [], {
-		"vpc": "vpc-aws-us",
-		"worker_count": 3,
-		"machine_type": "t2.xlarge",
-		"machine_image": "ami-05f238ddab9a512be",
-		"zones": ["us-east-1a", "us-east-1b", "us-east-1c"],
-		"expose_ui": true,
-		"redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
-		"rack_aware": false,
-		"other_nets": {},
-		"fqdn_map": {
-			"vpc-aws-us": "unit-test-name-vpc-aws-us.aws.ps-redislabs.com",
-			"vpc-aws-europe": "unit-test-name-vpc-aws-europe.aws.ps-redislabs.com"
-		},
-		"redis_cluster_name": "unit-test-name-vpc-aws-us.aws.ps-redislabs.com"
-	}],
-	["create_re_cluster", [], {
-		"vpc": "vpc-aws-europe",
-		"worker_count": 3,
-		"machine_type": "t2.xlarge",
-		"machine_image": "ami-01f6fd1863750f580",
-		"zones": ["eu-central-1c", "eu-central-1b", "eu-central-1a"],
-		"expose_ui": true,
-		"redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
-		"rack_aware": false,
-		"other_nets": {},
-		"fqdn_map": {
-			"vpc-aws-us": "unit-test-name-vpc-aws-us.aws.ps-redislabs.com",
-			"vpc-aws-europe": "unit-test-name-vpc-aws-europe.aws.ps-redislabs.com"
-		},
-		"redis_cluster_name": "unit-test-name-vpc-aws-europe.aws.ps-redislabs.com"
-	}],
-	["create_ns_records", [], {
-		"vpc": "vpc-aws-us",
-		"parent_zone": "aws.ps-redislabs.com",
-		"cluster_fqdn": "unit-test-name-vpc-aws-us.aws.ps-redislabs.com"
-	}],
-	["create_ns_records", [], {
-		"vpc": "vpc-aws-europe",
-		"parent_zone": "aws.ps-redislabs.com",
-		"cluster_fqdn": "unit-test-name-vpc-aws-europe.aws.ps-redislabs.com"
-	}]
+	["().get_provider", [], {}],
+	["().get_provider", [], {}],
+	["().get_region", [], {}],
+	["().get_resource_group", [], {}],
+	["().get_provider", [], {}],
+	["().get_provider", [], {}],
+	["().get_region", [], {}],
+	["().get_resource_group", [], {}],
+	["().add_peers", [
+		["vpc-aws-europe"]
+	], {}],
+	["().create_network", [], {}],
+	["().create_re_ui", [], {}],
+	["().create_network", [], {}],
+	["().create_re_ui", [], {}],
+	["().create_bastion", [], {}],
+	["().create_bastion", [], {}]
 ]

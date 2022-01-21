@@ -2,7 +2,7 @@
 import pytest
 from exceptions_test_input import *
 import os
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 import yaml
 import json
 
@@ -44,38 +44,20 @@ def readexpected():
     }
     return expected
 
-@pytest.fixture(autouse=True)
-def setMocks(monkeypatch, getenv):
-    [monkeypatch.setenv(x, getenv[x]) for x in getenv]
-
-    import providers
-
-    providers.gcp = Mock()
-    providers.aws = Mock()
-    providers.azure = Mock()
-
-    yield
-
-
 @pytest.mark.parametrize("config_file", ["aws", "azure", "gcp", "mixed"] )
-def test_register(monkeypatch, getenv, readconfigs, readexpected, config_file):
-    [monkeypatch.setenv(x, getenv[x]) for x in getenv]
-    import providers
-    from generator import generator
+@patch('generator.vpc.VPC_GCP.VPC_GCP')
+@patch('generator.vpc.VNET_Azure.VNET_Azure')
+@patch('generator.vpc.VPC_AWS.VPC_AWS')
+def test_register(aws_mock, azure_mock, gcp_mock, getenv, readconfigs, readexpected, config_file):
+    aws_mock.return_value.get_provider.return_value = "aws"
+    azure_mock.return_value.get_provider.return_value = "azure"
+    gcp_mock.return_value.get_provider.return_value = "gcp"
+
+    from generator import generator, vpc
     generator.generate(readconfigs[config_file])
 
     (exp_aws, exp_azure, exp_gcp) = readexpected[config_file]
 
-    assert(exp_aws == json.loads(json.dumps(providers.aws.mock_calls)))
-    assert(exp_azure == json.loads(json.dumps(providers.azure.mock_calls)))
-    assert(exp_gcp == json.loads(json.dumps(providers.gcp.mock_calls)))
-
-#Just a safe guard to ensure we are testing with a mock since only test_provider
-#uses Mock and we don't want a leak
-def test_providers_are_mock(monkeypatch, getenv):
-    [monkeypatch.setenv(x, getenv[x]) for x in getenv]
-    import providers
-    from unittest.mock import Mock
-    assert isinstance(providers.aws, Mock)
-    assert isinstance(providers.azure, Mock)
-    assert isinstance(providers.gcp, Mock)
+    assert(exp_aws == json.loads(json.dumps(aws_mock.mock_calls)))
+    assert(exp_azure == json.loads(json.dumps(azure_mock.mock_calls)))
+    assert(exp_gcp == json.loads(json.dumps(gcp_mock.mock_calls)))

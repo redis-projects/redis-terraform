@@ -43,6 +43,8 @@ class Cloud_Provider_VPC_VNET(object):
     def add_peers(self,peer_list) -> int:
         from generator.generator import vpc
         for peer in peer_list:
+            if peer not in vpc:
+                raise Exception(f'ERROR: Requested peering vpc {peer} not found in config file')
             if peer not in self._peer_request_list and self._name not in vpc[peer].get_peer_request_list():
                 # Same provider, go for VPC/VNET peering
                 if self._provider == vpc[peer]._provider:
@@ -88,11 +90,13 @@ class Cloud_Provider_VPC_VNET(object):
         self._peer_request_list = []
         self._vpc_accept_list = []
         self._vpc_request_list = []
-        self._vpn_set = set()
- 
+        self._vpn_set = set()   
+
+        if not "provider" in kwargs:
+            raise Exception("A provider must be specified for each network")
+
         if "name" not in kwargs:
-            logging.error("The VPC/VNET must have an attribute called name")
-            sys.exit(1)
+            raise Exception("The VPC/VNET must have an attribute called name")
         if kwargs["name"] == "" or kwargs["name"] is None:
-            logging.error("The VPC or VNET must have a non-empty attribute called name")
+            raise Exception("The VPC or VNET must have a non-empty attribute called name")
 

@@ -40,9 +40,9 @@ class Nameserver_Entries(object):
             )
 
         Output(f"{self._vpc}-dns-name", value = self._cluster_fqdn)
+
         if self._cluster not in re_cluster:
-            logging.error(f"The specified cluster ({self._cluster}) is not found in the 'clusters' section")
-            sys.exit(1)
+            raise Exception(f"The specified cluster ({self._cluster}) is not found in the 'clusters' section")
         re_cluster[f"{self._cluster}"].set_cluster_name(self._cluster_fqdn)
 
     def get_domain(self):
@@ -74,22 +74,19 @@ class Nameserver_Entries(object):
             else:
                 logging.warn(f"Class {self.__class__.__name__}: Key {key} is being ignored ")
         
-        # If provider was not set, assume provider is identical to the VPC/VNET provider
-        if self._provider == None:
-            self._provider = vpc[self._vpc].get_provider()
-
-        if not self._cluster:
-            logging.error(f"Property 'cluster' required for each entry of 'nameservers'")
-            sys.exit(1)
         if not self._vpc:
-            logging.error(f"Property 'vpc' required for each entry of 'nameservers'")
-            sys.exit(1)
+            raise Exception("Property 'vpc' required for each entry of 'nameservers'")
+        if not self._cluster:
+            raise Exception("Property 'cluster' required for each entry of 'nameservers'")
         if not self._domain:
-            logging.error(f"Property 'domain' required for each entry of 'nameservers'")
-            sys.exit(1)
+            raise Exception("Property 'domain' required for each entry of 'nameservers'")
         if not self._parent_zone:
             logging.error(f"Property 'parent_zone' required for each entry of 'nameservers'")
             sys.exit(1)
+
+        # If provider was not set, assume provider is identical to the VPC/VNET provider            
+        if self._provider == None:
+            self._provider = vpc[self._vpc].get_provider()
 
         self._cluster_fqdn = f"{deployment_name()}-{self._cluster}.{self._domain}"
         

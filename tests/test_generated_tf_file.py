@@ -24,7 +24,7 @@ def readconfigs():
     configs = {
         "gcp": readfile("config.yaml.gcp"),
         "aws": readfile("config.yaml.aws"),
-        "azure": readfile("tests/main.tf.json.azure"),
+        "azure": readfile("config.yaml.azure"),
         "mixed": readfile("config.yaml.mixed")
     }
     return configs

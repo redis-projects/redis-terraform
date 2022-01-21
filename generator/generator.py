@@ -51,7 +51,7 @@ def generate(config_file):
             elif network["provider"] == "azure":
                 vpc[network["name"]] = VNET_Azure(**network)
             else:
-                logging.error(f"network {network['name']} has an unsupported provider {network['provider']}")
+                raise Exception(f"network {network['name']} has an unsupported provider {network['provider']}")
             logging.debug(f"A new network vpc {network['name']} has been added with the arguments {network}")
     else:
         logging.error("No section called network in the config file, but this is a requirement")

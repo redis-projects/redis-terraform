@@ -1,5 +1,5 @@
 [
-	["create_network", [], {
+	["", [], {
 		"name": "vpc-gcp-east1",
 		"public_cidr": "10.1.0.0/24",
 		"private_cidr": "10.2.0.0/16",
@@ -7,14 +7,11 @@
 		"bastion_zone": "us-east1-b",
 		"bastion_machine_image": "rhel-7-v20210721",
 		"bastion_machine_type": "n1-standard-1",
-		"project": "redislabs-sa-training-services",
-		"peer_request_list": ["vpc-gcp-us"],
-		"cidr_map": {
-			"vpc-gcp-east1": ["10.1.0.0/24", "10.2.0.0/16"],
-			"vpc-gcp-us": ["10.3.0.0/24", "10.4.0.0/16"]
-		}
+		"provider": "gcp",
+		"peer_with": ["vpc-gcp-us"],
+		"project": "redislabs-sa-training-services"
 	}],
-	["create_network", [], {
+	["", [], {
 		"name": "vpc-gcp-us",
 		"public_cidr": "10.3.0.0/24",
 		"private_cidr": "10.4.0.0/16",
@@ -22,53 +19,26 @@
 		"bastion_zone": "us-central1-b",
 		"bastion_machine_image": "rhel-7-v20210721",
 		"bastion_machine_type": "n1-standard-1",
-		"project": "redislabs-sa-training-services",
-		"peer_accept_list": ["vpc-gcp-east1"],
-		"cidr_map": {
-			"vpc-gcp-east1": ["10.1.0.0/24", "10.2.0.0/16"],
-			"vpc-gcp-us": ["10.3.0.0/24", "10.4.0.0/16"]
-		}
+		"provider": "gcp",
+		"project": "redislabs-sa-training-services"
 	}],
-	["create_re_cluster", [], {
-		"vpc": "vpc-gcp-east1",
-		"worker_count": 3,
-		"machine_type": "n1-standard-4",
-		"machine_image": "rhel-8-v20210721",
-		"zones": ["us-east1-b", "us-east1-c", "us-east1-d"],
-		"expose_ui": true,
-		"redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
-		"rack_aware": true,
-		"other_nets": {},
-		"fqdn_map": {
-			"vpc-gcp-east1": "unit-test-name-vpc-gcp-east1.ps-redislabs.com",
-			"vpc-gcp-us": "unit-test-name-vpc-gcp-us.ps-redislabs.com"
-		},
-		"redis_cluster_name": "unit-test-name-vpc-gcp-east1.ps-redislabs.com"
-	}],
-	["create_re_cluster", [], {
-		"vpc": "vpc-gcp-us",
-		"worker_count": 3,
-		"machine_type": "n1-standard-4",
-		"machine_image": "rhel-8-v20210721",
-		"zones": ["us-central1-a", "us-central1-b", "us-central1-c"],
-		"expose_ui": true,
-		"redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
-		"rack_aware": true,
-		"other_nets": {},
-		"fqdn_map": {
-			"vpc-gcp-east1": "unit-test-name-vpc-gcp-east1.ps-redislabs.com",
-			"vpc-gcp-us": "unit-test-name-vpc-gcp-us.ps-redislabs.com"
-		},
-		"redis_cluster_name": "unit-test-name-vpc-gcp-us.ps-redislabs.com"
-	}],
-	["create_ns_records", [], {
-		"vpc": "vpc-gcp-east1",
-		"parent_zone": "ps-redislabs",
-		"cluster_fqdn": "unit-test-name-vpc-gcp-east1.ps-redislabs.com"
-	}],
-	["create_ns_records", [], {
-		"vpc": "vpc-gcp-us",
-		"parent_zone": "ps-redislabs",
-		"cluster_fqdn": "unit-test-name-vpc-gcp-us.ps-redislabs.com"
-	}]
+	["().get_provider", [], {}],
+	["().get_provider", [], {}],
+	["().get_provider", [], {}],
+	["().get_provider", [], {}],
+	["().get_region", [], {}],
+	["().get_resource_group", [], {}],
+	["().get_provider", [], {}],
+	["().get_provider", [], {}],
+	["().get_region", [], {}],
+	["().get_resource_group", [], {}],
+	["().add_peers", [
+		["vpc-gcp-us"]
+	], {}],
+	["().create_network", [], {}],
+	["().create_re_ui", [], {}],
+	["().create_network", [], {}],
+	["().create_re_ui", [], {}],
+	["().create_bastion", [], {}],
+	["().create_bastion", [], {}]
 ]

@@ -12,7 +12,7 @@ clusters:
     expose_ui: True
     redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
     rack_aware: True
-  - name: cluster1
+  - name: cluster2
     vpc: vpc-azure-us
     worker_count: 3 
     machine_type: Standard_B2s

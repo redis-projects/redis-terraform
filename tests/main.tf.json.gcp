@@ -13,7 +13,7 @@
                 "vars": {
                     "redis_user_name": "admin@admin.com",
                     "redis_pwd": "admin",
-                    "redis_cluster_name": "unit-test-name-vpc-gcp-us.ps-redislabs.com",
+                    "redis_cluster_name": "unit-test-name-cluster2.ps-redislabs.com",
                     "FQDN1": "domain1.test.net",
                     "FQDN2": "domain2.test.net"
                 }
@@ -22,7 +22,7 @@
                 "template": "${file(\"${path.module}/templates/extra-vars.tpl\")}",
                 "vars": {
                     "ansible_user": "redislabs",
-                    "redis_cluster_name": "unit-test-name-vpc-gcp-east1.ps-redislabs.com",
+                    "redis_cluster_name": "unit-test-name-cluster1.ps-redislabs.com",
                     "redis_user_name": "admin@admin.com",
                     "redis_pwd": "admin",
                     "redis_email_from": "admin@domain.tld",
@@ -40,7 +40,7 @@
                 "template": "${file(\"${path.module}/templates/extra-vars.tpl\")}",
                 "vars": {
                     "ansible_user": "redislabs",
-                    "redis_cluster_name": "unit-test-name-vpc-gcp-us.ps-redislabs.com",
+                    "redis_cluster_name": "unit-test-name-cluster2.ps-redislabs.com",
                     "redis_user_name": "admin@admin.com",
                     "redis_pwd": "admin",
                     "redis_email_from": "admin@domain.tld",
@@ -76,29 +76,30 @@
         }
     },
     "output": {
-        "gcp-bastion-vpc-gcp-east1-ip-output": {
-            "value": "${module.bastion-vpc-gcp-east1.bastion-public-ip}"
-        },
-        "gcp-bastion-vpc-gcp-us-ip-output": {
-            "value": "${module.bastion-vpc-gcp-us.bastion-public-ip}"
-        },
         "gcp-re-ui-vpc-gcp-east1-ip-output": {
             "value": "${module.re-ui-vpc-gcp-east1.ui-ip.address}"
         },
         "gcp-re-ui-vpc-gcp-us-ip-output": {
             "value": "${module.re-ui-vpc-gcp-us.ui-ip.address}"
         },
+        "gcp-bastion-vpc-gcp-east1-ip-output": {
+            "value": "${module.bastion-vpc-gcp-east1.bastion-public-ip}"
+        },
+        "gcp-bastion-vpc-gcp-us-ip-output": {
+            "value": "${module.bastion-vpc-gcp-us.bastion-public-ip}"
+        },
         "vpc-gcp-east1-dns-name": {
-            "value": "unit-test-name-vpc-gcp-east1.ps-redislabs.com"
+            "value": "unit-test-name-cluster1.ps-redislabs.com"
         },
         "vpc-gcp-us-dns-name": {
-            "value": "unit-test-name-vpc-gcp-us.ps-redislabs.com"
+            "value": "unit-test-name-cluster2.ps-redislabs.com"
         }
     },
     "module": {
         "network-vpc-gcp-east1": {
             "source": "./modules/gcp/network",
             "name": "unit-test-name-vpc-gcp-east1",
+            "resource_tags": {},
             "gce_public_subnet_cidr": "10.1.0.0/24",
             "region": "us-east1",
             "providers": {
@@ -114,27 +115,20 @@
             ],
             "gce_private_subnet_cidr": "10.2.0.0/16"
         },
-        "bastion-vpc-gcp-east1": {
-            "source": "./modules/gcp/bastion",
+        "re-ui-vpc-gcp-east1": {
+            "source": "./modules/gcp/re-ui",
             "name": "unit-test-name-vpc-gcp-east1",
-            "gce_public_subnet_cidr": "10.0.1.0/24",
-            "gce_private_subnet_cidr": "10.0.2.0/24",
-            "region": "us-central1",
-            "subnet": "${module.network-vpc-gcp-east1.public-subnet-name}",
-            "os": "rhel-7-v20210721",
-            "boot_disk_size": 50,
-            "bastion_machine_type": "n1-standard-1",
-            "gce_ssh_user": "redislabs",
-            "gce_ssh_pub_key_file": "~/.ssh/id_rsa.pub",
-            "active_active_script": "${data.template_file.aa_db}",
+            "resource_tags": {},
+            "instances": "${module.re-vpc-gcp-east1.re-nodes.*.name}",
             "providers": {
                 "google": "google.vpc-gcp-east1"
             },
-            "zone": "us-east1-b"
+            "zones": "${module.re-vpc-gcp-east1.re-nodes.*.zone}"
         },
         "network-vpc-gcp-us": {
             "source": "./modules/gcp/network",
             "name": "unit-test-name-vpc-gcp-us",
+            "resource_tags": {},
             "gce_public_subnet_cidr": "10.3.0.0/24",
             "region": "us-central1",
             "providers": {
@@ -150,11 +144,41 @@
             ],
             "gce_private_subnet_cidr": "10.4.0.0/16"
         },
+        "re-ui-vpc-gcp-us": {
+            "source": "./modules/gcp/re-ui",
+            "name": "unit-test-name-vpc-gcp-us",
+            "resource_tags": {},
+            "instances": "${module.re-vpc-gcp-us.re-nodes.*.name}",
+            "providers": {
+                "google": "google.vpc-gcp-us"
+            },
+            "zones": "${module.re-vpc-gcp-us.re-nodes.*.zone}"
+        },
+        "bastion-vpc-gcp-east1": {
+            "source": "./modules/gcp/bastion",
+            "name": "unit-test-name-vpc-gcp-east1",
+            "resource_tags": {},
+            "gce_public_subnet_cidr": "10.1.0.0/24",
+            "gce_private_subnet_cidr": "10.2.0.0/16",
+            "region": "us-east1",
+            "subnet": "${module.network-vpc-gcp-east1.public-subnet-name}",
+            "os": "rhel-7-v20210721",
+            "boot_disk_size": 50,
+            "bastion_machine_type": "n1-standard-1",
+            "gce_ssh_user": "redislabs",
+            "gce_ssh_pub_key_file": "~/.ssh/id_rsa.pub",
+            "active_active_script": "${data.template_file.aa_db}",
+            "providers": {
+                "google": "google.vpc-gcp-east1"
+            },
+            "zone": "us-east1-b"
+        },
         "bastion-vpc-gcp-us": {
             "source": "./modules/gcp/bastion",
             "name": "unit-test-name-vpc-gcp-us",
-            "gce_public_subnet_cidr": "10.0.1.0/24",
-            "gce_private_subnet_cidr": "10.0.2.0/24",
+            "resource_tags": {},
+            "gce_public_subnet_cidr": "10.3.0.0/24",
+            "gce_private_subnet_cidr": "10.4.0.0/16",
             "region": "us-central1",
             "subnet": "${module.network-vpc-gcp-us.public-subnet-name}",
             "os": "rhel-7-v20210721",
@@ -168,9 +192,30 @@
             },
             "zone": "us-central1-b"
         },
+        "ns-vpc-gcp-east1": {
+            "source": "./modules/gcp/ns",
+            "providers": {
+                "google-beta": "google-beta.vpc-gcp-east1"
+            },
+            "cluster_fqdn": "unit-test-name-cluster1.ps-redislabs.com",
+            "parent_zone": "ps-redislabs",
+            "resource_tags": {},
+            "ip_addresses": "${module.re-vpc-gcp-east1.re-public-ips}"
+        },
+        "ns-vpc-gcp-us": {
+            "source": "./modules/gcp/ns",
+            "providers": {
+                "google-beta": "google-beta.vpc-gcp-us"
+            },
+            "cluster_fqdn": "unit-test-name-cluster2.ps-redislabs.com",
+            "parent_zone": "ps-redislabs",
+            "resource_tags": {},
+            "ip_addresses": "${module.re-vpc-gcp-us.re-public-ips}"
+        },
         "re-vpc-gcp-east1": {
             "source": "./modules/gcp/re",
             "name": "unit-test-name-vpc-gcp-east1",
+            "resource_tags": {},
             "kube_worker_machine_count": 3,
             "kube_worker_machine_type": "n1-standard-4",
             "boot_disk_size": 50,
@@ -187,15 +232,6 @@
                 "us-east1-d"
             ]
         },
-        "re-ui-vpc-gcp-east1": {
-            "source": "./modules/gcp/re-ui",
-            "name": "unit-test-name-vpc-gcp-east1",
-            "instances": "${module.re-vpc-gcp-east1.re-nodes.*.name}",
-            "providers": {
-                "google": "google.vpc-gcp-east1"
-            },
-            "zones": "${module.re-vpc-gcp-east1.re-nodes.*.zone}"
-        },
         "re-provisioner-vpc-gcp-east1": {
             "source": "./modules/ansible/re",
             "ssh_user": "redislabs",
@@ -203,15 +239,12 @@
             "extra_vars": "${data.template_file.extra_vars-vpc-gcp-east1}",
             "ssh_private_key_file": "~/.ssh/id_rsa",
             "host": "${module.bastion-vpc-gcp-east1.bastion-public-ip}",
-            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
-            "cluster_fqdn": [],
-            "other_bastions": [],
-            "other_ssh_users": [],
-            "ssh_keys": []
+            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar"
         },
         "re-vpc-gcp-us": {
             "source": "./modules/gcp/re",
             "name": "unit-test-name-vpc-gcp-us",
+            "resource_tags": {},
             "kube_worker_machine_count": 3,
             "kube_worker_machine_type": "n1-standard-4",
             "boot_disk_size": 50,
@@ -228,15 +261,6 @@
                 "us-central1-c"
             ]
         },
-        "re-ui-vpc-gcp-us": {
-            "source": "./modules/gcp/re-ui",
-            "name": "unit-test-name-vpc-gcp-us",
-            "instances": "${module.re-vpc-gcp-us.re-nodes.*.name}",
-            "providers": {
-                "google": "google.vpc-gcp-us"
-            },
-            "zones": "${module.re-vpc-gcp-us.re-nodes.*.zone}"
-        },
         "re-provisioner-vpc-gcp-us": {
             "source": "./modules/ansible/re",
             "ssh_user": "redislabs",
@@ -244,33 +268,12 @@
             "extra_vars": "${data.template_file.extra_vars-vpc-gcp-us}",
             "ssh_private_key_file": "~/.ssh/id_rsa",
             "host": "${module.bastion-vpc-gcp-us.bastion-public-ip}",
-            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar",
-            "cluster_fqdn": [],
-            "other_bastions": [],
-            "other_ssh_users": [],
-            "ssh_keys": []
-        },
-        "ns-vpc-gcp-east1": {
-            "source": "./modules/gcp/ns",
-            "name": "unit-test-name-vpc-gcp-east1",
-            "providers": {
-                "google-beta": "google-beta.vpc-gcp-east1"
-            },
-            "cluster_fqdn": "unit-test-name-vpc-gcp-east1.ps-redislabs.com",
-            "parent_zone": "ps-redislabs",
-            "ip_addresses": "${module.re-vpc-gcp-east1.re-public-ips}"
-        },
-        "ns-vpc-gcp-us": {
-            "source": "./modules/gcp/ns",
-            "name": "unit-test-name-vpc-gcp-us",
-            "providers": {
-                "google-beta": "google-beta.vpc-gcp-us"
-            },
-            "cluster_fqdn": "unit-test-name-vpc-gcp-us.ps-redislabs.com",
-            "parent_zone": "ps-redislabs",
-            "ip_addresses": "${module.re-vpc-gcp-us.re-public-ips}"
+            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar"
         },
         "docker-provisioner-vpc-gcp-us": {
+            "depends_on": [
+                "module.re-provisioner-vpc-gcp-us"
+            ],
             "source": "./modules/docker/create",
             "ssh_user": "redislabs",
             "ssh_private_key_file": "~/.ssh/id_rsa",
