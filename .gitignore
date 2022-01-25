@@ -53,3 +53,5 @@ inventory/
 *.tf.json
 
 cli/
+
+**__pycache__**
