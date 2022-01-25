@@ -11,9 +11,9 @@ terraform {
 # Network Interface
 
 resource "aws_network_interface" "cluster_nic" {
-  subnet_id       = var.subnet[count.index].id
+  subnet_id       = var.subnet[count.index % length(var.zones)].id
   security_groups = var.security_groups
-  count           = length(var.subnet)
+  count           = var.worker_count
 
   tags = merge("${var.resource_tags}",{
     Name = "${var.name}-cluster-nic-${count.index}"
