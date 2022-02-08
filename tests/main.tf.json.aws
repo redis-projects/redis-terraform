@@ -77,6 +77,7 @@
         "network-vpc-aws-us": {
             "source": "./modules/aws/network",
             "name": "unit-test-name-vpc-aws-us",
+            "resource_name": "unit-test-name-vpc-aws-us-vpc",
             "resource_tags": {},
             "vpc_name": "vpc-aws-us",
             "vpc_cidr": "10.1.0.0/16",
@@ -126,6 +127,7 @@
         "network-vpc-aws-europe": {
             "source": "./modules/aws/network",
             "name": "unit-test-name-vpc-aws-europe",
+            "resource_name": "unit-test-name-vpc-aws-europe-vpc",
             "resource_tags": {},
             "vpc_name": "vpc-aws-europe",
             "vpc_cidr": "10.0.0.0/16",

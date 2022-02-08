@@ -91,6 +91,7 @@
         "network-vpc-azure-europe": {
             "source": "./modules/azure/network",
             "name": "unit-test-name-vpc-azure-europe",
+            "resource_name": "unit-test-name-vpc-azure-europe-vpc",
             "resource_tags": {},
             "vpc_cidr": "10.1.0.0/16",
             "public_subnet_cidr": "10.1.1.0/24",
@@ -124,6 +125,7 @@
         "network-vpc-azure-us": {
             "source": "./modules/azure/network",
             "name": "unit-test-name-vpc-azure-us",
+            "resource_name": "unit-test-name-vpc-azure-us-vpc",
             "resource_tags": {},
             "vpc_cidr": "10.2.0.0/16",
             "public_subnet_cidr": "10.2.1.0/24",
@@ -163,6 +165,7 @@
             "public_secgroup": "${module.network-vpc-azure-europe.public-security-groups}",
             "os": "cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810",
             "bastion_machine_type": "Standard_B1s",
+            "bastion_machine_plan": "",
             "ssh_user": "redislabs",
             "ssh_pub_key_file": "~/.ssh/id_rsa.pub",
             "providers": {
@@ -178,6 +181,7 @@
             "public_secgroup": "${module.network-vpc-azure-us.public-security-groups}",
             "os": "cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810",
             "bastion_machine_type": "Standard_B1s",
+            "bastion_machine_plan": "",
             "ssh_user": "redislabs",
             "ssh_pub_key_file": "~/.ssh/id_rsa.pub",
             "providers": {
@@ -213,6 +217,7 @@
             "machine_count": 3,
             "machine_type": "Standard_B2s",
             "os": "cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810",
+            "machine_plan": "",
             "private_subnet_id": "${module.network-vpc-azure-europe.private-subnet}",
             "private_secgroup": "${module.network-vpc-azure-europe.private-security-groups}",
             "ssh_user": "redislabs",
@@ -244,6 +249,7 @@
             "machine_count": 3,
             "machine_type": "Standard_B2s",
             "os": "cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810",
+            "machine_plan": "",
             "private_subnet_id": "${module.network-vpc-azure-us.private-subnet}",
             "private_secgroup": "${module.network-vpc-azure-us.private-security-groups}",
             "ssh_user": "redislabs",
