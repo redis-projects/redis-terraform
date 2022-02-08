@@ -3,6 +3,11 @@ variable "name" {
   type        = string
 }
 
+variable "resource_name" {
+  description = "Name to be given to the VPC"
+  type        = string
+}
+
 variable "vpc_name" {
   description = "VPC name (no project prefix)"
   type        = string

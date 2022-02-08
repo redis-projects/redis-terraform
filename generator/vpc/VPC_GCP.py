@@ -77,11 +77,13 @@ class VPC_GCP(Cloud_Provider_VPC_VNET):
         return self._provider
 
     def __init__(self, **kwargs):
+        from generator.generator import deployment_name
         super().__init__(**kwargs)
         self._bastion_machine_image : str = "rhel-7-v20210721"
         self._bastion_machine_type : str = "n1-standard-1"
         self._bastion_zone : str = "us-central1-b"
         self._name : str = None
+        self._resource_name : str = None
         self._private_cidr : str = "10.0.2.0/16"
         self._project : str = "redislabs-sa-training-services"
         self._provider : str = "gcp"
@@ -104,6 +106,7 @@ class VPC_GCP(Cloud_Provider_VPC_VNET):
             elif key == "bastion_machine_type": self._bastion_machine_type = value
             elif key == "bastion_zone": self._bastion_zone = value
             elif key == "name": self._name = value
+            elif key == "resource_name": self._resource_name = value
             elif key == "private_cidr": self._private_cidr = value
             elif key == "project": self._project =value
             elif key == "public_cidr": self._public_cidr = value
@@ -114,6 +117,9 @@ class VPC_GCP(Cloud_Provider_VPC_VNET):
             elif key == "peer_with": pass # ignore this key, will be traversed later
             else:
                 logging.warn(f"Key {key} is being ignored ")
+
+        if self._resource_name is None:
+            self._resource_name = f'{deployment_name()}-{self._name}-vpc'
 
         Provider("google", project=self._project, region=self._region,
              credentials=relative_file("../../terraform_account.json"), alias=self._name)

@@ -10,7 +10,7 @@ terraform {
 
 # Create virtual network
 resource "azurerm_virtual_network" "vpc" {
-    name                = "${var.name}-vpc"
+    name                = "${var.resource_name}"
     address_space       = [ var.vpc_cidr ]
     location            = var.region
     resource_group_name = var.resource_group

@@ -95,10 +95,13 @@ resource "azurerm_linux_virtual_machine" "redis" {
       version   = split(":", var.os)[3]
     }
 
-    plan {
-      name      = split(":", var.os)[2]
-      product   = split(":", var.os)[1]
-      publisher = split(":", var.os)[0]     
+    dynamic "plan" {
+      for_each = var.machine_plan == "" ? [] : [1]
+      content {
+        name      = split(":", var.machine_plan)[0]
+        product   = split(":", var.machine_plan)[1]
+        publisher = split(":", var.machine_plan)[2]
+      }
     }
 
     computer_name  = "${var.name}-redis-${count.index}"

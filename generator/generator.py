@@ -9,6 +9,9 @@ from generator.vpc.VPC_AWS import VPC_AWS
 from generator.cluster.Cluster_Azure import Cluster_Azure
 from generator.cluster.Cluster_GCP import Cluster_GCP
 from generator.cluster.Cluster_AWS import Cluster_AWS
+from generator.servicenodes.Servicenodes_Azure import Servicenodes_Azure
+from generator.servicenodes.Servicenodes_GCP import Servicenodes_GCP
+from generator.servicenodes.Servicenodes_AWS import Servicenodes_AWS
 from generator.nameserver.Nameserver_Entries import Nameserver_Entries
 from generator.service.Service import Service
 from generator.database.Databases import Databases
@@ -32,7 +35,9 @@ def generate(config_file):
     # Disctionary for all nameserver entries
     global ns_entry
     ns_entry = {}
-    # Disctionary for all services
+    # Dictionary for Servicenodes
+    servicenodes = {}
+    # Dictionary for all services
     service = {}
     # Disctionary for all databases
     database = {}
@@ -76,10 +81,21 @@ def generate(config_file):
                 re_cluster[f'{cluster["name"]}'] = Cluster_GCP(**cluster)
             logging.debug(f"A new cluster for VPC/VNET {cluster['vpc']} has been added with the arguments {cluster}")
 
+    if 'servicenodes' in config_file:
+        for sn in config_file['servicenodes']:
+            provider = vpc[sn["vpc"]].get_provider()
+            if provider == "aws":
+                servicenodes[f'{sn["vpc"]}'] = Servicenodes_AWS(**sn)
+            elif provider == "azure":
+                servicenodes[f'{sn["vpc"]}'] = Servicenodes_Azure(**sn)
+            elif provider == "gcp":
+                servicenodes[f'{sn["vpc"]}'] = Servicenodes_GCP(**sn)
+            logging.debug(f"A new Servicenodes entry for VPC/VNET {sn['vpc']} has been added with the arguments {sn}")
+
     if 'services' in config_file:
         for svc in config_file['services']:
             if svc["vpc"] in service:
-                service[svc["vpc"]].add(Service(**svc))
+                service[svc["vpc"]].append(Service(**svc))
             else:
                 service[svc["vpc"]] = [Service(**svc)]
             logging.debug(f"A new service for VPC/VNET {svc['vpc']} has been added with the arguments {svc}")
@@ -107,6 +123,9 @@ def generate(config_file):
     # Create the Clusters
     for cluster in re_cluster :
         re_cluster[cluster].create_re_cluster()
+    # Create the Service nodes
+    for sn in servicenodes :
+        servicenodes[sn].create_servicenodes()
     # Create Services
     for vpc in service :
         service[vpc][0].provision_docker()

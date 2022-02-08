@@ -1,4 +1,8 @@
 variable "name" {}
+variable "resource_name" {
+  description = "Name to be given to the VPC"
+  type        = string
+}
 variable "gce_public_subnet_cidr" {}
 variable "gce_private_subnet_cidr" {}
 variable "region" {}

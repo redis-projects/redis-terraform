@@ -3,6 +3,11 @@ variable "name" {
   type        = string
 }
 
+variable "resource_name" {
+  description = "Name to be given to the VNET"
+  type        = string
+}
+
 variable "resource_tags" {
   description = "hash with tags for all resources"
 }

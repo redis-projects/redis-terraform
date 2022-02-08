@@ -31,6 +31,7 @@ class VPC_AWS(Cloud_Provider_VPC_VNET):
         Module(f"network-{self._name}", 
             source              = f"./modules/{self._provider}/network",
             name                = f"{deployment_name()}-{self._name}",
+            resource_name       = self._resource_name,
             resource_tags       = self._global_config["resource_tags"],
             vpc_name            = self._name,
             vpc_cidr            = self._vpc_cidr,
@@ -99,11 +100,13 @@ class VPC_AWS(Cloud_Provider_VPC_VNET):
         pass
 
     def __init__(self, **kwargs):
+        from generator.generator import deployment_name
         super().__init__(**kwargs)
         self._bastion_machine_image : str = "ami-0b1db37f0fa006678"
         self._bastion_machine_type : str = "t2.micro"
         self._bastion_zone : str = "us-east-1c"
         self._name : str = None
+        self._resource_name : str = None
         self._public_cidr : str = "10.1.1.0/24"
         self._provider : str = "aws"
         self._region : str = "us-east-1"
@@ -124,6 +127,7 @@ class VPC_AWS(Cloud_Provider_VPC_VNET):
             elif key == "bastion_machine_type": self._bastion_machine_type = value
             elif key == "bastion_zone": self._bastion_zone = value
             elif key == "name": self._name = value
+            elif key == "resource_name": self._resource_name = value
             elif key == "private_cidr": self._private_cidr = value
             elif key == "public_cidr": self._public_cidr = value
             elif key == "provider": self._provider = value
@@ -134,6 +138,9 @@ class VPC_AWS(Cloud_Provider_VPC_VNET):
             elif key == "peer_with": pass # ignore this key, will be traversed later
             else:
                 logging.warn(f"Key {key} is being ignored ")
+
+        if self._resource_name is None:
+            self._resource_name = f'{deployment_name()}-{self._name}-vpc'
 
         Provider("aws", region=self._region, access_key=os.getenv("AWS_ACCESS_KEY_ID", ""),
              secret_key=os.getenv("AWS_SECRET_ACCESS_KEY", ""), alias=self._name)

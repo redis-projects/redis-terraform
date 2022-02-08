@@ -31,6 +31,11 @@ variable "os" {
   type        = string    
 }
 
+variable "bastion_machine_plan" {
+  description = "Azure OS image plan (Marketplace)"
+  type        = string    
+}
+
 variable "ssh_user" {
   description = "root user for bastion node"
   type        = string

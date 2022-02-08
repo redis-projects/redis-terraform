@@ -51,6 +51,7 @@ class Cluster_Azure(Cluster):
             machine_count     = self._worker_count,
             machine_type      = self._machine_type,
             os                = self._machine_image,
+            machine_plan      = self._machine_plan,
             private_subnet_id = f"${{module.network-{self._vpc}.private-subnet}}",
             private_secgroup  = f"${{module.network-{self._vpc}.private-security-groups}}",
             ssh_user          = self._redis_user,
@@ -75,6 +76,7 @@ class Cluster_Azure(Cluster):
         self._zones = None
         self._machine_image = None
         self._machine_type = None
+        self._machine_plan = ""
         self._redis_user = SSH_USER
         self._ssh_public_key = SSH_PUBLIC_KEY
         self._ssh_private_key =  SSH_PRIVATE_KEY
@@ -94,6 +96,7 @@ class Cluster_Azure(Cluster):
             elif key == "zones": self._zones = value
             elif key == "machine_image": self._machine_image = value
             elif key == "machine_type": self._machine_type = value
+            elif key == "machine_plan": self._machine_plan = value
             else:
                 logging.warn(f"Class {self.__class__.__name__}: Key {key} is being ignored ")
         

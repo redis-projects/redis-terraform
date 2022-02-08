@@ -7,7 +7,7 @@ terraform {
 }
 
 resource "google_compute_network" "vpc" {
-  name                    = var.name
+  name                    = var.resource_name
   auto_create_subnetworks = "false"
   routing_mode            = "GLOBAL"
 }

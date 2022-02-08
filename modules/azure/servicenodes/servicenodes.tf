@@ -8,40 +8,29 @@ terraform {
   }
 }
 
-# Create public IP for bastion node
-resource "azurerm_public_ip" "bastion-public-ip" {
-    name                         = "${var.name}-bastion-public-ip"
-    location                     = var.region
-    resource_group_name          = var.resource_group
-    allocation_method            = "Dynamic"
-
-    tags = {
-        environment = "${var.name}"
-    }
-}
-
-# Create network interface for bastion node
-resource "azurerm_network_interface" "bastion-nic" {
-    name                      = "${var.name}-bastion-nic"
-    location                  = var.region
-    resource_group_name       = var.resource_group
+# Create network interface for Servicenodes
+resource "azurerm_network_interface" "service-nic" {
+    name                = "${var.name}-service-${count.index}-nic"
+    location            = var.region
+    resource_group_name = var.resource_group
+    count               = var.machine_count
 
     ip_configuration {
-        name                          = "${var.name}-bastion-nic-configuration"
-        subnet_id                     = var.public_subnet_id
+        name                          = "${var.name}-service-nic-${count.index}-configuration"
+        subnet_id                     = var.private_subnet_id
         private_ip_address_allocation = "Dynamic"
-        public_ip_address_id          = azurerm_public_ip.bastion-public-ip.id
     }
 
-    tags = {
+    tags = merge("${var.resource_tags}",{
         environment = "${var.name}"
-    }
+    })
 }
 
 # Connect the security group to the network interface
-resource "azurerm_network_interface_security_group_association" "public-nic" {
-    network_interface_id      = azurerm_network_interface.bastion-nic.id
-    network_security_group_id = var.public_secgroup[0]
+resource "azurerm_network_interface_security_group_association" "private-nic" {
+    network_interface_id      = azurerm_network_interface.service-nic[count.index].id
+    network_security_group_id = var.private_secgroup[0]
+    count                     = var.machine_count
 }
 
 # Generate random text for a unique storage account name
@@ -62,21 +51,23 @@ resource "azurerm_storage_account" "mystorageaccount" {
     account_tier                = "Standard"
     account_replication_type    = "LRS"
 
-    tags = {
+    tags = merge("${var.resource_tags}",{
         environment = "${var.name}"
-    }
+    })
 }
 
-# Create bastion node
-resource "azurerm_linux_virtual_machine" "bastion" {
-    name                  = "${var.name}-bastion"
+# Create Service nodes
+resource "azurerm_linux_virtual_machine" "service" {
+    name                  = "${var.name}-service-${count.index}"
     location              = var.region
     resource_group_name   = var.resource_group
-    network_interface_ids = [azurerm_network_interface.bastion-nic.id]
-    size                  = var.bastion_machine_type
+    network_interface_ids = [azurerm_network_interface.service-nic[count.index].id]
+    size                  = var.machine_type
+    zone                  = sort(var.zones)[count.index % length(var.zones)]
+    count                 = var.machine_count
 
     os_disk {
-      name                 = "${var.name}-bastion_os_disk"
+      name                 = "${var.name}-service-${count.index}_os_disk"
       caching              = "ReadWrite"
       storage_account_type = "Premium_LRS"
     }
@@ -89,15 +80,15 @@ resource "azurerm_linux_virtual_machine" "bastion" {
     }
 
     dynamic "plan" {
-      for_each = var.bastion_machine_plan == "" ? [] : [1]
+      for_each = var.machine_plan == "" ? [] : [1]
       content {
-        name      = split(":", var.bastion_machine_plan)[0]
-        product   = split(":", var.bastion_machine_plan)[1]
-        publisher = split(":", var.bastion_machine_plan)[2]
+        name      = split(":", var.machine_plan)[0]
+        product   = split(":", var.machine_plan)[1]
+        publisher = split(":", var.machine_plan)[2]
       }
     }
-    
-    computer_name  = "bastion"
+
+    computer_name  = "${var.name}-service-${count.index}"
     admin_username = var.ssh_user
     disable_password_authentication = true
 
@@ -110,8 +101,7 @@ resource "azurerm_linux_virtual_machine" "bastion" {
         storage_account_uri = azurerm_storage_account.mystorageaccount.primary_blob_endpoint
     }
 
-    tags = {
+    tags = merge("${var.resource_tags}",{
         environment = "${var.name}"
-    }
-    
+    })
 }
