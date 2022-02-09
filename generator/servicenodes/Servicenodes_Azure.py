@@ -9,7 +9,7 @@ from typing import List
 
 class Servicenodes_Azure(Servicenodes):
     def create_servicenodes(self) -> int:
-        Module(f"servicenodes-{self._vpc}",
+        Module(f"servicenodes-{self._name}",
             source            = f"./modules/{self._provider}/servicenodes",
             name              = f"{os.getenv('name')}-{self._vpc}",
             resource_tags     = self._global_config["resource_tags"],
@@ -24,7 +24,8 @@ class Servicenodes_Azure(Servicenodes):
             providers         = {"azurerm": f"azurerm.{self._vpc}"},
             zones             = self._zones,
             region            = self._region,
-            resource_group    = self._resource_group
+            resource_group    = self._resource_group,
+            depends_on        = [f"module.bastion-{self._vpc}"]
         )
  
     def __init__(self, **kwargs):

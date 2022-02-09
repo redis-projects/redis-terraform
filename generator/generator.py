@@ -36,6 +36,7 @@ def generate(config_file):
     global ns_entry
     ns_entry = {}
     # Dictionary for Servicenodes
+    global servicenodes
     servicenodes = {}
     # Dictionary for all services
     service = {}
@@ -94,15 +95,15 @@ def generate(config_file):
 
     if 'services' in config_file:
         for svc in config_file['services']:
-            if svc["vpc"] in service:
-                service[svc["vpc"]].append(Service(**svc))
+            if svc["servicenode"] in service:
+                service[svc["servicenode"]].append(Service(**svc))
             else:
-                service[svc["vpc"]] = [Service(**svc)]
-            logging.debug(f"A new service for VPC/VNET {svc['vpc']} has been added with the arguments {svc}")
+                service[svc["servicenode"]] = [Service(**svc)]
+            logging.debug(f"A new service for VPC/VNET {svc['servicenode']} has been added with the arguments {svc}")
 
     if 'databases' in config_file:
         for re_db in config_file['databases']:
-            service[svc["vpc"]] = Databases(**re_db)
+            service[svc["vpc"]] = Databases(**re_db) #TODO this looks wrong
             logging.debug(f"A new database for cluster(s) {database['clusters']} has been added with the arguments {re_db}")
 
     # By now we have thefile mapped and crated all objects.
@@ -113,7 +114,7 @@ def generate(config_file):
     # Create the VPCs/VNETs and the UI Loadbalancer
     for name in vpc :
         vpc[name].create_network()
-        vpc[name].create_re_ui()
+        vpc[name].expose_re_ui()
     # Create the Bastion hosts
     for name in vpc :
         vpc[name].create_bastion()

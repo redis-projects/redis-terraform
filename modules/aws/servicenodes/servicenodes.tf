@@ -16,7 +16,7 @@ resource "aws_network_interface" "service_nic" {
   count           = var.node_count
 
   tags = merge("${var.resource_tags}",{
-    Name = "${var.name}-cluster-nic-${count.index}"
+    Name = "${var.name}-servicenode-nic-${count.index}"
   })
 }
 

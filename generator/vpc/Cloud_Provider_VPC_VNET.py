@@ -15,6 +15,11 @@ class Cloud_Provider_VPC_VNET(object):
     def create_bastion(self) -> int:
         pass
 
+    def expose_re_ui(self) -> int:
+        if self._expose_ui:
+            return self.create_re_ui()
+        return 0
+        
     @abstractmethod
     def create_re_ui(self) -> int:
         pass

@@ -8,31 +8,35 @@ from typing import List
 class Service(object):
     def provision_docker(self):
         if self._docker_provisioned == False:
-            Module(f"docker-provisioner-{self._vpc}",
-                depends_on           = [f"module.re-provisioner-{self._vpc}"],
+            from generator.generator import servicenodes
+            Module(f"docker-provisioner-{self._servicenode}",
+                depends_on           = [f"module.servicenodes-{self._servicenode}"],
                 source               = "./modules/docker/create",
                 ssh_user             = self._ssh_user,
                 ssh_private_key_file = self._ssh_private_key_file,
-                host                 = f"${{module.bastion-{self._vpc}.bastion-public-ip}}"
+                servicenodes         = f"${{module.servicenodes-{self._servicenode}.servicenodes}}",
+                bastion_host         = f"${{module.bastion-{servicenodes[self._servicenode].get_vpc()}.bastion-public-ip}}"
             )
         self._docker_provisioned = True
 
     def create_docker_service(self):
-        Module(f"docker-service-{self._name}",
+        from generator.generator import servicenodes
+        Module(f"docker-service-{self._servicenode}-{self._name}",
             source               = "./modules/docker/services",
-            depends_on           = [f"module.docker-provisioner-{self._vpc}"],
+            depends_on           = [f"module.docker-provisioner-{self._servicenode}"],
             ssh_user             = self._ssh_user,
             contents             = self._contents,
             start_script         = "start.sh",
             ssh_private_key_file = self._ssh_private_key_file,
-            host                 = f"${{module.bastion-{self._vpc}.bastion-public-ip}}"
+            servicenodes         = f"${{module.servicenodes-{self._servicenode}.servicenodes}}",
+            bastion_host         = f"${{module.bastion-{servicenodes[self._servicenode].get_vpc()}.bastion-public-ip}}"
         )
 
     def __init__(self, **kwargs):
         self._name : str = None
         self._type : str = None
         self._contents : str = None
-        self._vpc : str = None
+        self._servicenode : str = None
         self._docker_provisioned = False
         self._ssh_user = SSH_USER
         self._ssh_private_key_file = SSH_PRIVATE_KEY
@@ -42,7 +46,7 @@ class Service(object):
             if key == "name": self._name = value
             elif key == "type": self._type = value
             elif key == "contents": self._contents = value
-            elif key == "vpc": self._vpc = value
+            elif key == "servicenode": self._servicenode = value
             elif key == "ssh_user": self._ssh_user = value
             elif key == "ssh_private_key_file": self._ssh_private_key_file = value
             else:

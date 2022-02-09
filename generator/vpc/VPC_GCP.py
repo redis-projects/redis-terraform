@@ -23,6 +23,7 @@ class VPC_GCP(Cloud_Provider_VPC_VNET):
         Module(f"network-{self._name}", 
             source                  = f"./modules/{self._provider}/network",
             name                    = f"{deployment_name()}-{self._name}",
+            resource_name           = self._resource_name,
             resource_tags           = self._global_config["resource_tags"],
             gce_public_subnet_cidr  = self._public_cidr,
             region                  = self._region,

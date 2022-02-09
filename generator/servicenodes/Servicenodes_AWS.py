@@ -10,7 +10,7 @@ from typing import List
 
 class Servicenodes_AWS(Servicenodes):
     def create_servicenodes(self) -> int:
-        Module(f"servicenodes-{self._vpc}", 
+        Module(f"servicenodes-{self._name}", 
             source          = f"./modules/{self._provider}/servicenodes",
             name            = f"{os.getenv('name')}-{self._vpc}",
             resource_tags   = self._global_config["resource_tags"],
@@ -23,11 +23,12 @@ class Servicenodes_AWS(Servicenodes):
             ssh_key_name    = f"${{module.keypair-{self._vpc}.key-name}}",
             providers       = {"aws": f"aws.{self._vpc}"},
             zones           = self._zones,
-            subnet          = f"${{module.network-{self._vpc}.public-subnet}}"
+            subnet          = f"${{module.network-{self._vpc}.public-subnet}}",
+            depends_on      = [f"module.bastion-{self._vpc}"]
         )
-        
+
         Output(f"AWS-servicenodes-{self._name}-ip-adresses",
-            value=f"${{module.servicenodes-{self._vpc}.servicenodes.*.private_ip}}",sensitive=True)
+            value=f"${{module.servicenodes-{self._name}.servicenodes.*.private_ip}}",sensitive=True)
         
     def __init__(self, **kwargs):
         from generator.generator import vpc
