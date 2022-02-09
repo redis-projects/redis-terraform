@@ -9,13 +9,13 @@ output "raw_vpc" {
 }
 
 output "private-subnet" {
-  description = "The id of the private subnets"
+  description = "The private subnets"
   value       = aws_subnet.private-subnet-1
 }
 
 output "public-subnet" {
-  description = "The id of the public subnet"
-  value       = aws_subnet.public-subnet-1.id 
+  description = "The public subnets"
+  value       = aws_subnet.public-subnet-1
 }
 
 output "public-private-security-groups" {

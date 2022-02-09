@@ -62,12 +62,15 @@ class VPC_AWS(Cloud_Provider_VPC_VNET):
             providers      = {"aws": f"aws.{self._name}"},
         )
 
+        # The public_cidr disctionary becomes an array in Terraform keys()/values() 
+        # where the sort order is by key
+        bastion_zone_index = sorted(self._public_cidr).index(self._bastion_zone)
         Module(f"bastion-{self._name}",
             source            = f"./modules/{self._provider}/bastion",
             vpc               = f'${{module.network-{self._name}.vpc}}',
             name              = f"{deployment_name()}-{self._name}",
             resource_tags     = self._global_config["resource_tags"],
-            subnet            = f'${{module.network-{self._name}.public-subnet}}',
+            subnet            = f'${{module.network-{self._name}.public-subnet[{bastion_zone_index}].id}}',
             ami               = self._bastion_machine_image,
             instance_type     = self._bastion_machine_type,
             redis_user        = self._redis_user,
@@ -107,7 +110,6 @@ class VPC_AWS(Cloud_Provider_VPC_VNET):
         self._bastion_zone : str = "us-east-1c"
         self._name : str = None
         self._resource_name : str = None
-        self._public_cidr : str = "10.1.1.0/24"
         self._provider : str = "aws"
         self._region : str = "us-east-1"
         self._vpc_cidr : str = "10.1.0.0/16"
@@ -144,4 +146,3 @@ class VPC_AWS(Cloud_Provider_VPC_VNET):
 
         Provider("aws", region=self._region, access_key=os.getenv("AWS_ACCESS_KEY_ID", ""),
              secret_key=os.getenv("AWS_SECRET_ACCESS_KEY", ""), alias=self._name)
-

@@ -11,7 +11,7 @@ class Nameserver_Entries(object):
         from generator.generator import deployment_name, vpc, re_cluster
 
         if self._provider== "azure":
-            Module(f"ns-{self._vpc}",
+            Module(f"ns-{self._cluster}",
                 source         = f"./modules/{self._provider}/ns",
                 providers      = {"azurerm": f"azurerm.{self._vpc}"},
                 cluster_fqdn   = self._cluster_fqdn,
@@ -21,7 +21,7 @@ class Nameserver_Entries(object):
                 resource_group = vpc[self._vpc].get_resource_group()
             )
         elif self._provider== "aws":
-            Module(f"ns-{self._vpc}",
+            Module(f"ns-{self._cluster}",
                 source        = f"./modules/{self._provider}/ns",
                 providers     = {"aws": f"aws.{self._vpc}"},
                 cluster_fqdn  = self._cluster_fqdn,
@@ -30,7 +30,7 @@ class Nameserver_Entries(object):
                 ip_addresses  = f'${{module.re-{self._vpc}.re-public-ips}}'
             )
         elif self._provider== "gcp":
-            Module(f"ns-{self._vpc}",
+            Module(f"ns-{self._cluster}",
                 source        = f"./modules/{self._provider}/ns",
                 providers     = {"google-beta": f"google-beta.{self._vpc}"},
                 cluster_fqdn  = self._cluster_fqdn,

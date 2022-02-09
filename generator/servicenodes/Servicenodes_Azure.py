@@ -17,8 +17,8 @@ class Servicenodes_Azure(Servicenodes):
             machine_type      = self._machine_type,
             os                = self._machine_image,
             machine_plan      = self._machine_plan,
-            private_subnet_id = f"${{module.network-{self._vpc}.private-subnet}}",
-            private_secgroup  = f"${{module.network-{self._vpc}.private-security-groups}}",
+            subnet            = f"${{module.network-{self._vpc}.public-subnet}}",
+            security_groups   = f"${{module.network-{self._vpc}.public-security-groups}}",
             ssh_user          = self._redis_user,
             ssh_pub_key_file  = self._ssh_public_key,
             providers         = {"azurerm": f"azurerm.{self._vpc}"},
@@ -31,6 +31,7 @@ class Servicenodes_Azure(Servicenodes):
         from generator.generator import vpc
         super().__init__()
         self._vpc : str = None
+        self._name : str= None
         self._count : int = 3
         self._zones = None
         self._machine_image = None
@@ -42,6 +43,7 @@ class Servicenodes_Azure(Servicenodes):
         logging.debug("Creating Object of class "+self.__class__.__name__+" with class arguments "+str(kwargs))
         for key, value in kwargs.items():
             if key == "vpc": self._vpc = value
+            elif key == "name": self._name = value
             elif key == "count": self._count = value
             elif key == "zones": self._zones = value
             elif key == "machine_image": self._machine_image = value
@@ -54,3 +56,6 @@ class Servicenodes_Azure(Servicenodes):
         self._region = vpc[self._vpc].get_region()
         self._resource_group = vpc[self._vpc].get_resource_group()
         self._boot_disk_size = 50
+
+        if self._name is None:
+          assert("Each servicenodes block requires a unique name to be defined")

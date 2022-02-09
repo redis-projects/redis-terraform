@@ -85,12 +85,12 @@ def generate(config_file):
         for sn in config_file['servicenodes']:
             provider = vpc[sn["vpc"]].get_provider()
             if provider == "aws":
-                servicenodes[f'{sn["vpc"]}'] = Servicenodes_AWS(**sn)
+                servicenodes[f'{sn["name"]}'] = Servicenodes_AWS(**sn)
             elif provider == "azure":
-                servicenodes[f'{sn["vpc"]}'] = Servicenodes_Azure(**sn)
+                servicenodes[f'{sn["name"]}'] = Servicenodes_Azure(**sn)
             elif provider == "gcp":
-                servicenodes[f'{sn["vpc"]}'] = Servicenodes_GCP(**sn)
-            logging.debug(f"A new Servicenodes entry for VPC/VNET {sn['vpc']} has been added with the arguments {sn}")
+                servicenodes[f'{sn["name"]}'] = Servicenodes_GCP(**sn)
+            logging.debug(f"A new Servicenodes entry named {sn['name']} has been added with the arguments {sn}")
 
     if 'services' in config_file:
         for svc in config_file['services']:

@@ -16,13 +16,13 @@ variable "resource_group" {
   type        = string
 }
 
-variable "private_subnet_id" {
+variable "subnet" {
   description = "Object for the private subnet"
   type        = string
 }
 
-variable "private_secgroup" {
-  description = "list of security group IDs for the private subnet"
+variable "security_groups" {
+  description = "list of security group IDs for the public subnet"
   type        = list
 }
 

@@ -27,6 +27,7 @@ class Servicenodes_GCP(Servicenodes):
     def __init__(self, **kwargs):
         from generator.generator import vpc
         super().__init__()
+        self._name : str = None
         self._vpc : str = None
         self._count : int = 3
         self._zones = None
@@ -38,6 +39,7 @@ class Servicenodes_GCP(Servicenodes):
         logging.debug("Creating Object of class "+self.__class__.__name__+" with class arguments "+str(kwargs))
         for key, value in kwargs.items():
             if key == "vpc": self._vpc = value
+            elif key == "name": self._name = value
             elif key == "count": self._count = value
             elif key == "zones": self._zones = value
             elif key == "machine_image": self._machine_image = value
@@ -48,6 +50,9 @@ class Servicenodes_GCP(Servicenodes):
         self._provider = vpc[self._vpc].get_provider()
         self._region = vpc[self._vpc].get_region()
         self._boot_disk_size = 50
+
+        if self._name is None:
+          assert("Each servicenodes block requires a unique name to be defined")
 
 
         

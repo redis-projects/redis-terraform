@@ -17,7 +17,7 @@ resource "azurerm_network_interface" "service-nic" {
 
     ip_configuration {
         name                          = "${var.name}-service-nic-${count.index}-configuration"
-        subnet_id                     = var.private_subnet_id
+        subnet_id                     = var.subnet
         private_ip_address_allocation = "Dynamic"
     }
 
@@ -29,7 +29,7 @@ resource "azurerm_network_interface" "service-nic" {
 # Connect the security group to the network interface
 resource "azurerm_network_interface_security_group_association" "private-nic" {
     network_interface_id      = azurerm_network_interface.service-nic[count.index].id
-    network_security_group_id = var.private_secgroup[0]
+    network_security_group_id = var.security_groups[0]
     count                     = var.machine_count
 }
 

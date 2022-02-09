@@ -36,12 +36,13 @@ resource "aws_internet_gateway" "igw" {
 # Subnets
 
 resource "aws_subnet" "public-subnet-1" {
+  count = length(var.public_subnet_cidr)
   vpc_id = aws_vpc.vpc.id
-  cidr_block = var.public_subnet_cidr
-  availability_zone = var.availability_zone
+  cidr_block = values(var.public_subnet_cidr)[count.index]
+  availability_zone = keys(var.public_subnet_cidr)[count.index]
 
   tags = merge("${var.resource_tags}",{
-    Name = "${var.name}-public-subnet-1"
+    Name = "${var.name}-public-subnet-${count.index}"
   })
 }
 
@@ -62,20 +63,22 @@ resource "aws_subnet" "private-subnet-1" {
 
 # Elastic IP for NAT Gateway
 resource "aws_eip" "eip-nat" {
+  count = length(var.public_subnet_cidr)
   vpc = true
 
   tags = merge("${var.resource_tags}",{
-    Name = "${var.name}-eip-nat"
+    Name = "${var.name}-eip-nat-${count.index}"
   })
 }
 
 # NAT Gateway
 resource "aws_nat_gateway" "nat_gateway" {
-  allocation_id = aws_eip.eip-nat.id
-  subnet_id = aws_subnet.public-subnet-1.id
+  count = length(var.public_subnet_cidr)
+  allocation_id = aws_eip.eip-nat[count.index].id
+  subnet_id = aws_subnet.public-subnet-1[count.index].id
 
   tags = merge("${var.resource_tags}",{
-    Name = "${var.name}-nat-gateway"
+    Name = "${var.name}-nat-gateway-${count.index}"
   })
 }
 
@@ -99,13 +102,14 @@ resource "aws_route_table" "rt-private" {
   })
 }
 
-# Associate Public Subnet with Route Table for Internet Gateway
+# Associate Public Subnets with Route Table for Internet Gateway
 resource "aws_route_table_association" "rt-to-public-subnet" {
-  subnet_id = aws_subnet.public-subnet-1.id
+  count = length(var.public_subnet_cidr)
+  subnet_id = aws_subnet.public-subnet-1[count.index].id
   route_table_id = aws_route_table.rt-public.id
 }
 
-# Associate Private Subnet with Route Table
+# Associate Private Subnets with Route Table
 resource "aws_route_table_association" "rt-to-private-subnet" {
   count = length(var.private_subnet_cidr)
   subnet_id = aws_subnet.private-subnet-1[count.index].id

@@ -17,19 +17,23 @@ class Servicenodes_AWS(Servicenodes):
             node_count      = self._count,
             instance_type   = self._machine_type,
             ami             = self._machine_image,
-            security_groups = f"${{module.network-{self._vpc}.private-security-groups}}",
+            security_groups = f"${{module.network-{self._vpc}.public-security-groups}}",
             redis_user      = self._redis_user,
             ssh_public_key  = self._ssh_public_key,
             ssh_key_name    = f"${{module.keypair-{self._vpc}.key-name}}",
             providers       = {"aws": f"aws.{self._vpc}"},
             zones           = self._zones,
-            subnet          = f"${{module.network-{self._vpc}.private-subnet}}"
+            subnet          = f"${{module.network-{self._vpc}.public-subnet}}"
         )
+        
+        Output(f"AWS-servicenodes-{self._name}-ip-adresses",
+            value=f"${{module.servicenodes-{self._vpc}.servicenodes.*.private_ip}}",sensitive=True)
         
     def __init__(self, **kwargs):
         from generator.generator import vpc
         super().__init__()
         self._vpc : str = None
+        self._name : str = None
         self._count : int = 3
         self._zones = None
         self._machine_image = None
@@ -40,6 +44,7 @@ class Servicenodes_AWS(Servicenodes):
         logging.debug("Creating Object of class "+self.__class__.__name__+" with class arguments "+str(kwargs))
         for key, value in kwargs.items():
             if key == "vpc": self._vpc = value
+            elif key == "name": self._name = value
             elif key == "count": self._count = value
             elif key == "zones": self._zones = value
             elif key == "machine_image": self._machine_image = value
@@ -49,3 +54,6 @@ class Servicenodes_AWS(Servicenodes):
         
         self._provider = vpc[self._vpc].get_provider()
         self._region = vpc[self._vpc].get_region()
+
+        if self._name is None:
+          assert("Each servicenodes block requires a unique name to be defined")

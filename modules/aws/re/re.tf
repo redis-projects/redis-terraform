@@ -63,7 +63,7 @@ resource "aws_instance" "node" {
 	EOF
 
   tags = merge("${var.resource_tags}",{
-    Name = "${var.name}-node-${count.index}"
+    Name = "${var.name}-redis-${count.index}"
   })
 }
 

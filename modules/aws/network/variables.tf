@@ -23,8 +23,8 @@ variable "vpc_cidr" {
 }
 
 variable "public_subnet_cidr" {
-  description = "CIDR block for the public subnet 1"
-  type        = string
+  description = "CIDR blocks for the public subnets in each zone"
+  type        = map
 }
 
 variable "private_subnet_cidr" {
