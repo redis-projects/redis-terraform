@@ -12,6 +12,9 @@ class Servicenodes(object):
     def get_vpc(self):
         return(self._vpc)
     
+    def get_count(self):
+        return(self._count)
+
     def __init__(self):
         from generator.generator import global_config
         self._global_config = {}

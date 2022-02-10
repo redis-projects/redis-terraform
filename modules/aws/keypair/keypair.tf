@@ -11,7 +11,7 @@ terraform {
 ############################################################
 # Key Pair
 
-resource "aws_key_pair" "peypair" {
+resource "aws_key_pair" "keypair" {
   key_name = "${var.name}-keypair"
   public_key = file(var.ssh_public_key)
 

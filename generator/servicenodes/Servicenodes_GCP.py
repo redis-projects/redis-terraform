@@ -9,7 +9,7 @@ from typing import List
 
 class Servicenodes_GCP(Servicenodes):
     def create_servicenodes(self) -> int:
-        Module(f"servicenodes-{self._vpc}",
+        Module(f"servicenodes-{self._name}",
             source                    = f"./modules/{self._provider}/servicenodes",
             name                      = f"{os.getenv('name')}-{self._vpc}",
             resource_tags             = self._global_config["resource_tags"],
@@ -21,14 +21,15 @@ class Servicenodes_GCP(Servicenodes):
             gce_ssh_user              = self._redis_user,
             gce_ssh_pub_key_file      = self._ssh_public_key,
             providers                 = {"google": f"google.{self._vpc}"},
-            zones                     = self._zones
+            zones                     = self._zones,
+            depends_on                = [f"module.bastion-{self._vpc}"]
         )
         
     def __init__(self, **kwargs):
         from generator.generator import vpc
         super().__init__()
-        self._name : str = None
         self._vpc : str = None
+        self._name : str = None
         self._count : int = 3
         self._zones = None
         self._machine_image = None
@@ -53,7 +54,3 @@ class Servicenodes_GCP(Servicenodes):
 
         if self._name is None:
           assert("Each servicenodes block requires a unique name to be defined")
-
-
-        
-

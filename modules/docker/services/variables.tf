@@ -13,10 +13,14 @@ variable "contents" {
   description = "Content to push to docker host"
 }
 
-variable "host" {
-    description = "Docker host"
+variable "servicenodes" {
+    description = "The service hosts to install on"
 }
 
 variable "start_script" {
     description = "Start up script"
+}
+
+variable "bastion_host" {
+    description = "Docker host"
 }

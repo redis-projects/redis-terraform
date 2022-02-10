@@ -9,6 +9,10 @@ variable "ssh_private_key_file" {
   sensitive   = true
 }
 
-variable "host" {
+variable "bastion_host" {
     description = "Docker host"
+}
+
+variable "servicenodes" {
+    description = "The service hosts to install on"
 }
