@@ -16,10 +16,21 @@ resource "aws_network_interface" "service_nic" {
   count           = var.node_count
 
   tags = merge("${var.resource_tags}",{
-    Name = "${var.name}-cluster-nic-${count.index}"
+    Name = "${var.name}-service-nic-${count.index}"
   })
 }
 
+resource "aws_eip" "eip" {
+  vpc                       = true
+  count                     = var.node_count
+  network_interface         = aws_network_interface.service_nic[count.index].id
+  associate_with_private_ip = aws_network_interface.service_nic[count.index].private_ip
+  depends_on                = [aws_instance.node]
+
+  tags = merge("${var.resource_tags}",{
+    Name = "${var.name}-cluster-eip-${count.index}"
+  })
+}
 
 ###########################################################
 # EC2
