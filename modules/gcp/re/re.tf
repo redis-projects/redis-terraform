@@ -16,7 +16,6 @@ resource "google_compute_instance" "node" {
   name            = "${var.name}-redis-${count.index}"
   machine_type    = var.kube_worker_machine_type
   zone            = var.zones[count.index % length(var.zones)]
-  #tags            = values(var.resource_tags)
   can_ip_forward  = true
 
   boot_disk {

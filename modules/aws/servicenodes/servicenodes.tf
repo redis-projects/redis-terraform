@@ -28,7 +28,7 @@ resource "aws_eip" "eip" {
   depends_on                = [aws_instance.node]
 
   tags = merge("${var.resource_tags}",{
-    Name = "${var.name}-cluster-eip-${count.index}"
+    Name = "${var.name}-service-eip-${count.index}"
   })
 }
 

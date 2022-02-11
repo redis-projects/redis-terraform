@@ -57,13 +57,24 @@ resource "aws_subnet" "private-subnet-1" {
   })
 }
 
+resource "aws_subnet" "lb-subnet" {
+  count = length(var.lb_subnet_cidr)
+  vpc_id = aws_vpc.vpc.id
+  cidr_block = values(var.lb_subnet_cidr)[count.index]
+  availability_zone = keys(var.lb_subnet_cidr)[count.index]
+
+  tags = merge("${var.resource_tags}",{
+    Name = "${var.name}-lb-subnet-${count.index}"
+  })
+}
+
 
 ############################################################
 # NAT Gateway
 
 # Elastic IP for NAT Gateway
 resource "aws_eip" "eip-nat" {
-  count = length(var.public_subnet_cidr)
+  count = length(var.lb_subnet_cidr)
   vpc = true
 
   tags = merge("${var.resource_tags}",{
@@ -73,9 +84,9 @@ resource "aws_eip" "eip-nat" {
 
 # NAT Gateway
 resource "aws_nat_gateway" "nat_gateway" {
-  count = length(var.public_subnet_cidr)
+  count = length(var.lb_subnet_cidr)
   allocation_id = aws_eip.eip-nat[count.index].id
-  subnet_id = aws_subnet.public-subnet-1[count.index].id
+  subnet_id = aws_subnet.lb-subnet[count.index].id
 
   tags = merge("${var.resource_tags}",{
     Name = "${var.name}-nat-gateway-${count.index}"
@@ -95,10 +106,19 @@ resource "aws_route_table" "rt-public" {
 }
 
 resource "aws_route_table" "rt-private" {
+  count = length(var.private_subnet_cidr)
   vpc_id = aws_vpc.vpc.id
 
   tags = merge("${var.resource_tags}",{
-    Name = "${var.name}-rt-private"
+    Name = "${var.name}-rt-private-${count.index}"
+  })
+}
+
+resource "aws_route_table" "rt-lb" {
+  vpc_id = aws_vpc.vpc.id
+
+  tags = merge("${var.resource_tags}",{
+    Name = "${var.name}-rt-lb"
   })
 }
 
@@ -113,7 +133,13 @@ resource "aws_route_table_association" "rt-to-public-subnet" {
 resource "aws_route_table_association" "rt-to-private-subnet" {
   count = length(var.private_subnet_cidr)
   subnet_id = aws_subnet.private-subnet-1[count.index].id
-  route_table_id = aws_route_table.rt-private.id
+  route_table_id = aws_route_table.rt-private[count.index].id
+}
+
+resource "aws_route_table_association" "rt-to-lb-subnet" {
+  count = length(var.lb_subnet_cidr)
+  subnet_id = aws_subnet.lb-subnet[count.index].id
+  route_table_id = aws_route_table.rt-lb.id
 }
 
 ############################################################
@@ -132,45 +158,59 @@ resource "aws_route" "public-allowipv6" {
 }
 
 resource "aws_route" "private-allipv4" {
-  route_table_id         = aws_route_table.rt-private.id
+  count                  = length(var.private_subnet_cidr)
+  route_table_id         = aws_route_table.rt-private[count.index].id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_nat_gateway.nat_gateway[count.index].id
+}
+
+#resource "aws_route" "private-allowipv6" {
+#  count                       = length(var.private_subnet_cidr)
+#  route_table_id              = aws_route_table.rt-private[count.index].id
+#  destination_ipv6_cidr_block = "::/0"
+#  gateway_id                  = aws_nat_gateway.nat_gateway[count.index].id
+#}
+
+resource "aws_route" "lb-allipv4" {
+  route_table_id         = aws_route_table.rt-lb.id
   destination_cidr_block = "0.0.0.0/0"
   gateway_id             = aws_internet_gateway.igw.id
 }
 
-resource "aws_route" "private-allowipv6" {
-  route_table_id              = aws_route_table.rt-private.id
+resource "aws_route" "lb-allowipv6" {
+  route_table_id              = aws_route_table.rt-lb.id
   destination_ipv6_cidr_block = "::/0"
   gateway_id                  = aws_internet_gateway.igw.id
 }
 
 # Add route to the VPC of the peering request to routing table (private)
-resource "aws_route" "private-req" {
-  route_table_id            = aws_route_table.rt-private.id
-  destination_cidr_block    = var.cidr_map[var.peer_request_list[count.index]]
-  vpc_peering_connection_id = aws_vpc_peering_connection.peer[count.index].id
-  count                     = length(var.peer_request_list)
-}
+#resource "aws_route" "private-req" {
+#  route_table_id            = aws_route_table.rt-private.id
+#  destination_cidr_block    = var.cidr_map[var.peer_request_list[count.index]]
+#  vpc_peering_connection_id = aws_vpc_peering_connection.peer[count.index].id
+#  count                     = length(var.peer_request_list)
+#}
 
 # Add route to the VPC of the peering request to routing table (public)
-resource "aws_route" "public-req" {
-  route_table_id            = aws_route_table.rt-public.id
-  destination_cidr_block    = var.cidr_map[var.peer_request_list[count.index]]
-  vpc_peering_connection_id = aws_vpc_peering_connection.peer[count.index].id
-  count                     = length(var.peer_request_list)
-}
+#resource "aws_route" "public-req" {
+#  route_table_id            = aws_route_table.rt-public.id
+#  destination_cidr_block    = var.cidr_map[var.peer_request_list[count.index]]
+#  vpc_peering_connection_id = aws_vpc_peering_connection.peer[count.index].id
+#  count                     = length(var.peer_request_list)
+#}
 
 # Add route to the VPC of the peering accept to routing table (private)
-resource "aws_route" "private-acc" {
-  route_table_id            = aws_route_table.rt-private.id
-  destination_cidr_block    = var.cidr_map[var.peer_accept_list[count.index]]
-  vpc_peering_connection_id = var.vpc_conn_index[count.index]
-  count                     = length(var.peer_accept_list)
-}
+#resource "aws_route" "private-acc" {
+#  route_table_id            = aws_route_table.rt-private.id
+#  destination_cidr_block    = var.cidr_map[var.peer_accept_list[count.index]]
+#  vpc_peering_connection_id = var.vpc_conn_index[count.index]
+#  count                     = length(var.peer_accept_list)
+#}
 
 # Add route to the VPC of the peering accept to routing table (public)
-resource "aws_route" "public-acc" {
-  route_table_id            = aws_route_table.rt-public.id
-  destination_cidr_block    = var.cidr_map[var.peer_accept_list[count.index]]
-  vpc_peering_connection_id = var.vpc_conn_index[count.index]
-  count                     = length(var.peer_accept_list)
-}
+#resource "aws_route" "public-acc" {
+#  route_table_id            = aws_route_table.rt-public.id
+#  destination_cidr_block    = var.cidr_map[var.peer_accept_list[count.index]]
+#  vpc_peering_connection_id = var.vpc_conn_index[count.index]
+#  count                     = length(var.peer_accept_list)
+#}

@@ -27,8 +27,10 @@ class Servicenodes_AWS(Servicenodes):
             depends_on      = [f"module.bastion-{self._vpc}"]
         )
 
-        Output(f"AWS-servicenodes-{self._name}-ip-adresses",
-            value=f"${{module.servicenodes-{self._name}.servicenodes.*.private_ip}}",sensitive=True)
+        Output(f"AWS-servicenodes-{self._name}-private-ip-adresses",
+            value=f"${{module.servicenodes-{self._name}.servicenodes_private_ip}}")
+        Output(f"AWS-servicenodes-{self._name}-public-ip-adresses",
+            value=f"${{module.servicenodes-{self._name}.servicenodes_public_ip}}")
         
     def __init__(self, **kwargs):
         from generator.generator import vpc

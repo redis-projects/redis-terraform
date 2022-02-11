@@ -6,6 +6,11 @@ terraform {
   }
 }
 
+resource "google_compute_address" "servicenodes-ip-address" {
+  name  = "${var.name}-${count.index}-service-ip-address"
+  count = var.kube_worker_machine_count
+}
+
 resource "google_compute_instance" "node" {
   count           = var.kube_worker_machine_count
   name            = "${var.name}-service-${count.index}"
@@ -22,6 +27,9 @@ resource "google_compute_instance" "node" {
 
   network_interface {
     subnetwork = var.subnet
+    access_config {
+      nat_ip  = google_compute_address.servicenodes-ip-address[count.index].address
+    }
   }
 
   service_account {

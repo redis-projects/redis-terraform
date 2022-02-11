@@ -18,7 +18,7 @@ resource "azurerm_dns_a_record" "A-records" {
   zone_name           = data.azurerm_dns_zone.parent.name
   resource_group_name = var.resource_group
   ttl                 = 60
-  records             = [ tostring(var.ip_addresses[count.index].ip_address) ]
+  records             = [ tostring(var.ip_addresses[count.index]) ]
   count               = length(var.ip_addresses)
   tags                = "${var.resource_tags}"
 }

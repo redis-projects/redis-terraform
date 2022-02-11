@@ -16,7 +16,7 @@ class Nameserver_Entries(object):
                 providers      = {"azurerm": f"azurerm.{self._vpc}"},
                 cluster_fqdn   = self._cluster_fqdn,
                 parent_zone    = self._parent_zone,
-                ip_addresses   = f'${{module.re-{self._vpc}.re-public-ips}}',
+                ip_addresses   = f'${{module.re-{re_cluster[self._cluster].get_vpc()}.re-public-ips}}',
                 resource_tags  = self._global_config["resource_tags"],
                 resource_group = vpc[self._vpc].get_resource_group()
             )
@@ -27,7 +27,8 @@ class Nameserver_Entries(object):
                 cluster_fqdn  = self._cluster_fqdn,
                 parent_zone   = self._parent_zone,
                 resource_tags = self._global_config["resource_tags"],
-                ip_addresses  = f'${{module.re-{self._vpc}.re-public-ips}}'
+ #               ip_addresses  = f'${{module.re-{re_cluster[self._cluster].get_vpc()}.re-public-ips}}',
+                dns_lb_name   = f'${{module.re-{self._vpc}.dns-lb-name}}'
             )
         elif self._provider== "gcp":
             Module(f"ns-{self._cluster}",
@@ -36,7 +37,7 @@ class Nameserver_Entries(object):
                 cluster_fqdn  = self._cluster_fqdn,
                 parent_zone   = self._parent_zone,
                 resource_tags = self._global_config["resource_tags"],
-                ip_addresses  = f'${{module.re-{self._vpc}.re-public-ips}}'
+                ip_addresses  = f'${{module.re-{re_cluster[self._cluster].get_vpc()}.re-public-ips}}'
             )
 
         Output(f"{self._vpc}-dns-name", value = self._cluster_fqdn)

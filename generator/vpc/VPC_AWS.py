@@ -37,6 +37,7 @@ class VPC_AWS(Cloud_Provider_VPC_VNET):
             vpc_cidr            = self._vpc_cidr,
             availability_zone   = self._bastion_zone,
             public_subnet_cidr  = self._public_cidr,
+            lb_subnet_cidr      = self._lb_cidr,
             providers           = {"aws": f"aws.{self._name}"},
             peer_request_list   = self._peer_request_list,
             peer_accept_list    = self._peer_accept_list,
@@ -81,7 +82,7 @@ class VPC_AWS(Cloud_Provider_VPC_VNET):
             availability_zone = self._bastion_zone
         )
 
-        Output(f"aws-bastion-{self._name}-ip-output",
+        Output(f"AWS-bastion-{self._name}-ip-output",
             value=f"${{module.bastion-{self._name}.bastion-public-ip}}")
 
     def create_re_ui(self) -> int:
@@ -113,6 +114,7 @@ class VPC_AWS(Cloud_Provider_VPC_VNET):
         self._provider : str = "aws"
         self._region : str = "us-east-1"
         self._vpc_cidr : str = "10.1.0.0/16"
+        self._lb_cidr = {}
         self._worker_machine_image : str = "ami-0b1db37f0fa006678"
         self._redis_user = SSH_USER
         self._ssh_public_key = SSH_PUBLIC_KEY
@@ -132,6 +134,7 @@ class VPC_AWS(Cloud_Provider_VPC_VNET):
             elif key == "resource_name": self._resource_name = value
             elif key == "private_cidr": self._private_cidr = value
             elif key == "public_cidr": self._public_cidr = value
+            elif key == "lb_cidr": self._lb_cidr = value
             elif key == "provider": self._provider = value
             elif key == "region": self._region = value
             elif key == "vpc_cidr": self._vpc_cidr = value

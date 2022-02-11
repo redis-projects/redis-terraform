@@ -41,9 +41,9 @@ resource "aws_vpn_connection_route" "remote" {
 }
 
 # Create AWS to remote Route
-resource "aws_route" "remoteroute" {
-  route_table_id            = aws_route_table.rt-private.id
-  destination_cidr_block    = "${var.private_subnet_list[count.index]}"
-  gateway_id                = "${aws_vpn_gateway.vpn_gw[0].id}"
-  count                     = length(var.vpn_list)
-}
+#resource "aws_route" "remoteroute" {
+#  route_table_id            = aws_route_table.rt-private.id
+#  destination_cidr_block    = "${var.private_subnet_list[count.index]}"
+#  gateway_id                = "${aws_vpn_gateway.vpn_gw[0].id}"
+#  count                     = length(var.vpn_list)
+#}

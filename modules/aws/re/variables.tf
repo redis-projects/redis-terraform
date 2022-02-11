@@ -3,8 +3,17 @@ variable "name" {
   type        = string
 }
 
+variable "vpc" {
+  description = "ID of the VPC"
+  type        = string
+}
 variable "subnet" {
-  description = "list of subnets"
+  description = "list of private subnets"
+  type        = list
+}
+
+variable "lb_subnet" {
+  description = "list of Load balancer subnets"
   type        = list
 }
 

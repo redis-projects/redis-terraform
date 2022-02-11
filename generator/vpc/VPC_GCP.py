@@ -89,6 +89,7 @@ class VPC_GCP(Cloud_Provider_VPC_VNET):
         self._project : str = "redislabs-sa-training-services"
         self._provider : str = "gcp"
         self._public_cidr : str = "10.0.1.0/24"
+        self._lb_cidr = {}
         self._region : str = "us-central1"
         self._worker_machine_image : str = "rhel-7-v20210721"
         self._redis_user = SSH_USER
@@ -111,6 +112,7 @@ class VPC_GCP(Cloud_Provider_VPC_VNET):
             elif key == "private_cidr": self._private_cidr = value
             elif key == "project": self._project =value
             elif key == "public_cidr": self._public_cidr = value
+            elif key == "lb_cidr": self._lb_cidr = value
             elif key == "provider": self._provider = value
             elif key == "region": self._region = value
             elif key == "worker_machine_image": self._worker_machine_image = value

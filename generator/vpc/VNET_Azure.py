@@ -93,6 +93,7 @@ class VNET_Azure(Cloud_Provider_VPC_VNET):
         self._provider : str = "azure"
         self._public_cidr : str = "10.2.1.0/24"
         self._gateway_cidr : str = "10.2.3.0/27"
+        self._lb_cidr = {}
         self._region : str = "WestUS3"
         self._resource_group : str = None
         self._subscription_id : str = None
@@ -122,6 +123,7 @@ class VNET_Azure(Cloud_Provider_VPC_VNET):
             elif key == "name": self._name = value
             elif key == "private_cidr": self._private_cidr = value
             elif key == "public_cidr": self._public_cidr = value
+            elif key == "lb_cidr": self._lb_cidr = value
             elif key == "gateway_cidr": self._gateway_cidr = value
             elif key == "provider": self._provider = value
             elif key == "region": self._region = value

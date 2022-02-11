@@ -37,6 +37,7 @@ class Cluster_AWS(Cluster):
         Module(f"re-{self._vpc}", 
             source          = f"./modules/{self._provider}/re",
             name            = f"{os.getenv('name')}-{self._vpc}",
+            vpc             = f'${{module.network-{self._vpc}.vpc}}',
             resource_tags   = self._global_config["resource_tags"],
             worker_count    = self._worker_count,
             instance_type   = self._machine_type,
@@ -47,7 +48,8 @@ class Cluster_AWS(Cluster):
             ssh_key_name    = f"${{module.keypair-{self._vpc}.key-name}}",
             providers       = {"aws": f"aws.{self._vpc}"},
             zones           = self._zones,
-            subnet          = f"${{module.network-{self._vpc}.private-subnet}}"
+            subnet          = f"${{module.network-{self._vpc}.private-subnet}}",
+            lb_subnet       = f"${{module.network-{self._vpc}.lb-subnet}}"
         )
         
         self.create_data_objects()

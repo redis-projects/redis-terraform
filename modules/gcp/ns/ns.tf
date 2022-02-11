@@ -11,7 +11,7 @@ resource "google_dns_record_set" "A-records" {
   managed_zone = var.parent_zone
   name         = "node${count.index+1}.${var.cluster_fqdn}."
   type         = "A"
-  rrdatas      = [ tostring(var.ip_addresses[count.index].address) ]
+  rrdatas      = [ tostring(var.ip_addresses[count.index]) ]
   ttl          = 60
   count        = length(var.ip_addresses)
 }

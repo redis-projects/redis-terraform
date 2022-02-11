@@ -22,17 +22,17 @@ resource "aws_network_interface" "cluster_nic" {
 
 
 # Elastic IP to the Network Interface
-resource "aws_eip" "eip" {
-  vpc                       = true
-  count                     = var.worker_count
-  network_interface         = aws_network_interface.cluster_nic[count.index].id
-  associate_with_private_ip = aws_network_interface.cluster_nic[count.index].private_ip
-  depends_on                = [aws_instance.node]
+#resource "aws_eip" "eip" {
+#  vpc                       = true
+#  count                     = var.worker_count
+#  network_interface         = aws_network_interface.cluster_nic[count.index].id
+#  associate_with_private_ip = aws_network_interface.cluster_nic[count.index].private_ip
+#  depends_on                = [aws_instance.node]
 
-  tags = merge("${var.resource_tags}",{
-    Name = "${var.name}-cluster-eip-${count.index}"
-  })
-}
+#  tags = merge("${var.resource_tags}",{
+#    Name = "${var.name}-cluster-eip-${count.index}"
+#  })
+#}
 
 ###########################################################
 # EC2

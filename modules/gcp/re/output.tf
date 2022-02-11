@@ -6,5 +6,5 @@ output "re-nodes" {
 
 output "re-public-ips" {
   description = "IP addresses of all Redis cluster nodes"
-  value       = google_compute_address.cluster-ip-address
+  value       = google_compute_address.cluster-ip-address.*.address
 }

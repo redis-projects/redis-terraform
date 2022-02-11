@@ -27,6 +27,11 @@ class Servicenodes_Azure(Servicenodes):
             resource_group    = self._resource_group,
             depends_on        = [f"module.bastion-{self._vpc}"]
         )
+
+        Output(f"Azure-servicenodes-{self._name}-private-ip-adresses",
+            value=f"${{module.servicenodes-{self._name}.servicenodes_private_ip}}")
+        Output(f"Azure-servicenodes-{self._name}-public-ip-adresses",
+            value=f"${{module.servicenodes-{self._name}.servicenodes_public_ip}}")
  
     def __init__(self, **kwargs):
         from generator.generator import vpc

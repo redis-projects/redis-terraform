@@ -35,7 +35,7 @@ resource "aws_lb" "re-gui" {
   tags                       = "${var.resource_tags}"
 }
 
-# Crete Listener
+# Create Listener
 resource "aws_lb_listener" "front_end" {
   load_balancer_arn = aws_lb.re-gui.arn
   port              = "8443"
