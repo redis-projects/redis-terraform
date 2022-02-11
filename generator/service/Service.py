@@ -14,7 +14,7 @@ class Service(object):
                 source               = "./modules/docker/create",
                 ssh_user             = self._ssh_user,
                 ssh_private_key_file = self._ssh_private_key_file,
-                servicenodes         = f"${{module.servicenodes-{self._servicenode}.servicenodes}}",
+                servicenodes_private_ips         = f"${{module.servicenodes-{self._servicenode}.servicenodes_private_ip}}",
                 bastion_host         = f"${{module.bastion-{servicenodes[self._servicenode].get_vpc()}.bastion-public-ip}}"
             )
         self._docker_provisioned = True
@@ -28,7 +28,7 @@ class Service(object):
             contents             = self._contents,
             start_script         = "start.sh",
             ssh_private_key_file = self._ssh_private_key_file,
-            servicenodes         = f"${{module.servicenodes-{self._servicenode}.servicenodes}}",
+            servicenodes_private_ips         = f"${{module.servicenodes-{self._servicenode}.servicenodes_private_ip}}",
             bastion_host         = f"${{module.bastion-{servicenodes[self._servicenode].get_vpc()}.bastion-public-ip}}"
         )
 

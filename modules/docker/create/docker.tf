@@ -1,11 +1,11 @@
 resource "null_resource" "create_docker" {
-    count   = "${length(var.servicenodes)}"
+    count   = "${length(var.servicenodes_private_ips)}"
 
     connection {
       type        = "ssh"
       user        = var.ssh_user
       private_key = file(var.ssh_private_key_file)
-      host        = element(var.servicenodes.*.private_ip, count.index)
+      host        = element(var.servicenodes_private_ips, count.index)
 
       bastion_host        = var.bastion_host
     }

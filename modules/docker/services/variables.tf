@@ -13,8 +13,8 @@ variable "contents" {
   description = "Content to push to docker host"
 }
 
-variable "servicenodes" {
-    description = "The service hosts to install on"
+variable "servicenodes_private_ips" {
+    description = "The service hosts IPs to install on"
 }
 
 variable "start_script" {
