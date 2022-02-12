@@ -1,3 +1,3 @@
 docker kill node_exporter cadvisor grafana prometheus
-docker ps | grep riot- | awk -F" " '{print $1}' | xargs docker kill
+bash stop_riot.sh
 docker network rm br0
