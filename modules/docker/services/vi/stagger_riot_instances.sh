@@ -4,6 +4,14 @@
 FILE_LEN=$(grep -c '^' $1 | awk '{print $1}')
 while IFS="" read -r p || [ -n "$p" ]
 do
+    if [ -n "$2" ]
+    then
+        if [[ ! $p == *[[:space:]]$2[[:space:]]* ]]
+        then
+            continue
+        fi
+    fi    
+
     echo "Executing $p"
     # $p could look like NUM_THREADS=4 SOURCE_PORT=6379 SOURCE_URL=source.ec.com DESTINATION_PORT=10006 DESTINATION_URL=redis-10006.re.com TYPE_DS="--type ds" bash start_riot.sh job-1
     bash -c "$p"

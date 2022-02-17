@@ -1,1 +1,6 @@
-docker ps | grep riot- | awk -F" " '{print $1}' | xargs docker kill
+if [[ -n $1 ]]
+then
+    FILTER="-f label=$1"
+fi
+
+docker ps $FILTER | grep riot- | awk -F" " '{print $1}' | xargs docker kill
