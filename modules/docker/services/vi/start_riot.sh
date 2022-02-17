@@ -1,11 +1,11 @@
 if [[ -n $DB_NAME ]]
 then
-    DB_LABEL="-l db_name=$DB_NAME"
+    DB_LABEL="-l DB_NAME=$DB_NAME"
 fi
 
 if [[ -n $JOB_NAME ]]
 then
-    JOB_LABEL="-l job_name=$JOB_NAME"
+    JOB_LABEL="-l JOB_NAME=$JOB_NAME"
 fi
 
 docker run -d $DB_LABEL $JOB_LABEL --rm \
