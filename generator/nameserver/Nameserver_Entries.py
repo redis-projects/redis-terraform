@@ -28,7 +28,7 @@ class Nameserver_Entries(object):
                 parent_zone   = self._parent_zone,
                 resource_tags = self._global_config["resource_tags"],
  #               ip_addresses  = f'${{module.re-{re_cluster[self._cluster].get_vpc()}.re-public-ips}}',
-                dns_lb_name   = f'${{module.re-{self._vpc}.dns-lb-name}}'
+                dns_lb_name   = f'${{module.re-{re_cluster[self._cluster].get_vpc()}.dns-lb-name}}'
             )
         elif self._provider== "gcp":
             Module(f"ns-{self._cluster}",
@@ -40,7 +40,7 @@ class Nameserver_Entries(object):
                 ip_addresses  = f'${{module.re-{re_cluster[self._cluster].get_vpc()}.re-public-ips}}'
             )
 
-        Output(f"{self._vpc}-dns-name", value = self._cluster_fqdn)
+        Output(f"DNS-Name_cluster_{self._cluster}", value = self._cluster_fqdn)
 
         if self._cluster not in re_cluster:
             raise Exception(f"The specified cluster ({self._cluster}) is not found in the 'clusters' section")
