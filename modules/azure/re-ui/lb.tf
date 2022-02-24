@@ -58,6 +58,6 @@ resource "azurerm_lb_rule" "re-ui-lb-rule" {
   backend_port                   = 8443
   frontend_ip_configuration_name = "${var.name}-re-ui-lb-fe-ip"
   load_distribution              = "SourceIP"
-  backend_address_pool_id        = azurerm_lb_backend_address_pool.re-ui-pool.id
+  backend_address_pool_ids       = [ azurerm_lb_backend_address_pool.re-ui-pool.id ]
   probe_id                       = azurerm_lb_probe.re-ui-lb-probe.id
 }
