@@ -25,6 +25,7 @@ class VNET_Azure(Cloud_Provider_VPC_VNET):
              public_subnet_cidr  = self._public_cidr,
              private_subnet_cidr = self._private_cidr,
              gateway_subnet_cidr = self._gateway_cidr,
+             lb_subnet_cidr      = self._lb_cidr,
              region              = self._region,
              resource_group      = self._resource_group,
              expose_ui           = self._expose_ui,

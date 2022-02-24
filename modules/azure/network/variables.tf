@@ -30,7 +30,11 @@ variable "private_subnet_cidr" {
 }
 
 variable "gateway_subnet_cidr" {
-  description = "CIDR for the Gateway subnet"
+  description = "CIDR for the VPN gateway subnet"
+  type        = string
+}
+variable "lb_subnet_cidr" {
+  description = "CIDR for the Loadbalancer subnet"
   type        = string
 }
 

@@ -2,6 +2,11 @@ variable "name" {
   description = "Combined name of the deployment and VPC: <DEPLOYMENT>-<VPC>"
   type        = string
 }
+
+variable "vpc" {
+  description = "The VPC/VNET"
+  type        = string
+}
 variable "region" {
   description = "Region for the VCP/VNET deployment"
   type        = string

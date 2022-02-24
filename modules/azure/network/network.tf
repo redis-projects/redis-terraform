@@ -35,6 +35,40 @@ resource "azurerm_subnet" "private-subnet" {
     virtual_network_name = azurerm_virtual_network.vpc.name
     address_prefixes     = [ var.private_subnet_cidr ]
 }
+
+resource "azurerm_subnet" "lb-subnet" {
+    name                 = "${var.name}-lb-subnet"
+    resource_group_name  = var.resource_group
+    virtual_network_name = azurerm_virtual_network.vpc.name
+    address_prefixes     = [ var.lb_subnet_cidr ]
+}
+
+resource "azurerm_public_ip_prefix" "redis-public-prefix" {
+  name                = "${var.name}-redis-public-ip-prefix"
+  location            = var.region
+  resource_group_name = var.resource_group
+  prefix_length       = 30
+}
+
+resource "azurerm_nat_gateway" "redis-nat-gateway" {
+  name                    = "${var.name}-redis-natgateway"
+  location                = var.region
+  resource_group_name     = var.resource_group
+  sku_name                = "Standard"
+  idle_timeout_in_minutes = 10
+}
+
+resource "azurerm_nat_gateway_public_ip_prefix_association" "public_ip_nat_association" {
+  nat_gateway_id       = azurerm_nat_gateway.redis-nat-gateway.id
+  public_ip_prefix_id = azurerm_public_ip_prefix.redis-public-prefix.id
+}
+
+resource "azurerm_subnet_nat_gateway_association" "subnet-nat-association" {
+  subnet_id      = azurerm_subnet.private-subnet.id
+  nat_gateway_id = azurerm_nat_gateway.redis-nat-gateway.id
+  depends_on     = [azurerm_subnet.private-subnet]
+}
+
 resource "azurerm_subnet_network_security_group_association" "private-net" {
   subnet_id                 = azurerm_subnet.private-subnet.id
   network_security_group_id = azurerm_network_security_group.allow-local.id

@@ -47,6 +47,7 @@ class Cluster_Azure(Cluster):
         Module(f"re-{self._vpc}",
             source            = f"./modules/{self._provider}/re",
             name              = f"{os.getenv('name')}-{self._vpc}",
+            vpc               = f'${{module.network-{self._vpc}.vpc}}',
             resource_tags     = self._global_config["resource_tags"],
             machine_count     = self._worker_count,
             machine_type      = self._machine_type,
