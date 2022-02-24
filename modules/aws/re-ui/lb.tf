@@ -28,9 +28,9 @@ resource "aws_lb_target_group_attachment" "tg-ips" {
 # create NLB (Network Load Balancer)
 resource "aws_lb" "re-gui" {
   name                       = "${var.name}-lb"
-  internal                   = false
+  internal                   = length(var.ui_subnets) != 0 ? false : true
   load_balancer_type         = "network"
-  subnets                    = var.subnets
+  subnets                    = length(var.ui_subnets) != 0 ? var.subnets : var.ui_subnets
   enable_deletion_protection = false
   tags                       = "${var.resource_tags}"
 }

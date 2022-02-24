@@ -36,6 +36,11 @@ variable "lb_subnet_cidr" {
   type        = map
 }
 
+variable "ui_cidr" {
+  description = "CIDR blocks for private UI Load balancers"
+  type        = map
+}
+
 variable "availability_zone" {
   description = "Default availability zone"
   type        = string

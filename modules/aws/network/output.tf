@@ -23,6 +23,12 @@ output "lb-subnet" {
   value       = aws_subnet.lb-subnet
 }
 
+output "ui-subnet" {
+  description = "The UI Load Balancer subnets"
+  value       = aws_subnet.ui-subnet
+}
+
+
 output "public-private-security-groups" {
   description = "The ids of the private and public groups"
   value       = [aws_security_group.allow-local.id, aws_security_group.allow-ssh.id]

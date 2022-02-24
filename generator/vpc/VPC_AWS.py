@@ -38,6 +38,7 @@ class VPC_AWS(Cloud_Provider_VPC_VNET):
             availability_zone   = self._bastion_zone,
             public_subnet_cidr  = self._public_cidr,
             lb_subnet_cidr      = self._lb_cidr,
+            ui_cidr             = self._ui_cidr,
             providers           = {"aws": f"aws.{self._name}"},
             peer_request_list   = self._peer_request_list,
             peer_accept_list    = self._peer_accept_list,
@@ -93,7 +94,8 @@ class VPC_AWS(Cloud_Provider_VPC_VNET):
             vpc            = f'${{module.network-{self._name}.vpc}}',
             resource_tags  = self._global_config["resource_tags"],
             ips            = f'${{module.re-{self._name}.re-nodes.*.private_ip}}',
-            subnets        = f'${{module.network-{self._name}.private-subnet.*.id}}',
+            subnets        = f'${{module.network-{self._name}.lb-subnet.*.id}}',
+            ui_subnets     = f'${{module.network-{self._name}.ui-subnet.*.id}}',
             providers      = {"aws": f"aws.{self._name}"}
         )
 
@@ -115,10 +117,11 @@ class VPC_AWS(Cloud_Provider_VPC_VNET):
         self._region : str = "us-east-1"
         self._vpc_cidr : str = "10.1.0.0/16"
         self._lb_cidr = {}
+        self._ui_cidr = {}
         self._worker_machine_image : str = "ami-0b1db37f0fa006678"
         self._redis_user = SSH_USER
         self._ssh_public_key = SSH_PUBLIC_KEY
-        self._expose_ui = False
+        self._expose_ui = True
         self._peer_accept_list = []
         self._peer_request_list = []
         self._vpc_accept_list = []
@@ -135,6 +138,7 @@ class VPC_AWS(Cloud_Provider_VPC_VNET):
             elif key == "private_cidr": self._private_cidr = value
             elif key == "public_cidr": self._public_cidr = value
             elif key == "lb_cidr": self._lb_cidr = value
+            elif key == "ui_cidr": self._ui_cidr = value
             elif key == "provider": self._provider = value
             elif key == "region": self._region = value
             elif key == "vpc_cidr": self._vpc_cidr = value

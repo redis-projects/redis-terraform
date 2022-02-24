@@ -88,6 +88,17 @@ resource "aws_subnet" "lb-subnet" {
   })
 }
 
+resource "aws_subnet" "ui-subnet" {
+  count = length(var.ui_cidr)
+  vpc_id = aws_vpc.vpc.id
+  cidr_block = values(var.ui_cidr)[count.index]
+  availability_zone = keys(var.ui_cidr)[count.index]
+
+  tags = merge("${var.resource_tags}",{
+    Name = "${var.name}-ui-subnet-${count.index}"
+  })
+}
+
 
 ############################################################
 # NAT Gateway

@@ -13,6 +13,11 @@ variable "subnets" {
   type        = list
 }
 
+variable "ui_subnets" {
+  description = "List of UI subnets"
+  type        = list
+}
+
 variable "vpc" {
   description = "ID of the VPC"
   type        = string
