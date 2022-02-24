@@ -38,12 +38,6 @@ resource "azurerm_network_interface" "bastion-nic" {
     }
 }
 
-# Connect the security group to the network interface
-resource "azurerm_network_interface_security_group_association" "public-nic" {
-    network_interface_id      = azurerm_network_interface.bastion-nic.id
-    network_security_group_id = var.public_secgroup[0]
-}
-
 # Generate random text for a unique storage account name
 resource "random_id" "randomId" {
     keepers = {

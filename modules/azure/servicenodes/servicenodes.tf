@@ -26,13 +26,6 @@ resource "azurerm_network_interface" "service-nic" {
     })
 }
 
-# Connect the security group to the network interface
-resource "azurerm_network_interface_security_group_association" "private-nic" {
-    network_interface_id      = azurerm_network_interface.service-nic[count.index].id
-    network_security_group_id = var.security_groups[0]
-    count                     = var.machine_count
-}
-
 # Generate random text for a unique storage account name
 resource "random_id" "randomId" {
     keepers = {

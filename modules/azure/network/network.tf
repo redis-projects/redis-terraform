@@ -35,3 +35,14 @@ resource "azurerm_subnet" "private-subnet" {
     virtual_network_name = azurerm_virtual_network.vpc.name
     address_prefixes     = [ var.private_subnet_cidr ]
 }
+resource "azurerm_subnet_network_security_group_association" "private-net" {
+  subnet_id                 = azurerm_subnet.private-subnet.id
+  network_security_group_id = azurerm_network_security_group.allow-local.id
+  depends_on     = [azurerm_subnet.private-subnet, azurerm_network_security_group.allow-local]
+}
+
+resource "azurerm_subnet_network_security_group_association" "public-net" {
+  subnet_id                 = azurerm_subnet.public-subnet.id
+  network_security_group_id = azurerm_network_security_group.allow-ssh.id
+  depends_on     = [azurerm_subnet.public-subnet, azurerm_network_security_group.allow-ssh]
+}
