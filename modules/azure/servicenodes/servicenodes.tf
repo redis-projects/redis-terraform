@@ -9,6 +9,19 @@ terraform {
 }
 
 # Create network interface for Servicenodes
+resource "azurerm_public_ip" "service-public-ip" {
+    name                = "${var.name}-service-public-ip-${count.index}"
+    location            = var.region
+    resource_group_name = var.resource_group
+    allocation_method   = "Static"
+    sku                 = "Standard"
+    count               = var.machine_count
+
+    tags = merge("${var.resource_tags}",{
+        environment = "${var.name}"
+    })
+}
+
 resource "azurerm_network_interface" "service-nic" {
     name                = "${var.name}-service-${count.index}-nic"
     location            = var.region
@@ -19,6 +32,7 @@ resource "azurerm_network_interface" "service-nic" {
         name                          = "${var.name}-service-nic-${count.index}-configuration"
         subnet_id                     = var.subnet
         private_ip_address_allocation = "Dynamic"
+        public_ip_address_id          = azurerm_public_ip.service-public-ip[count.index].id
     }
 
     tags = merge("${var.resource_tags}",{
