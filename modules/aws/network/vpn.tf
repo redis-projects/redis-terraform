@@ -1,3 +1,14 @@
+locals {
+  remote_route_list = flatten([
+    for rt-private-id in aws_route_table.rt-private.*.id : [
+      for private_subnet in var.private_subnet_list : {
+        destination_cidr_block    = private_subnet
+        route_table_id            = rt-private-id
+      }
+    ]
+  ])
+}
+
 # create customer gateway
 resource "aws_customer_gateway" "main" {
   bgp_asn    = 65000
@@ -41,9 +52,9 @@ resource "aws_vpn_connection_route" "remote" {
 }
 
 # Create AWS to remote Route
-#resource "aws_route" "remoteroute" {
-#  route_table_id            = aws_route_table.rt-private.id
-#  destination_cidr_block    = "${var.private_subnet_list[count.index]}"
-#  gateway_id                = "${aws_vpn_gateway.vpn_gw[0].id}"
-#  count                     = length(var.vpn_list)
-#}
+resource "aws_route" "remoteroute" {
+  route_table_id            = local.remote_route_list[count.index].route_table_id
+  destination_cidr_block    = local.remote_route_list[count.index].destination_cidr_block
+  gateway_id                = "${aws_vpn_gateway.vpn_gw[0].id}"
+  count                     = length(var.vpn_list)*length(var.private_subnet_cidr)
+}

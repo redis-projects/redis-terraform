@@ -7,6 +7,26 @@ terraform {
   }
 }
 
+locals {
+  private-req-list = flatten([
+    for rt-private-id in aws_route_table.rt-private.*.id : [
+      for peer_conn in aws_vpc_peering_connection.peer.*.id : {
+        vpc_peering_connection_id = peer_conn
+        destination_cidr_block    = var.cidr_map[var.peer_request_list[index(aws_vpc_peering_connection.peer.*.id ,peer_conn)]]
+        route_table_id            = rt-private-id
+      }
+    ]
+  ])
+  private-acc-list = flatten([
+    for rt-private-id in aws_route_table.rt-private.*.id : [
+      for peer_conn in var.vpc_conn_index : {
+        vpc_peering_connection_id = peer_conn
+        destination_cidr_block    = var.cidr_map[var.peer_accept_list[index(var.vpc_conn_index ,peer_conn)]]
+        route_table_id            = rt-private-id
+      }
+    ]
+  ])
+}
 
 ############################################################
 # VPC
@@ -184,33 +204,33 @@ resource "aws_route" "lb-allowipv6" {
 }
 
 # Add route to the VPC of the peering request to routing table (private)
-#resource "aws_route" "private-req" {
-#  route_table_id            = aws_route_table.rt-private.id
-#  destination_cidr_block    = var.cidr_map[var.peer_request_list[count.index]]
-#  vpc_peering_connection_id = aws_vpc_peering_connection.peer[count.index].id
-#  count                     = length(var.peer_request_list)
-#}
+resource "aws_route" "private-req" {
+  route_table_id            = local.private-req-list[count.index].route_table_id
+  destination_cidr_block    = local.private-req-list[count.index].destination_cidr_block
+  vpc_peering_connection_id = local.private-req-list[count.index].vpc_peering_connection_id
+  count                     = length(var.peer_request_list)*length(var.private_subnet_cidr)
+}
 
 # Add route to the VPC of the peering request to routing table (public)
-#resource "aws_route" "public-req" {
-#  route_table_id            = aws_route_table.rt-public.id
-#  destination_cidr_block    = var.cidr_map[var.peer_request_list[count.index]]
-#  vpc_peering_connection_id = aws_vpc_peering_connection.peer[count.index].id
-#  count                     = length(var.peer_request_list)
-#}
+resource "aws_route" "public-req" {
+  route_table_id            = aws_route_table.rt-public.id
+  destination_cidr_block    = var.cidr_map[var.peer_request_list[count.index]]
+  vpc_peering_connection_id = aws_vpc_peering_connection.peer[count.index].id
+  count                     = length(var.peer_request_list)
+}
 
 # Add route to the VPC of the peering accept to routing table (private)
-#resource "aws_route" "private-acc" {
-#  route_table_id            = aws_route_table.rt-private.id
-#  destination_cidr_block    = var.cidr_map[var.peer_accept_list[count.index]]
-#  vpc_peering_connection_id = var.vpc_conn_index[count.index]
-#  count                     = length(var.peer_accept_list)
-#}
+resource "aws_route" "private-acc" {
+  route_table_id            = local.private-acc-list[count.index].route_table_id
+  destination_cidr_block    = local.private-acc-list[count.index].destination_cidr_block
+  vpc_peering_connection_id = local.private-acc-list[count.index].vpc_peering_connection_id
+  count                     = length(var.vpc_conn_index)*length(var.private_subnet_cidr)
+}
 
 # Add route to the VPC of the peering accept to routing table (public)
-#resource "aws_route" "public-acc" {
-#  route_table_id            = aws_route_table.rt-public.id
-#  destination_cidr_block    = var.cidr_map[var.peer_accept_list[count.index]]
-#  vpc_peering_connection_id = var.vpc_conn_index[count.index]
-#  count                     = length(var.peer_accept_list)
-#}
+resource "aws_route" "public-acc" {
+  route_table_id            = aws_route_table.rt-public.id
+  destination_cidr_block    = var.cidr_map[var.peer_accept_list[count.index]]
+  vpc_peering_connection_id = var.vpc_conn_index[count.index]
+  count                     = length(var.peer_accept_list)
+}
