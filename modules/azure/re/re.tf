@@ -63,6 +63,7 @@ resource "azurerm_linux_virtual_machine" "redis" {
       name                 = "${var.name}-redis-${count.index}_os_disk"
       caching              = "ReadWrite"
       storage_account_type = "Premium_LRS"
+#      disk_size_gb         = 35
     }
 
     source_image_reference {
@@ -98,3 +99,22 @@ resource "azurerm_linux_virtual_machine" "redis" {
         environment = "${var.name}"
     })
 }
+#resource "azurerm_managed_disk" "datadisk" {
+#  name                 = "${var.name}-redis-${count.index}-datadisk"
+#  location             = var.region
+#  resource_group_name  = var.resource_group
+#  storage_account_type = "Premium_LRS"
+#  create_option        = "Empty"
+#  disk_size_gb         = 4000
+#  count                = var.machine_count
+#  zones                = [ sort(var.zones)[count.index % length(var.zones)] ]
+#}
+
+#resource "azurerm_virtual_machine_data_disk_attachment" "datadisk" {
+#  managed_disk_id    = azurerm_managed_disk.datadisk[count.index].id
+#  virtual_machine_id = azurerm_linux_virtual_machine.redis[count.index].id
+#  lun                = "3"
+#  caching            = "ReadWrite"
+#  count              = var.machine_count
+#}
+

@@ -67,3 +67,20 @@ resource "aws_instance" "node" {
   })
 }
 
+#resource "aws_volume_attachment" "datadisk" {
+#  device_name = "/dev/sdc"
+#  volume_id   = aws_ebs_volume.datadisk[count.index].id
+#  instance_id = aws_instance.node[count.index].id
+#  count       = var.worker_count
+#}
+#resource "aws_ebs_volume" "datadisk" {
+#  availability_zone = sort(var.zones)[count.index % length(var.zones)]
+#  size              = 5000
+#  type              = "gp2"
+#  count             = var.worker_count
+#
+#  tags = merge("${var.resource_tags}",{
+#    Name = "${var.name}-datadisk-${count.index}"
+#  })
+#}
+
