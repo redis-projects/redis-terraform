@@ -8,21 +8,6 @@ terraform {
   }
 }
 
-# Create public IP for Redis nodes
-resource "azurerm_public_ip" "redis-public-ip" {
-    name                = "${var.name}-redis-${count.index}-public-ip"
-    location            = var.region
-    resource_group_name = var.resource_group
-    allocation_method   = "Static"
-    sku                 = "Standard"
-    availability_zone   = sort(var.zones)[count.index % length(var.zones)]
-    count               = var.machine_count
-
-    tags = merge("${var.resource_tags}",{
-        environment = "${var.name}"
-    })
-}
-
 # Create network interface for Redis nodes
 resource "azurerm_network_interface" "redis-nic" {
     name                = "${var.name}-redis-${count.index}-nic"
@@ -34,7 +19,6 @@ resource "azurerm_network_interface" "redis-nic" {
         name                          = "${var.name}-redis-nic-${count.index}-configuration"
         subnet_id                     = var.private_subnet_id
         private_ip_address_allocation = "Dynamic"
-        public_ip_address_id          = azurerm_public_ip.redis-public-ip[count.index].id
     }
 
     tags = merge("${var.resource_tags}",{
