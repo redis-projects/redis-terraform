@@ -66,12 +66,10 @@ class Nameserver_Entries(object):
         self._provider : str = None
         logging.debug("Creating Object of class "+self.__class__.__name__+" with class arguments "+str(kwargs))
         for key, value in kwargs.items():
-            if key == "provider": self._provider = value
-            elif key == "domain": self._domain = value
+            if key   == "domain": self._domain = value
             elif key == "parent_zone": self._parent_zone = value
             elif key == "vpc": self._vpc = value
             elif key == "cluster": self._cluster = value
-            elif key == "provider": self._provider = value
             else:
                 logging.warn(f"Class {self.__class__.__name__}: Key {key} is being ignored ")
         
@@ -85,10 +83,6 @@ class Nameserver_Entries(object):
             logging.error(f"Property 'parent_zone' required for each entry of 'nameservers'")
             sys.exit(1)
 
-        # If provider was not set, assume provider is identical to the VPC/VNET provider            
-        if self._provider == None:
-            self._provider = vpc[self._vpc].get_provider()
+        self._provider = vpc[self._vpc].get_provider()
 
         self._cluster_fqdn = f"{deployment_name()}-{self._cluster}.{self._domain}"
-        
-

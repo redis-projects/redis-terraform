@@ -3,6 +3,33 @@
 Tracking all changes for the "Terraform" project building Redis-Enterprise
 clusters on a public clould infrastructure.
 
+## [0.9.1] - Unreleased
+### Added
+- New "docker" service implemented and a vault as POC
+- Adding VPN functionality between AWS and Azure
+- RIOT is introduced to migrate Redis data as part of the new 'services'
+- grafana has been added to the 'services' for monitoring
+- prometheus has been added to the 'services' for monitoring
+- Service nodes can now we deployed in the public subnet to run services
+- Clusters deployed in Azure can have DNS in AWS (Route53)
+- Azure deployments can now use images without plan (free)
+- The VPC/VNET names can be specified in the config file
+- The UI access can now be public or internal only
+- The tags for the resources can be specified in the config file
+### Changed
+- Python code is refactored with OOP design
+- moving keywords 'rack_aware', 'redis_distro' from network section to the 
+  'clusters' section
+- rebooting Redis cluster nodes in post-provisioningto clear yum locks
+- Removing ssh tunneling between clusters of diffeent cloud providers
+- Security groups in Azure are now associated to the subnets intead of NICs
+- The internet gateway was removed for the private subnets and replaced by
+  NAT gateways (egress) and a network load balancer on port 53/udp for
+  ingress DNS traffic. This is for tightening security. AWS and Azure only.
+- For Azure, the service principal can now use a certificate or a password and
+  theuser/password can be set through environment variables as an alternative
+  to the config file
+
 ## [0.9.0] - Unreleased
 ### Added
 - Support for Azure was added, including DNS, rack awareness, exporting the GUI

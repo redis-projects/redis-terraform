@@ -1,0 +1,108 @@
+---
+global:
+  resource_tags:
+    owner: Homer Simpson
+    env: production
+    service: donut
+clusters:
+  - name: az-redis-cluster
+    vpc: prod-az-redis
+    worker_count: 3
+    machine_type: Standard_B2s
+    machine_image: OpenLogic:CentOS:7.5:7.5.201808150
+    zones:
+    - 1
+    - 2
+    - 3
+    expose_ui: True
+    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.8/redislabs-6.2.8-53-rhel7-x86_64.tar
+    rack_aware: True
+  - name: aws-redis-cluster
+    vpc: prod-aws-redis
+    worker_count: 3
+    machine_type: t3.medium
+    machine_image: ami-04c84f136b3c9d872
+    zones:
+    - ap-south-1a
+    - ap-south-1b
+    - ap-south-1c
+    expose_ui: True
+    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.8/redislabs-6.2.8-53-rhel7-x86_64.tar
+    rack_aware: True
+networks:
+  - name: prod-az-redis
+    resource_name: az-redis-vnet
+    vpc_cidr: 10.71.0.0/22
+    public_cidr: 10.71.1.0/25
+    private_cidr: 10.71.0.128/25
+    lb_cidr: 10.71.2.0/24
+    gateway_cidr: 10.71.3.0/26
+    region: CentralIndia
+    bastion_zone: 3
+    bastion_machine_image: OpenLogic:CentOS:7.5:7.5.201808150
+    bastion_machine_type: Standard_B2s
+    provider: azure
+    resource_group: ps-verse-rg
+    subscription_id: ef03f41d-d2bd-4691-b3a0-3aff1c6711f7
+    tenant_id: 1428732f-21cf-469e-ad48-5721f4eac1e2
+    application_id: e333cbb0-7738-470a-8472-d9fe7484b217
+    client_certificate_path: /Users/audi/.ssh/ps-verse-keyvault-ps-verse-20220208.pfx
+  - name: prod-aws-redis
+    resource_name: aws-redis-vpc
+    vpc_cidr: 10.17.0.0/23
+    public_cidr:
+      ap-south-1a: 10.17.0.64/26
+      ap-south-1b: 10.17.0.128/26
+      ap-south-1c: 10.17.0.192/26
+    private_cidr:
+      ap-south-1a: 10.17.1.64/26
+      ap-south-1b: 10.17.1.128/26
+      ap-south-1c: 10.17.1.192/26
+    lb_cidr:
+      ap-south-1a: 10.17.0.0/28
+      ap-south-1b: 10.17.0.16/28
+      ap-south-1c: 10.17.0.32/28
+    ui_cidr: 
+      ap-south-1a: 10.17.1.0/28
+      ap-south-1b: 10.17.1.16/28
+      ap-south-1c: 10.17.1.32/28
+    region: ap-south-1
+    bastion_zone: ap-south-1c
+    bastion_machine_image: ami-04c84f136b3c9d872
+    bastion_machine_type: t3.medium
+    peer_with:
+    - prod-az-redis
+    provider: aws
+services:
+  - type: docker
+    name: vi-aws
+    contents: vi
+    servicenode: prod-service-nodes-aws
+  - type: docker
+    name: vi-az
+    contents: vi
+    servicenode: prod-service-nodes-az
+servicenodes:
+  - name: prod-service-nodes-az
+    vpc: prod-az-redis
+    count: 1
+    machine_type: Standard_B2s
+    machine_image: OpenLogic:CentOS:7.5:7.5.201808150
+    zones:
+    - 1
+  - name: prod-service-nodes-aws
+    vpc: prod-aws-redis
+    count: 1
+    machine_type: t3.medium
+    machine_image: ami-04c84f136b3c9d872
+    zones:
+    - ap-south-1a
+nameservers:
+  - cluster: aws-redis-cluster
+    vpc: prod-aws-redis
+    parent_zone: aws.ps-redislabs.com
+    domain: aws.ps-redislabs.com
+  - cluster: az-redis-cluster
+    vpc: prod-aws-redis
+    parent_zone: aws.ps-redislabs.com
+    domain: aws.ps-redislabs.com
