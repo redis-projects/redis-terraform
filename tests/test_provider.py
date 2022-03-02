@@ -2,7 +2,7 @@
 import pytest
 from exceptions_test_input import *
 import os
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 import yaml
 import json
 
@@ -30,17 +30,23 @@ def readconfigs():
 @pytest.fixture(autouse=True)
 def readexpected():
     def readfile(file):
-        f = open(file + ".aws", "r")
-        fg = open(file + ".gcp", "r")
-        fz = open(file + ".azure", "r")
+        if os.path.exists(file):
+            f = open(file, "r")
+            return json.load(f)
+        return []
 
-        return (json.load(f), json.load(fz), json.load(fg))
+    def readfiles(file):
+        f = readfile(file + ".aws")
+        fg = readfile(file + ".gcp")
+        fz = readfile(file + ".azure")
+
+        return (f, fz, fg)
 
     expected = {
-        "gcp": readfile("tests/provider.test.gcp"),
-        "aws": readfile("tests/provider.test.aws"),
-        "azure": readfile("tests/provider.test.azure"),
-        "mixed": readfile("tests/provider.test.mixed")
+        "gcp": readfiles("tests/provider.test.gcp"),
+        "aws": readfiles("tests/provider.test.aws"),
+        "azure": readfiles("tests/provider.test.azure"),
+        "mixed": readfiles("tests/provider.test.mixed")
     }
     return expected
 

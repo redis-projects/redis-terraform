@@ -70,14 +70,3 @@ def test_register(monkeypatch, getenv, readconfigs, readexpected, provider):
     #Azure diff returns {replace: {}} for an uninvestigated reason.
     #Just compared instead since it is still valid and shows no difference.
     assert str(mydiff) == '{replace: {}}' or mydiff == {}
-
-#Just a safe guard to ensure we are not testing with a mock since test_provider
-#uses Mock and we don't want a leak
-def test_providers_not_mock(monkeypatch, getenv):
-    [monkeypatch.setenv(x, getenv[x]) for x in getenv]
-
-    import providers
-    from unittest.mock import Mock
-    assert not isinstance(providers.aws, Mock)
-    assert not isinstance(providers.azure, Mock)
-    assert not isinstance(providers.gcp, Mock)

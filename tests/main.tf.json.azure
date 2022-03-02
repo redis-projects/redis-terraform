@@ -80,10 +80,7 @@
         "Azure-bastion-vpc-azure-us-ip-output": {
             "value": "${module.bastion-vpc-azure-us.bastion-public-ip}"
         },
-        "vpc-azure-europe-dns-name": {
-            "value": "unit-test-name-cluster1.azure.ps-redislabs.com"
-        },
-        "vpc-azure-us-dns-name": {
+        "DNS-Name_cluster_cluster1": {
             "value": "unit-test-name-cluster1.azure.ps-redislabs.com"
         }
     },
@@ -97,6 +94,7 @@
             "public_subnet_cidr": "10.1.1.0/24",
             "private_subnet_cidr": "10.1.2.0/24",
             "gateway_subnet_cidr": "10.2.3.0/27",
+            "lb_subnet_cidr": {},
             "region": "germanywestcentral",
             "resource_group": "terratest-rg",
             "expose_ui": true,
@@ -131,6 +129,7 @@
             "public_subnet_cidr": "10.2.1.0/24",
             "private_subnet_cidr": "10.2.2.0/24",
             "gateway_subnet_cidr": "10.2.3.0/27",
+            "lb_subnet_cidr": {},
             "region": "WestUS3",
             "resource_group": "terratest-rg",
             "expose_ui": true,
@@ -188,10 +187,10 @@
                 "azurerm": "azurerm.vpc-azure-us"
             }
         },
-        "ns-vpc-azure-europe": {
+        "ns-cluster1": {
             "source": "./modules/azure/ns",
             "providers": {
-                "azurerm": "azurerm.vpc-azure-europe"
+                "azurerm": "azurerm.vpc-azure-us"
             },
             "cluster_fqdn": "unit-test-name-cluster1.azure.ps-redislabs.com",
             "parent_zone": "azure.ps-redislabs.com",
@@ -199,20 +198,10 @@
             "resource_tags": {},
             "resource_group": "terratest-rg"
         },
-        "ns-vpc-azure-us": {
-            "source": "./modules/azure/ns",
-            "providers": {
-                "azurerm": "azurerm.vpc-azure-us"
-            },
-            "cluster_fqdn": "unit-test-name-cluster1.azure.ps-redislabs.com",
-            "parent_zone": "azure.ps-redislabs.com",
-            "ip_addresses": "${module.re-vpc-azure-us.re-public-ips}",
-            "resource_tags": {},
-            "resource_group": "terratest-rg"
-        },
         "re-vpc-azure-europe": {
             "source": "./modules/azure/re",
             "name": "unit-test-name-vpc-azure-europe",
+            "vpc": "${module.network-vpc-azure-europe.vpc}",
             "resource_tags": {},
             "machine_count": 3,
             "machine_type": "Standard_B2s",
@@ -245,6 +234,7 @@
         "re-vpc-azure-us": {
             "source": "./modules/azure/re",
             "name": "unit-test-name-vpc-azure-us",
+            "vpc": "${module.network-vpc-azure-us.vpc}",
             "resource_tags": {},
             "machine_count": 3,
             "machine_type": "Standard_B2s",

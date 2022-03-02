@@ -81,7 +81,7 @@ def generate(config_file):
             elif provider == "gcp":
                 re_cluster[f'{cluster["name"]}'] = Cluster_GCP(**cluster)
             logging.debug(f"A new cluster for VPC/VNET {cluster['vpc']} has been added with the arguments {cluster}")
-
+    
     if 'servicenodes' in config_file:
         for sn in config_file['servicenodes']:
             provider = vpc[sn["vpc"]].get_provider()

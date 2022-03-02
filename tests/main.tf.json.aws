@@ -60,16 +60,16 @@
         "vpc-aws-europe-ui-endpoint": {
             "value": "${module.re-ui-vpc-aws-europe.ui-ip}"
         },
-        "aws-bastion-vpc-aws-us-ip-output": {
+        "AWS-bastion-vpc-aws-us-ip-output": {
             "value": "${module.bastion-vpc-aws-us.bastion-public-ip}"
         },
-        "aws-bastion-vpc-aws-europe-ip-output": {
+        "AWS-bastion-vpc-aws-europe-ip-output": {
             "value": "${module.bastion-vpc-aws-europe.bastion-public-ip}"
         },
-        "vpc-aws-us-dns-name": {
+        "DNS-Name_cluster_clusterA": {
             "value": "unit-test-name-clusterA.aws.ps-redislabs.com"
         },
-        "vpc-aws-europe-dns-name": {
+        "DNS-Name_cluster_clusterB": {
             "value": "unit-test-name-clusterB.aws.ps-redislabs.com"
         }
     },
@@ -80,9 +80,19 @@
             "resource_name": "unit-test-name-vpc-aws-us-vpc",
             "resource_tags": {},
             "vpc_name": "vpc-aws-us",
-            "vpc_cidr": "10.1.0.0/16",
+            "vpc_cidr": "10.17.0.0/23",
             "availability_zone": "us-east-1c",
-            "public_subnet_cidr": "10.1.1.0/24",
+            "public_subnet_cidr": {
+                "us-east-1a": "10.17.0.64/26",
+                "us-east-1b": "10.17.0.128/26",
+                "us-east-1c": "10.17.0.192/26"
+            },
+            "lb_subnet_cidr": {
+                "us-east-1a": "10.17.0.0/27",
+                "us-east-1b": "10.17.0.32/27",
+                "us-east-1c": "10.17.1.0/27"
+            },
+            "ui_cidr": {},
             "providers": {
                 "aws": "aws.vpc-aws-us"
             },
@@ -102,15 +112,15 @@
                 "vpc-aws-europe": "eu-central-1"
             },
             "cidr_map": {
-                "vpc-aws-us": "10.1.0.0/16",
-                "vpc-aws-europe": "10.0.0.0/16"
+                "vpc-aws-us": "10.17.0.0/23",
+                "vpc-aws-europe": "10.0.0.0/23"
             },
             "vpc_conn_index": [],
             "private_subnet_list": [],
             "private_subnet_cidr": {
-                "us-east-1a": "10.1.3.0/24",
-                "us-east-1b": "10.1.2.0/24",
-                "us-east-1c": "10.1.4.0/24"
+                "us-east-1a": "10.17.1.64/26",
+                "us-east-1b": "10.17.1.128/26",
+                "us-east-1c": "10.17.1.192/26"
             }
         },
         "re-ui-vpc-aws-us": {
@@ -119,7 +129,8 @@
             "vpc": "${module.network-vpc-aws-us.vpc}",
             "resource_tags": {},
             "ips": "${module.re-vpc-aws-us.re-nodes.*.private_ip}",
-            "subnets": "${module.network-vpc-aws-us.private-subnet.*.id}",
+            "subnets": "${module.network-vpc-aws-us.lb-subnet.*.id}",
+            "ui_subnets": "${module.network-vpc-aws-us.ui-subnet.*.id}",
             "providers": {
                 "aws": "aws.vpc-aws-us"
             }
@@ -130,9 +141,19 @@
             "resource_name": "unit-test-name-vpc-aws-europe-vpc",
             "resource_tags": {},
             "vpc_name": "vpc-aws-europe",
-            "vpc_cidr": "10.0.0.0/16",
+            "vpc_cidr": "10.0.0.0/23",
             "availability_zone": "eu-central-1b",
-            "public_subnet_cidr": "10.0.1.0/24",
+            "public_subnet_cidr": {
+                "eu-central-1a": "10.0.0.64/26",
+                "eu-central-1b": "10.0.0.128/26",
+                "eu-central-1c": "10.0.0.192/26"
+            },
+            "lb_subnet_cidr": {
+                "eu-central-1a": "10.0.0.0/27",
+                "eu-central-1b": "10.0.0.32/27",
+                "eu-central-1c": "10.0.1.0/27"
+            },
+            "ui_cidr": {},
             "providers": {
                 "aws": "aws.vpc-aws-europe"
             },
@@ -152,17 +173,17 @@
                 "vpc-aws-europe": "eu-central-1"
             },
             "cidr_map": {
-                "vpc-aws-europe": "10.0.0.0/16",
-                "vpc-aws-us": "10.1.0.0/16"
+                "vpc-aws-europe": "10.0.0.0/23",
+                "vpc-aws-us": "10.17.0.0/23"
             },
             "vpc_conn_index": [
                 "${module.network-vpc-aws-us.peering-request-ids[\"vpc-aws-europe\"]}"
             ],
             "private_subnet_list": [],
             "private_subnet_cidr": {
-                "eu-central-1b": "10.0.3.0/24",
-                "eu-central-1a": "10.0.2.0/24",
-                "eu-central-1c": "10.0.4.0/24"
+                "eu-central-1a": "10.0.1.64/26",
+                "eu-central-1b": "10.0.1.128/26",
+                "eu-central-1c": "10.0.1.192/26"
             }
         },
         "re-ui-vpc-aws-europe": {
@@ -171,7 +192,8 @@
             "vpc": "${module.network-vpc-aws-europe.vpc}",
             "resource_tags": {},
             "ips": "${module.re-vpc-aws-europe.re-nodes.*.private_ip}",
-            "subnets": "${module.network-vpc-aws-europe.private-subnet.*.id}",
+            "subnets": "${module.network-vpc-aws-europe.lb-subnet.*.id}",
+            "ui_subnets": "${module.network-vpc-aws-europe.ui-subnet.*.id}",
             "providers": {
                 "aws": "aws.vpc-aws-europe"
             }
@@ -190,7 +212,7 @@
             "vpc": "${module.network-vpc-aws-us.vpc}",
             "name": "unit-test-name-vpc-aws-us",
             "resource_tags": {},
-            "subnet": "${module.network-vpc-aws-us.public-subnet}",
+            "subnet": "${module.network-vpc-aws-us.public-subnet[2].id}",
             "ami": "ami-0b1db37f0fa006678",
             "instance_type": "t2.micro",
             "redis_user": "redislabs",
@@ -216,7 +238,7 @@
             "vpc": "${module.network-vpc-aws-europe.vpc}",
             "name": "unit-test-name-vpc-aws-europe",
             "resource_tags": {},
-            "subnet": "${module.network-vpc-aws-europe.public-subnet}",
+            "subnet": "${module.network-vpc-aws-europe.public-subnet[1].id}",
             "ami": "ami-02241e4f36e06d650",
             "instance_type": "t2.micro",
             "redis_user": "redislabs",
@@ -228,7 +250,7 @@
             "security_groups": "${module.network-vpc-aws-europe.public-security-groups}",
             "availability_zone": "eu-central-1b"
         },
-        "ns-vpc-aws-us": {
+        "ns-clusterA": {
             "source": "./modules/aws/ns",
             "providers": {
                 "aws": "aws.vpc-aws-us"
@@ -236,9 +258,9 @@
             "cluster_fqdn": "unit-test-name-clusterA.aws.ps-redislabs.com",
             "parent_zone": "aws.ps-redislabs.com",
             "resource_tags": {},
-            "ip_addresses": "${module.re-vpc-aws-us.re-public-ips}"
+            "dns_lb_name": "${module.re-vpc-aws-us.dns-lb-name}"
         },
-        "ns-vpc-aws-europe": {
+        "ns-clusterB": {
             "source": "./modules/aws/ns",
             "providers": {
                 "aws": "aws.vpc-aws-europe"
@@ -246,11 +268,12 @@
             "cluster_fqdn": "unit-test-name-clusterB.aws.ps-redislabs.com",
             "parent_zone": "aws.ps-redislabs.com",
             "resource_tags": {},
-            "ip_addresses": "${module.re-vpc-aws-europe.re-public-ips}"
+            "dns_lb_name": "${module.re-vpc-aws-europe.dns-lb-name}"
         },
         "re-vpc-aws-us": {
             "source": "./modules/aws/re",
             "name": "unit-test-name-vpc-aws-us",
+            "vpc": "${module.network-vpc-aws-us.vpc}",
             "resource_tags": {},
             "worker_count": 3,
             "instance_type": "t2.xlarge",
@@ -267,7 +290,8 @@
                 "us-east-1b",
                 "us-east-1c"
             ],
-            "subnet": "${module.network-vpc-aws-us.private-subnet}"
+            "subnet": "${module.network-vpc-aws-us.private-subnet}",
+            "lb_subnet": "${module.network-vpc-aws-us.lb-subnet}"
         },
         "re-provisioner-vpc-aws-us": {
             "source": "./modules/ansible/re",
@@ -281,6 +305,7 @@
         "re-vpc-aws-europe": {
             "source": "./modules/aws/re",
             "name": "unit-test-name-vpc-aws-europe",
+            "vpc": "${module.network-vpc-aws-europe.vpc}",
             "resource_tags": {},
             "worker_count": 3,
             "instance_type": "t2.xlarge",
@@ -297,7 +322,8 @@
                 "eu-central-1b",
                 "eu-central-1a"
             ],
-            "subnet": "${module.network-vpc-aws-europe.private-subnet}"
+            "subnet": "${module.network-vpc-aws-europe.private-subnet}",
+            "lb_subnet": "${module.network-vpc-aws-europe.lb-subnet}"
         },
         "re-provisioner-vpc-aws-europe": {
             "source": "./modules/ansible/re",

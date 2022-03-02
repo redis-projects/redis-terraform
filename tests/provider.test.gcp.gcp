@@ -32,13 +32,16 @@
 	["().get_provider", [], {}],
 	["().get_region", [], {}],
 	["().get_resource_group", [], {}],
+	["().get_provider", [], {}],
+	["().get_provider", [], {}],
+	["().get_region", [], {}],
 	["().add_peers", [
 		["vpc-gcp-us"]
 	], {}],
 	["().create_network", [], {}],
-	["().create_re_ui", [], {}],
+	["().expose_re_ui", [], {}],
 	["().create_network", [], {}],
-	["().create_re_ui", [], {}],
+	["().expose_re_ui", [], {}],
 	["().create_bastion", [], {}],
 	["().create_bastion", [], {}]
 ]

@@ -10,6 +10,10 @@ class Nameserver_Entries(object):
         
         from generator.generator import deployment_name, vpc, re_cluster
 
+        if self._cluster not in re_cluster:
+            raise Exception(f"The specified cluster ({self._cluster}) is not found in the 'clusters' section")
+
+        #TODO: This should be done abstractly
         if self._provider== "azure":
             Module(f"ns-{self._cluster}",
                 source         = f"./modules/{self._provider}/ns",
@@ -42,8 +46,6 @@ class Nameserver_Entries(object):
 
         Output(f"DNS-Name_cluster_{self._cluster}", value = self._cluster_fqdn)
 
-        if self._cluster not in re_cluster:
-            raise Exception(f"The specified cluster ({self._cluster}) is not found in the 'clusters' section")
         re_cluster[f"{self._cluster}"].set_cluster_name(self._cluster_fqdn)
 
     def get_domain(self):
