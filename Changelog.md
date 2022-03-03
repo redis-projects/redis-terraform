@@ -3,7 +3,7 @@
 Tracking all changes for the "Terraform" project building Redis-Enterprise
 clusters on a public clould infrastructure.
 
-## [0.9.1] - Unreleased
+## [0.9.1] - Released
 ### Added
 - New "docker" service implemented and a vault as POC
 - Adding VPN functionality between AWS and Azure
