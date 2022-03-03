@@ -3,6 +3,11 @@ variable "name" {
   type        = string
 }
 
+variable "vnet_name" {
+  description = "Name of this VNET"
+  type        = string
+}
+
 variable "resource_name" {
   description = "Name to be given to the VNET"
   type        = string
@@ -10,10 +15,6 @@ variable "resource_name" {
 
 variable "resource_tags" {
   description = "hash with tags for all resources"
-}
-variable "expose_ui" {
-  description = "Boolean to tell if the GUI port should be exposed"
-  type        = bool
 }
 
 variable "vpc_cidr" {
@@ -29,12 +30,13 @@ variable "private_subnet_cidr" {
   type        = string
 }
 
-variable "gateway_subnet_cidr" {
-  description = "CIDR for the VPN gateway subnet"
+variable "ui_cidr" {
+  description = "CIDR blocks for private UI Load balancers"
   type        = string
 }
-variable "lb_subnet_cidr" {
-  description = "CIDR for the Loadbalancer subnet"
+
+variable "gateway_subnet_cidr" {
+  description = "CIDR for the VPN gateway subnet"
   type        = string
 }
 
@@ -62,12 +64,12 @@ variable "vpn_list" {
   description = "List of VPC/VNETs which are connected via VPN"
   type        = list
 }
-
-variable "vpn_connections" {
-  description = "List of VPN connections"
+variable "gcp_azure_vpns" {
+  description = "List of objects for peered GCP networks"
   type        = list
 }
-variable "vpn_vpc_list" {
-  description = "List of VPCs we connect to through VPN"
+
+variable "aws_vpns" {
+  description = "List of objects for peered AWS networks"
   type        = list
 }

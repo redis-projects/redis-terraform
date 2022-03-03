@@ -47,6 +47,20 @@ resource "azurerm_network_security_rule" "public-outgoing" {
     network_security_group_name = azurerm_network_security_group.allow-ssh.name
 }
 
+resource "azurerm_network_security_rule" "grafana" {
+    name                        = "${var.name}-grafana"
+    priority                    = 1003
+    direction                   = "Inbound"
+    access                      = "Allow"
+    protocol                    = "TCP"
+    source_port_range           = "*"
+    destination_port_range      = "3000"
+    source_address_prefix       = "*"
+    destination_address_prefix  = "*"
+    resource_group_name         = var.resource_group
+    network_security_group_name = azurerm_network_security_group.allow-ssh.name
+}
+
 resource "azurerm_network_security_rule" "private-incoming" {
     name                        = "${var.name}-private-incoming"
     priority                    = 1101
@@ -76,7 +90,6 @@ resource "azurerm_network_security_rule" "private-dns" {
 }
 
 resource "azurerm_network_security_rule" "Redis-GUI" {
-    count                       = var.expose_ui ? 1 : 0
     name                        = "${var.name}-GUI-REST-traffic"
     priority                    = 1104
     direction                   = "Inbound"

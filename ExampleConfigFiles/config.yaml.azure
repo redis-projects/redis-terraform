@@ -5,6 +5,7 @@ clusters:
     worker_count: 3 
     machine_type: Standard_B2s
     machine_image: cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810
+    machine_plan: centos-8-3-free:centos-8-3-free:cognosys
     zones: 
     - 1
     - 2
@@ -17,6 +18,7 @@ clusters:
     worker_count: 3 
     machine_type: Standard_B2s
     machine_image: cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810
+    machine_plan: centos-8-3-free:centos-8-3-free:cognosys
     zones: 
     - 1
     - 2
@@ -32,6 +34,7 @@ networks:
     region: germanywestcentral
     bastion_zone: 2
     bastion_machine_image: cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810
+    bastion_machine_plan: centos-8-3-free:centos-8-3-free:cognosys
     bastion_machine_type: Standard_B1s
     provider: azure
     resource_group: terratest-rg
@@ -48,6 +51,7 @@ networks:
     region: WestUS3
     bastion_zone: 2
     bastion_machine_image: cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810
+    bastion_machine_plan: centos-8-3-free:centos-8-3-free:cognosys
     bastion_machine_type: Standard_B1s
     provider: azure
     resource_group: terratest-rg
@@ -60,9 +64,7 @@ nameservers:
     vpc: vpc-azure-europe
     parent_zone: azure.ps-redislabs.com
     domain: azure.ps-redislabs.com
-    provider: azure
-  - cluster: cluster1
+  - cluster: cluster2
     vpc: vpc-azure-us
     parent_zone: azure.ps-redislabs.com
     domain: azure.ps-redislabs.com
-    provider: azure

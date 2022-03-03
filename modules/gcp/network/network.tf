@@ -28,6 +28,15 @@ resource "google_compute_subnetwork" "private-subnet" {
   region        = var.region
 }
 
+
+resource "google_compute_subnetwork" "ui-subnet" {
+  count         = length(var.ui_cidr) == 0 ? 0 : 1
+  name          = "${var.name}-ui-subnet"
+  network       = google_compute_network.vpc.name
+  ip_cidr_range = var.ui_cidr
+  region        = var.region
+}
+
 resource "google_compute_router" "router" {
   name    = "${var.name}-router"
   region  = google_compute_subnetwork.private-subnet.region
@@ -74,7 +83,7 @@ resource "google_compute_firewall" "private-firewall" {
     protocol = "ipip"
   }
 
-  source_ranges = concat([var.gce_public_subnet_cidr], [var.gce_private_subnet_cidr], var.cidr_list)
+  source_ranges = concat([var.gce_public_subnet_cidr], [var.gce_private_subnet_cidr], var.cidr_list, var.private_subnet_list)
 }
 
 resource "google_compute_firewall" "private-ui-firewall" {
@@ -103,7 +112,7 @@ resource "google_compute_firewall" "public-firewall" {
 
   allow {
     protocol = "tcp"
-    ports    = ["22", "80", "443", "9443", "12000"]
+    ports    = ["22", "80", "443", "3000"]
   }
 
   source_ranges = ["0.0.0.0/0"]

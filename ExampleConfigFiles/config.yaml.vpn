@@ -21,6 +21,7 @@ clusters:
     worker_count: 3 
     machine_type: Standard_B2s
     machine_image: cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810
+    machine_plan: centos-8-3-free:centos-8-3-free:cognosys
     zones: 
     - 1
     - 2
@@ -63,6 +64,7 @@ networks:
     region: WestUS3
     bastion_zone: 2
     bastion_machine_image: cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810
+    bastion_machine_plan: centos-8-3-free:centos-8-3-free:cognosys
     bastion_machine_type: Standard_B1s
     provider: azure
     resource_group: terratest-rg

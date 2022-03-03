@@ -2,3 +2,4 @@ terraformpy
 pyyaml
 pytest-xdist
 jsondiff
+secrets

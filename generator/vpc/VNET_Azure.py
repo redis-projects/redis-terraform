@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 import os
 import logging
+import string
 from generator import SSH_USER, SSH_PUBLIC_KEY
 from generator.vpc.Cloud_Provider_VPC_VNET import Cloud_Provider_VPC_VNET
 
@@ -9,32 +10,36 @@ from terraformpy import Module, Provider, Data, Output
 from typing import List
 
 class VNET_Azure(Cloud_Provider_VPC_VNET):
+
     def create_network(self) -> int:
 
-        vpn_list = list(self._vpn_set)
+        vpn_list = sorted(self._vpn_set)
         vpc_request_list = [f'${{module.network-{s}.vpc}}' for s in self._peer_request_list]
         vpc_accept_list  = [f'${{module.network-{s}.vpc}}' for s in self._peer_accept_list]
-        vpn_connections  = [f'${{module.network-{s}.vpn_connection}}' for s in vpn_list]
-        vpn_vpc_list     = [f'${{module.network-{s}.raw_vpc}}' for s in vpn_list]
+        aws_vpns = [s for s in self._vpns if type(s["cidr"]) is dict]
+        for vpn in aws_vpns:
+            vpn['cidr_list'] = []
+            for zone,cidr in vpn['cidr'].items():
+                vpn['cidr_list'].append(cidr)
 
         Module("network-%s" % self._name, source="./modules/azure/network",
-             name                = '%s-%s' % (os.getenv("name"), self._name),
-             resource_name       = self._resource_name,
-             resource_tags       = self._global_config["resource_tags"],
-             vpc_cidr            = self._vpc_cidr,
-             public_subnet_cidr  = self._public_cidr,
-             private_subnet_cidr = self._private_cidr,
-             gateway_subnet_cidr = self._gateway_cidr,
-             lb_subnet_cidr      = self._lb_cidr,
-             region              = self._region,
-             resource_group      = self._resource_group,
-             expose_ui           = self._expose_ui,
-             vpc_request_list    = vpc_request_list,
-             vpc_accept_list     = vpc_accept_list,
-             vpn_list            = vpn_list,
-             vpn_connections     = vpn_connections,
-             vpn_vpc_list        = vpn_vpc_list,
-             providers           = {"azurerm": "azurerm.%s" % self._name})
+            name                = '%s-%s' % (os.getenv("name"), self._name),
+            vnet_name           = f"{self._name}",
+            resource_name       = self._resource_name,
+            resource_tags       = self._global_config["resource_tags"],
+            vpc_cidr            = self._vpc_cidr,
+            public_subnet_cidr  = self._public_cidr,
+            private_subnet_cidr = self._private_cidr,
+            ui_cidr             = self._ui_cidr,
+            gateway_subnet_cidr = self._gateway_cidr,
+            region              = self._region,
+            resource_group      = self._resource_group,
+            vpc_request_list    = vpc_request_list,
+            vpc_accept_list     = vpc_accept_list,
+            vpn_list            = vpn_list,
+            gcp_azure_vpns      = [s for s in self._vpns if type(s["cidr"]) is not dict],
+            aws_vpns            = aws_vpns,
+            providers           = {"azurerm": "azurerm.%s" % self._name})
 
 
     def create_bastion(self) -> int:
@@ -65,11 +70,12 @@ class VNET_Azure(Cloud_Provider_VPC_VNET):
             instances         = f'${{module.re-{self._name}.re-nodes.*.private_ip_address}}',
             providers         = {"azurerm": f"azurerm.{self._name}"},
             vnet              = f'${{module.network-{self._name}.vpc}}',
+            ui_subnet         = f'${{module.network-{self._name}.ui-subnet}}',
             region            = self._region,
             resource_group    = self._resource_group
         )
 
-        Output(f"re-ui-{self._name}-ip-output",
+        Output(f"Azure-re-ui-{self._name}-ip-output",
             value = f'${{module.re-ui-{self._name}.ui-ip}}')
         return(0)
     
@@ -94,12 +100,12 @@ class VNET_Azure(Cloud_Provider_VPC_VNET):
         self._provider : str = "azure"
         self._public_cidr : str = "10.2.1.0/24"
         self._gateway_cidr : str = "10.2.3.0/27"
-        self._lb_cidr = {}
         self._region : str = "WestUS3"
         self._resource_group : str = None
         self._subscription_id : str = None
         self._tenant_id : str = None
         self._vpc_cidr : str = "10.2.0.0/16"
+        self._ui_cidr = ""
         self._worker_machine_image : str = "cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810"
         self._resource_name : str = None
         self._redis_user = SSH_USER
@@ -110,6 +116,7 @@ class VNET_Azure(Cloud_Provider_VPC_VNET):
         self._vpc_accept_list = []
         self._vpc_request_list = []
         self._vpn_set = set()
+        self._vpns = []
 
         logging.debug("Creating Object of class "+self.__class__.__name__+" with class arguments "+str(kwargs))
 
@@ -124,7 +131,7 @@ class VNET_Azure(Cloud_Provider_VPC_VNET):
             elif key == "name": self._name = value
             elif key == "private_cidr": self._private_cidr = value
             elif key == "public_cidr": self._public_cidr = value
-            elif key == "lb_cidr": self._lb_cidr = value
+            elif key == "ui_cidr": self._ui_cidr = value
             elif key == "gateway_cidr": self._gateway_cidr = value
             elif key == "provider": self._provider = value
             elif key == "region": self._region = value
@@ -143,9 +150,9 @@ class VNET_Azure(Cloud_Provider_VPC_VNET):
             self._resource_name = f'{deployment_name()}-{self._name}-vpc'
 
         if self._client_certificate_path is None and self._client_secret == "":
-            assert("Either the client_certificate_path or the client_secret must bespecified for an Azure VNET (vpc)")
+            raise Exception("Either the client_certificate_path or the client_secret must bespecified for an Azure VNET (vpc)")
         elif self._client_certificate_path is not None and self._client_secret != "":
-            assert("You must specify either the client_certificate_path or the client_secret (or $AZURE_SECRET_ACCESS_KEY) for an Azure VNET (vpc), not both!")
+            raise Exception("You must specify either the client_certificate_path or the client_secret (or $AZURE_SECRET_ACCESS_KEY) for an Azure VNET (vpc), not both!")
         elif self._client_certificate_path is not None:
             Provider("azurerm", features={}, client_id=self._application_id, tenant_id=self._tenant_id,
               subscription_id=self._subscription_id, client_certificate_path=self._client_certificate_path,

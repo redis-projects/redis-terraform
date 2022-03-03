@@ -22,3 +22,7 @@ variable "vnet" {
   description = "ID of th virtul network (aka vpc)ß"
   type        = string
 }
+
+variable "ui_subnet" {
+  description = "UI subnet object"
+}

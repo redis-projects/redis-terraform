@@ -3,6 +3,29 @@
 Tracking all changes for the "Terraform" project building Redis-Enterprise
 clusters on a public clould infrastructure.
 
+## [0.9.5] - Released
+### Added
+- VPN connection has been added for GCP (GCP-AWS and GCP-Azure)
+- ui_cidr has been added to GCP and Azure, enabling the exposure
+  of the GUI not only to the public internet but internally (security)
+- Port 3000/tcp is now open for Grafana deployments
+- New unit tests have been added for the VPN use cases, all
+  reference files have been update
+### Changed
+- Azure and GCP now use a private network without internet gateway. DNS
+  requests are now handled via a DNS load balancer, just like we did 
+  in AWS recently
+- In AWS, there is a new security group for servicenodes
+- Output of terraform has been aligned and is now easierto read
+- The "allow-crdb" security was removed as it is no longer 
+  required with VPN
+### Fixed
+- Fixed the export_ui behavior which was notworking before
+- The private ssh key now gets removed before being copied to allow
+  idempotent runs
+- Example config files have all been adjusted and tested. They are now
+  in their own directory called ExampleConfigFiles
+
 ## [0.9.1] - Released
 ### Added
 - New "docker" service implemented and a vault as POC

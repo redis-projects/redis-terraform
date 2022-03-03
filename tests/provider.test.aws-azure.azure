@@ -5,30 +5,21 @@
 		{
 			"name": "vnet-az",
 			"resource_name": "az-redis-vnet",
-			"vpc_cidr": "10.2.0.0/22",
-			"public_cidr": "10.2.1.0/25",
-			"private_cidr": "10.2.0.128/25",
-			"gateway_cidr": "10.2.3.0/26",
+			"vpc_cidr": "10.71.0.0/22",
+			"public_cidr": "10.71.1.0/25",
+			"private_cidr": "10.71.0.128/25",
+			"gateway_cidr": "10.71.3.0/26",
 			"region": "CentralIndia",
 			"bastion_zone": 3,
 			"bastion_machine_image": "OpenLogic:CentOS:7.5:7.5.201808150",
 			"bastion_machine_type": "Standard_B2s",
 			"provider": "azure",
-			"resource_group": "terratest-rg",
+			"resource_group": "ps-verse-rg",
 			"subscription_id": "ef03f41d-d2bd-4691-b3a0-3aff1c6711f7",
 			"tenant_id": "1428732f-21cf-469e-ad48-5721f4eac1e2",
-			"application_id": "801fb60b-0efb-4a9e-aa4a-98f8abff125e",
-			"client_certificate_path": "/Users/audi/Documents/GIT/rl-terraform/terraform_account.pfx",
-			"peer_with": [
-				"vpc-gcp",
-				"vpc-aws"
-			]
+			"application_id": "e333cbb0-7738-470a-8472-d9fe7484b217",
+			"client_certificate_path": "/Users/audi/.ssh/ps-verse-keyvault-ps-verse-20220208.pfx"
 		}
-	],
-	[
-		"().get_provider",
-		[],
-		{}
 	],
 	[
 		"().get_provider",
@@ -78,16 +69,6 @@
 		{}
 	],
 	[
-		"().add_peers",
-		[
-			[
-				"vpc-gcp",
-				"vpc-aws"
-			]
-		],
-		{}
-	],
-	[
 		"().get_vpn_peers",
 		[],
 		{}
@@ -109,11 +90,6 @@
 	],
 	[
 		"().create_bastion",
-		[],
-		{}
-	],
-	[
-		"().get_resource_group",
 		[],
 		{}
 	]

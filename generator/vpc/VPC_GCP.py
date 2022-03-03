@@ -19,19 +19,39 @@ class VPC_GCP(Cloud_Provider_VPC_VNET):
         cidr_list = cidr_list + [vpc[cidr].get_private_cidr() for cidr in self._peer_request_list]
         cidr_list = cidr_list + [vpc[cidr].get_public_cidr() for cidr in self._peer_accept_list]
         cidr_list = cidr_list + [vpc[cidr].get_private_cidr() for cidr in self._peer_accept_list]
+        vpn_list = sorted(self._vpn_set)
+        private_subnet_list = []
+        for peer in vpn_list:
+            if type(vpc[peer].get_private_cidr()) is dict: #AWS
+                for zone,cidr in vpc[peer].get_private_cidr().items():
+                    private_subnet_list.append(cidr)
+            else: #GCP and/or Azure
+                private_subnet_list.append(vpc[peer].get_private_cidr())
+        aws_vpns = [s for s in self._vpns if type(s["cidr"]) is dict]
+        for vpn in aws_vpns:
+            vpn['cidr_list'] = []
+            for zone,cidr in vpn['cidr'].items():
+                vpn['cidr_list'].append(cidr)
 
         Module(f"network-{self._name}", 
             source                  = f"./modules/{self._provider}/network",
             name                    = f"{deployment_name()}-{self._name}",
+            vpc_name                = f"{self._name}",
             resource_name           = self._resource_name,
             resource_tags           = self._global_config["resource_tags"],
             gce_public_subnet_cidr  = self._public_cidr,
+            ui_cidr                 = self._ui_cidr,
             region                  = self._region,
             providers               = {"google": f"google.{self._name}"},
             vpc_request_list        = vpc_request_list,
             vpc_accept_list         = vpc_accept_list,
             cidr_list               = cidr_list,
-            gce_private_subnet_cidr = self._private_cidr)
+            gce_private_subnet_cidr = self._private_cidr,
+            vpn_list                = vpn_list,
+            gcp_azure_vpns          = [s for s in self._vpns if type(s["cidr"]) is not dict],
+            aws_vpns                = aws_vpns,
+            private_subnet_list     = private_subnet_list
+            )
 
     def create_bastion(self) -> int:
         from generator.generator import deployment_name, vpc
@@ -48,12 +68,11 @@ class VPC_GCP(Cloud_Provider_VPC_VNET):
             bastion_machine_type    = self._bastion_machine_type,
             gce_ssh_user            = self._redis_user,
             gce_ssh_pub_key_file    = self._ssh_public_key,
-            active_active_script    = '${data.template_file.aa_db}',
             providers               = {"google": f"google.{self._name}"},
             zone                    = self._bastion_zone
         )
 
-        Output(f"gcp-bastion-{self._name}-ip-output",
+        Output(f"GCP-bastion-{self._name}-ip-output",
             value = f"${{module.bastion-{self._name}.bastion-public-ip}}")
 
     def create_re_ui(self) -> int:
@@ -63,11 +82,12 @@ class VPC_GCP(Cloud_Provider_VPC_VNET):
             name          = f'{deployment_name}-{self._name}',
             resource_tags = self._global_config["resource_tags"],
             instances     = f'${{module.re-{self._name}.re-nodes.*.name}}',
+            ui_subnet     = f'${{module.network-{self._name}.ui-subnet}}',
             providers     = {"google": f"google.{self._name}"},
             zones         = f'${{module.re-{self._name}.re-nodes.*.zone}}'
         )
 
-        Output(f"gcp-re-ui-{self._name}-ip-output",
+        Output(f"GCP-re-ui-{self._name}-ip-output",
             value=f'${{module.re-ui-{self._name}.ui-ip.address}}')
         return(0)
 
@@ -90,6 +110,7 @@ class VPC_GCP(Cloud_Provider_VPC_VNET):
         self._provider : str = "gcp"
         self._public_cidr : str = "10.0.1.0/24"
         self._lb_cidr = {}
+        self._ui_cidr = ""
         self._region : str = "us-central1"
         self._worker_machine_image : str = "rhel-7-v20210721"
         self._redis_user = SSH_USER
@@ -100,6 +121,7 @@ class VPC_GCP(Cloud_Provider_VPC_VNET):
         self._vpc_accept_list = []
         self._vpc_request_list = []
         self._vpn_set = set()
+        self._vpns = []
         self._boot_disk_size = 50
         logging.debug("Creating Object of class "+self.__class__.__name__+" with class arguments "+str(kwargs))
 
@@ -112,6 +134,7 @@ class VPC_GCP(Cloud_Provider_VPC_VNET):
             elif key == "private_cidr": self._private_cidr = value
             elif key == "project": self._project =value
             elif key == "public_cidr": self._public_cidr = value
+            elif key == "ui_cidr": self._ui_cidr = value
             elif key == "lb_cidr": self._lb_cidr = value
             elif key == "provider": self._provider = value
             elif key == "region": self._region = value

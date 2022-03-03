@@ -11,13 +11,13 @@ resource "aws_security_group" "allow-ssh" {
   })
 }
 
-resource "aws_security_group" "allow-crdb" {
-  name = "${var.name}-allow-crdb"
-  description = "Allow inbound crdb creation specific traffic"
+resource "aws_security_group" "servicenodes-sg" {
+  name = "${var.name}-snode-sg"
+  description = "Allow inbound traffic for service nodes"
   vpc_id = aws_vpc.vpc.id
 
   tags = merge("${var.resource_tags}",{
-    Name = "${var.name}-allow-crdb"
+    Name = "${var.name}-snode-sg"
   })
 }
 
@@ -149,22 +149,32 @@ resource "aws_security_group_rule" "private_acc" {
   count             = length(var.peer_accept_list)
 }
 
-resource "aws_security_group_rule" "public_crdb_creation_api" {
+resource "aws_security_group_rule" "grafana" {
   type              = "ingress"
-  from_port         = 9443
-  to_port           = 9443
+  from_port         = 3000
+  to_port           = 3000
   protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
-  description       = "SM GUI connection"
-  security_group_id = aws_security_group.allow-crdb.id
+  description       = "Grafana GUI connection"
+  security_group_id = aws_security_group.servicenodes-sg.id
 }
 
-resource "aws_security_group_rule" "public_crdb_syncer_api" {
+resource "aws_security_group_rule" "ssh-access" {
   type              = "ingress"
-  from_port         = 12000
-  to_port           = 12000
+  from_port         = 22
+  to_port           = 22
   protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
-  description       = "SM GUI connection"
-  security_group_id = aws_security_group.allow-crdb.id
+  description       = "SSH connection"
+  security_group_id = aws_security_group.servicenodes-sg.id
+}
+
+resource "aws_security_group_rule" "servicenode-outgoing" {
+  type              = "egress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"]
+  description       = "Outgoing Traffic"
+  security_group_id = aws_security_group.servicenodes-sg.id
 }

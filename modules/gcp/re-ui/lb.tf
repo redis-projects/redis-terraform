@@ -27,16 +27,24 @@ resource "google_compute_http_health_check" "default" {
   port               = 8443
 }
 
-resource "google_compute_address" "default" {
-  name         = "${var.name}-staticip"
+resource "google_compute_address" "re-ui-ip-external" {
+  count        = length(var.ui_subnet) == 0 ? 1 : 0
+  name         = "${var.name}-re-ui-lb-ip-address"
   address_type = "EXTERNAL"
+}
+
+resource "google_compute_address" "re-ui-ip-internal" {
+  count        = length(var.ui_subnet) == 0 ? 0 : 1
+  name         = "${var.name}-re-ui-lb-ip-address"
+  subnetwork   = var.ui_subnet[0].id
+  address_type = "INTERNAL"
 }
 
 # backend to forward port 443
 resource "google_compute_forwarding_rule" "tls" {
   name       = "${var.name}-tls"
   port_range = "8443"
-  ip_address = google_compute_address.default.address 
+  ip_address = length(var.ui_subnet) == 0 ? google_compute_address.re-ui-ip-external[0].address : google_compute_address.re-ui-ip-internal[0].address 
   target     = google_compute_target_pool.default.id
 }
 
@@ -45,5 +53,5 @@ resource "google_dns_record_set" "a" {
   type         = "A"
   ttl          = 60
   managed_zone = "ps-redislabs"
-  rrdatas      = [ google_compute_address.default.address ]
+  rrdatas      = length(var.ui_subnet) == 0 ? [ google_compute_address.re-ui-ip-external[0].address ] : [ google_compute_address.re-ui-ip-internal[0].address ]
 }

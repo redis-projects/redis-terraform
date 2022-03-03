@@ -5,28 +5,32 @@
 		{
 			"name": "vpc-aws",
 			"resource_name": "aws-redis-vpc",
-			"vpc_cidr": "10.3.0.0/23",
+			"vpc_cidr": "10.17.0.0/23",
 			"public_cidr": {
-				"ap-south-1a": "10.3.0.64/26",
-				"ap-south-1b": "10.3.0.128/26",
-				"ap-south-1c": "10.3.0.192/26"
+				"ap-south-1a": "10.17.0.64/26",
+				"ap-south-1b": "10.17.0.128/26",
+				"ap-south-1c": "10.17.0.192/26"
 			},
 			"private_cidr": {
-				"ap-south-1a": "10.3.1.64/26",
-				"ap-south-1b": "10.3.1.128/26",
-				"ap-south-1c": "10.3.1.192/26"
+				"ap-south-1a": "10.17.1.64/26",
+				"ap-south-1b": "10.17.1.128/26",
+				"ap-south-1c": "10.17.1.192/26"
 			},
 			"lb_cidr": {
-				"ap-south-1a": "10.3.0.0/28",
-				"ap-south-1b": "10.3.0.16/28",
-				"ap-south-1c": "10.3.0.32/28"
+				"ap-south-1a": "10.17.0.0/28",
+				"ap-south-1b": "10.17.0.16/28",
+				"ap-south-1c": "10.17.0.32/28"
+			},
+			"ui_cidr": {
+				"ap-south-1a": "10.17.1.0/28",
+				"ap-south-1b": "10.17.1.16/28",
+				"ap-south-1c": "10.17.1.32/28"
 			},
 			"region": "ap-south-1",
 			"bastion_zone": "ap-south-1c",
 			"bastion_machine_image": "ami-04c84f136b3c9d872",
 			"bastion_machine_type": "t3.medium",
 			"peer_with": [
-				"vnet-az",
 				"vpc-gcp"
 			],
 			"provider": "aws"
@@ -83,7 +87,6 @@
 		"().add_peers",
 		[
 			[
-				"vnet-az",
 				"vpc-gcp"
 			]
 		],

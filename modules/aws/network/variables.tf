@@ -91,12 +91,7 @@ variable "vpc_conn_index" {
   type        = list
 }
 
-variable "vpn_connections" {
-  description = "List of connection indexes to be accepted"
-  type        = list
-}
-
-variable "vpn_external_ips" {
-  description = "List of external IP addresses for the VPN tunnels"
+variable "gcp_azure_vpns" {
+  description = "list of peered VPN objects"
   type        = list
 }

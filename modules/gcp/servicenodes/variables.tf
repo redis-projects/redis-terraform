@@ -6,7 +6,10 @@ variable "gce_ssh_user" {}
 variable "gce_ssh_pub_key_file" {}
 variable "boot_disk_size" {}
 variable "name" {}
-variable "zones" {}
+variable "zones" {
+  description = "Availability zone"
+  type        = list
+}
 variable "resource_tags" {
   description = "hash with tags for all resources"
 }

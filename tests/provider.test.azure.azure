@@ -1,1 +1,180 @@
-[["", [], {"name": "vpc-azure-europe", "vpc_cidr": "10.1.0.0/16", "public_cidr": "10.1.1.0/24", "private_cidr": "10.1.2.0/24", "region": "germanywestcentral", "bastion_zone": 2, "bastion_machine_image": "cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810", "bastion_machine_type": "Standard_B1s", "provider": "azure", "resource_group": "terratest-rg", "subscription_id": "ef03f41d-d2bd-4691-b3a0-3aff1c6711f7", "tenant_id": "1428732f-21cf-469e-ad48-5721f4eac1e2", "application_id": "801fb60b-0efb-4a9e-aa4a-98f8abff125e", "client_certificate_path": "/Users/audi/Documents/GIT/rl-terraform/terraform_account.pfx", "peer_with": ["vpc-azure-us"]}], ["", [], {"name": "vpc-azure-us", "vpc_cidr": "10.2.0.0/16", "public_cidr": "10.2.1.0/24", "private_cidr": "10.2.2.0/24", "region": "WestUS3", "bastion_zone": 2, "bastion_machine_image": "cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810", "bastion_machine_type": "Standard_B1s", "provider": "azure", "resource_group": "terratest-rg", "subscription_id": "ef03f41d-d2bd-4691-b3a0-3aff1c6711f7", "tenant_id": "1428732f-21cf-469e-ad48-5721f4eac1e2", "application_id": "801fb60b-0efb-4a9e-aa4a-98f8abff125e", "client_certificate_path": "/Users/audi/Documents/GIT/rl-terraform/terraform_account.pfx"}], ["().get_provider", [], {}], ["().get_provider", [], {}], ["().get_provider", [], {}], ["().get_provider", [], {}], ["().get_region", [], {}], ["().get_resource_group", [], {}], ["().get_provider", [], {}], ["().get_provider", [], {}], ["().get_region", [], {}], ["().get_resource_group", [], {}], ["().add_peers", [["vpc-azure-us"]], {}], ["().create_network", [], {}], ["().expose_re_ui", [], {}], ["().create_network", [], {}], ["().expose_re_ui", [], {}], ["().create_bastion", [], {}], ["().create_bastion", [], {}], ["().get_resource_group", [], {}], ["().get_resource_group", [], {}]]
+[
+	[
+		"",
+		[],
+		{
+			"name": "vpc-azure-europe",
+			"vpc_cidr": "10.1.0.0/16",
+			"public_cidr": "10.1.1.0/24",
+			"private_cidr": "10.1.2.0/24",
+			"region": "germanywestcentral",
+			"bastion_zone": 2,
+			"bastion_machine_image": "cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810",
+			"bastion_machine_plan": "centos-8-3-free:centos-8-3-free:cognosys",
+			"bastion_machine_type": "Standard_B1s",
+			"provider": "azure",
+			"resource_group": "terratest-rg",
+			"subscription_id": "ef03f41d-d2bd-4691-b3a0-3aff1c6711f7",
+			"tenant_id": "1428732f-21cf-469e-ad48-5721f4eac1e2",
+			"application_id": "801fb60b-0efb-4a9e-aa4a-98f8abff125e",
+			"client_certificate_path": "/Users/audi/Documents/GIT/rl-terraform/terraform_account.pfx",
+			"peer_with": [
+				"vpc-azure-us"
+			]
+		}
+	],
+	[
+		"",
+		[],
+		{
+			"name": "vpc-azure-us",
+			"vpc_cidr": "10.2.0.0/16",
+			"public_cidr": "10.2.1.0/24",
+			"private_cidr": "10.2.2.0/24",
+			"region": "WestUS3",
+			"bastion_zone": 2,
+			"bastion_machine_image": "cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810",
+			"bastion_machine_plan": "centos-8-3-free:centos-8-3-free:cognosys",
+			"bastion_machine_type": "Standard_B1s",
+			"provider": "azure",
+			"resource_group": "terratest-rg",
+			"subscription_id": "ef03f41d-d2bd-4691-b3a0-3aff1c6711f7",
+			"tenant_id": "1428732f-21cf-469e-ad48-5721f4eac1e2",
+			"application_id": "801fb60b-0efb-4a9e-aa4a-98f8abff125e",
+			"client_certificate_path": "/Users/audi/Documents/GIT/rl-terraform/terraform_account.pfx"
+		}
+	],
+	[
+		"().get_provider",
+		[],
+		{}
+	],
+	[
+		"().get_provider",
+		[],
+		{}
+	],
+	[
+		"().get_provider",
+		[],
+		{}
+	],
+	[
+		"().set_ui",
+		[
+			true
+		],
+		{}
+	],
+	[
+		"().get_provider",
+		[],
+		{}
+	],
+	[
+		"().get_region",
+		[],
+		{}
+	],
+	[
+		"().get_resource_group",
+		[],
+		{}
+	],
+	[
+		"().get_provider",
+		[],
+		{}
+	],
+	[
+		"().set_ui",
+		[
+			true
+		],
+		{}
+	],
+	[
+		"().get_provider",
+		[],
+		{}
+	],
+	[
+		"().get_region",
+		[],
+		{}
+	],
+	[
+		"().get_resource_group",
+		[],
+		{}
+	],
+	[
+		"().add_peers",
+		[
+			[
+				"vpc-azure-us"
+			]
+		],
+		{}
+	],
+	[
+		"().get_vpn_peers",
+		[],
+		{}
+	],
+	[
+		"().get_vpn_peers().__iter__",
+		[],
+		{}
+	],
+	[
+		"().get_vpn_peers",
+		[],
+		{}
+	],
+	[
+		"().get_vpn_peers().__iter__",
+		[],
+		{}
+	],
+	[
+		"().create_network",
+		[],
+		{}
+	],
+	[
+		"().expose_re_ui",
+		[],
+		{}
+	],
+	[
+		"().create_network",
+		[],
+		{}
+	],
+	[
+		"().expose_re_ui",
+		[],
+		{}
+	],
+	[
+		"().create_bastion",
+		[],
+		{}
+	],
+	[
+		"().create_bastion",
+		[],
+		{}
+	],
+	[
+		"().get_resource_group",
+		[],
+		{}
+	],
+	[
+		"().get_resource_group",
+		[],
+		{}
+	]
+]

@@ -79,7 +79,9 @@ class Cluster_AWS(Cluster):
             if key == "vpc": self._vpc = value
             elif key == "name": self._name = value
             elif key == "worker_count": self._worker_count = value
-            elif key == "expose_ui": self._expose_ui = value
+            elif key == "expose_ui": 
+                self._expose_ui = value
+                vpc[self._vpc].set_ui(value)
             elif key == "rack_aware": self._rack_aware = value
             elif key == "redis_distro": self._redis_distro = value
             elif key == "zones": self._zones = value

@@ -4,7 +4,11 @@ output "re-nodes" {
   sensitive   = true
 }
 
-output "re-public-ips" {
-  description = "IP addresses of all Redis cluster nodes"
-  value       = google_compute_address.cluster-ip-address.*.address
+#output "re-public-ips" {
+#  description = "IP addresses of all Redis cluster nodes"
+#  value       = google_compute_address.cluster-ip-address.*.address
+#}
+
+output "dns-lb-name" {
+  value = google_compute_address.dns.address
 }

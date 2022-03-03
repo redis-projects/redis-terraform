@@ -48,6 +48,17 @@ resource "null_resource" "null_provisioner" {
       }
     }
 
+    provisioner "remote-exec" {
+      inline = [ "rm -f /home/${var.ssh_user}/.ssh/id_rsa" ]
+
+      connection {
+        type        = "ssh"
+        user        = var.ssh_user
+        private_key = file(var.ssh_private_key_file)
+        host        = var.host
+      }
+    }
+
     provisioner "file" {
       source      = "${var.ssh_private_key_file}"
       destination = "/home/${var.ssh_user}/.ssh/id_rsa"

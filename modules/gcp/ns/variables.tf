@@ -8,9 +8,14 @@ variable "parent_zone" {
   type        = string
 }
 
-variable "ip_addresses" {
-  description = "List of Public (!) IP addresses for each cluster node"
-  type        = list
+#variable "ip_addresses" {
+#  description = "List of Public (!) IP addresses for each cluster node"
+#  type        = list
+#}
+
+variable "dns_lb_name" {
+  description = "DNS name of the DNS load balancer"
+  type        = string
 }
 
 variable "resource_tags" {

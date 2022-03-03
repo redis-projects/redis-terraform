@@ -28,10 +28,14 @@ output "ui-subnet" {
   value       = aws_subnet.ui-subnet
 }
 
-
 output "public-private-security-groups" {
   description = "The ids of the private and public groups"
-  value       = [aws_security_group.allow-local.id, aws_security_group.allow-ssh.id]
+  value       = [aws_security_group.allow-local.id]
+}
+
+output "servicenode-security-group" {
+  description = "The ids of the servicenode security groups"
+  value       = [aws_security_group.servicenodes-sg.id]
 }
 
 output "private-security-groups" {
@@ -41,7 +45,7 @@ output "private-security-groups" {
 
 output "public-security-groups" {
   description = "The id of the public groups"
-  value       = [aws_security_group.allow-ssh.id, aws_security_group.allow-crdb.id]
+  value       = [aws_security_group.allow-ssh.id]
 }
 
 output "internet-gateway" {
@@ -58,4 +62,10 @@ output "vpn_connection" {
   description = "AWS VPN connection"
   value       = aws_vpn_connection.main 
   sensitive   = true
+}
+
+output "vpn_external_ip" {
+  description = "AWS VPN public IP"
+  value       = zipmap(local.gcp_azure_vpns_name,aws_vpn_connection.main)
+  #value       = aws_vpn_connection.main
 }

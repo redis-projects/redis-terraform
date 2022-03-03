@@ -1,47 +1,173 @@
 [
-	["", [], {
-		"name": "vpc-gcp-east1",
-		"public_cidr": "10.1.0.0/24",
-		"private_cidr": "10.2.0.0/16",
-		"region": "us-east1",
-		"bastion_zone": "us-east1-b",
-		"bastion_machine_image": "rhel-7-v20210721",
-		"bastion_machine_type": "n1-standard-1",
-		"provider": "gcp",
-		"peer_with": ["vpc-gcp-us"],
-		"project": "redislabs-sa-training-services"
-	}],
-	["", [], {
-		"name": "vpc-gcp-us",
-		"public_cidr": "10.3.0.0/24",
-		"private_cidr": "10.4.0.0/16",
-		"region": "us-central1",
-		"bastion_zone": "us-central1-b",
-		"bastion_machine_image": "rhel-7-v20210721",
-		"bastion_machine_type": "n1-standard-1",
-		"provider": "gcp",
-		"project": "redislabs-sa-training-services"
-	}],
-	["().get_provider", [], {}],
-	["().get_provider", [], {}],
-	["().get_provider", [], {}],
-	["().get_provider", [], {}],
-	["().get_region", [], {}],
-	["().get_resource_group", [], {}],
-	["().get_provider", [], {}],
-	["().get_provider", [], {}],
-	["().get_region", [], {}],
-	["().get_resource_group", [], {}],
-	["().get_provider", [], {}],
-	["().get_provider", [], {}],
-	["().get_region", [], {}],
-	["().add_peers", [
-		["vpc-gcp-us"]
-	], {}],
-	["().create_network", [], {}],
-	["().expose_re_ui", [], {}],
-	["().create_network", [], {}],
-	["().expose_re_ui", [], {}],
-	["().create_bastion", [], {}],
-	["().create_bastion", [], {}]
+	[
+		"",
+		[],
+		{
+			"name": "vpc-gcp-east1",
+			"public_cidr": "10.1.0.0/24",
+			"private_cidr": "10.2.0.0/16",
+			"region": "us-east1",
+			"bastion_zone": "us-east1-b",
+			"bastion_machine_image": "rhel-7-v20210721",
+			"bastion_machine_type": "n1-standard-1",
+			"provider": "gcp",
+			"peer_with": [
+				"vpc-gcp-us"
+			],
+			"project": "redislabs-sa-training-services"
+		}
+	],
+	[
+		"",
+		[],
+		{
+			"name": "vpc-gcp-us",
+			"public_cidr": "10.3.0.0/24",
+			"private_cidr": "10.4.0.0/16",
+			"region": "us-central1",
+			"bastion_zone": "us-central1-b",
+			"bastion_machine_image": "rhel-7-v20210721",
+			"bastion_machine_type": "n1-standard-1",
+			"provider": "gcp",
+			"project": "redislabs-sa-training-services"
+		}
+	],
+	[
+		"().get_provider",
+		[],
+		{}
+	],
+	[
+		"().get_provider",
+		[],
+		{}
+	],
+	[
+		"().get_provider",
+		[],
+		{}
+	],
+	[
+		"().set_ui",
+		[
+			true
+		],
+		{}
+	],
+	[
+		"().get_provider",
+		[],
+		{}
+	],
+	[
+		"().get_region",
+		[],
+		{}
+	],
+	[
+		"().get_resource_group",
+		[],
+		{}
+	],
+	[
+		"().get_provider",
+		[],
+		{}
+	],
+	[
+		"().set_ui",
+		[
+			true
+		],
+		{}
+	],
+	[
+		"().get_provider",
+		[],
+		{}
+	],
+	[
+		"().get_region",
+		[],
+		{}
+	],
+	[
+		"().get_resource_group",
+		[],
+		{}
+	],
+	[
+		"().get_provider",
+		[],
+		{}
+	],
+	[
+		"().get_provider",
+		[],
+		{}
+	],
+	[
+		"().get_region",
+		[],
+		{}
+	],
+	[
+		"().add_peers",
+		[
+			[
+				"vpc-gcp-us"
+			]
+		],
+		{}
+	],
+	[
+		"().get_vpn_peers",
+		[],
+		{}
+	],
+	[
+		"().get_vpn_peers().__iter__",
+		[],
+		{}
+	],
+	[
+		"().get_vpn_peers",
+		[],
+		{}
+	],
+	[
+		"().get_vpn_peers().__iter__",
+		[],
+		{}
+	],
+	[
+		"().create_network",
+		[],
+		{}
+	],
+	[
+		"().expose_re_ui",
+		[],
+		{}
+	],
+	[
+		"().create_network",
+		[],
+		{}
+	],
+	[
+		"().expose_re_ui",
+		[],
+		{}
+	],
+	[
+		"().create_bastion",
+		[],
+		{}
+	],
+	[
+		"().create_bastion",
+		[],
+		{}
+	]
 ]

@@ -106,11 +106,19 @@ def generate(config_file):
             service[svc["vpc"]] = Databases(**re_db) #TODO this looks wrong
             logging.debug(f"A new database for cluster(s) {database['clusters']} has been added with the arguments {re_db}")
 
-    # By now we have thefile mapped and crated all objects.
+    # By now we have the file mapped and crated all objects.
     # Next step is o model the network relationship (VPC Peering/VPN).
     for network in config_file['networks']:
         if "peer_with" in network:
             vpc[network['name']].add_peers(network['peer_with'])
+    # create all VPN secret keys, CIDRs and names for VPN peers
+    for network in config_file['networks']:
+        for vpn_peer in vpc[network['name']].get_vpn_peers():
+            secret_key = vpc[network['name']].create_vpn_secrets()
+            if vpn_peer not in vpc[network['name']].get_vpns():
+                vpc[network['name']].set_vpns(vpn_peer,vpc[vpn_peer].get_private_cidr(),secret_key,f'${{module.network-{vpn_peer}.vpn_external_ip}}')
+            if  network['name'] not in vpc[vpn_peer].get_vpns():
+                vpc[vpn_peer].set_vpns(network['name'],vpc[network['name']].get_private_cidr(),secret_key,f'${{module.network-{network["name"]}.vpn_external_ip}}')
     # Create the VPCs/VNETs and the UI Loadbalancer
     for name in vpc :
         vpc[name].create_network()

@@ -8,8 +8,17 @@ terraform {
   }
 }
 
-# First, we create a public IP for the Load Balancer
+# Create an internal IP if the UI is exposed internally
+resource "google_compute_address" "re-ui-ip" {
+  count        = length(var.ui_subnet) == 0 ? 0 : 1
+  name         = "${var.name}-re-ui-lb-ip-address"
+  subnetwork   = var.ui_subnet[0].id
+  address_type = "INTERNAL"
+  region       = var.region
+}
+# Create a public IP for the Load Balancer if the UI is exposed externally
 resource "azurerm_public_ip" "re-ui-ip" {
+  count               = length(var.ui_subnet) == 0 ? 1 : 0
   name                = "${var.name}-re-ui-lb-ip-address"
   location            = var.region
   resource_group_name = var.resource_group
@@ -17,7 +26,8 @@ resource "azurerm_public_ip" "re-ui-ip" {
   sku                 = "Standard"
 }
 
-resource "azurerm_lb" "re-ui-lb" {
+resource "azurerm_lb" "re-ui-lb-external" {
+  count               = length(var.ui_subnet) == 0 ? 1 : 0
   name                = "${var.name}-re-ui-lb"
   location            = var.region
   resource_group_name = var.resource_group
@@ -25,12 +35,25 @@ resource "azurerm_lb" "re-ui-lb" {
 
   frontend_ip_configuration {
     name                 = "${var.name}-re-ui-lb-fe-ip"
-    public_ip_address_id = azurerm_public_ip.re-ui-ip.id
+    public_ip_address_id = azurerm_public_ip.re-ui-ip[0].id 
+  }
+}
+
+resource "azurerm_lb" "re-ui-lb-internal" {
+  count               = length(var.ui_subnet) == 0 ? 0 : 1
+  name                = "${var.name}-re-ui-lb"
+  location            = var.region
+  resource_group_name = var.resource_group
+  sku                 = "Standard"
+
+  frontend_ip_configuration {
+    name      = "${var.name}-re-ui-lb-fe-ip"
+    subnet_id = var.ui_subnet[0].id 
   }
 }
 
 resource "azurerm_lb_backend_address_pool" "re-ui-pool" {
-  loadbalancer_id = azurerm_lb.re-ui-lb.id
+  loadbalancer_id = length(var.ui_subnet) == 0 ? azurerm_lb.re-ui-lb-external[0].id : azurerm_lb.re-ui-lb-internal[0].id
   name            = "${var.name}-re-ui-pool"
 }
 
@@ -44,14 +67,14 @@ resource "azurerm_lb_backend_address_pool_address" "re-ui-pool-ips" {
 
 resource "azurerm_lb_probe" "re-ui-lb-probe" {
   resource_group_name = var.resource_group
-  loadbalancer_id     = azurerm_lb.re-ui-lb.id
+  loadbalancer_id     = length(var.ui_subnet) == 0 ? azurerm_lb.re-ui-lb-external[0].id : azurerm_lb.re-ui-lb-internal[0].id
   name                = "probe-port-8443"
   port                = 8443
 }
 
 resource "azurerm_lb_rule" "re-ui-lb-rule" {
   resource_group_name            = var.resource_group
-  loadbalancer_id                = azurerm_lb.re-ui-lb.id
+  loadbalancer_id                = length(var.ui_subnet) == 0 ? azurerm_lb.re-ui-lb-external[0].id : azurerm_lb.re-ui-lb-internal[0].id
   name                           = "${var.name}-re-ui-lb-rule"
   protocol                       = "tcp"
   frontend_port                  = 8443

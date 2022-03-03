@@ -6,10 +6,10 @@ terraform {
   }
 }
 
-resource "google_compute_address" "cluster-ip-address" {
-  name  = "${var.name}-${count.index}-cluster-ip-address"
-  count = var.kube_worker_machine_count
-}
+#resource "google_compute_address" "cluster-ip-address" {
+#  name  = "${var.name}-${count.index}-cluster-ip-address"
+#  count = var.kube_worker_machine_count
+#}
 
 resource "google_compute_instance" "node" {
   count           = var.kube_worker_machine_count
@@ -28,9 +28,9 @@ resource "google_compute_instance" "node" {
   network_interface {
     subnetwork = var.subnet
 
-    access_config {
-      nat_ip  = google_compute_address.cluster-ip-address[count.index].address
-    }
+#    access_config {
+#      nat_ip  = google_compute_address.cluster-ip-address[count.index].address
+#    }
   }
 
   service_account {

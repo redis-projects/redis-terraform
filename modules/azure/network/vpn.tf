@@ -1,3 +1,14 @@
+locals {
+  aws_vpn = flatten([
+    for vpn in var.aws_vpns : [
+      for cidr in vpn.cidr_list : {
+        name = vpn.name
+        cidr = cidr
+      }
+    ]
+  ])
+}
+
 # First, create the special "GatewaySubnet" for VPN connections
 resource "azurerm_subnet" "GatewaySubnet" {
   name                 = "GatewaySubnet"
@@ -38,60 +49,94 @@ resource "azurerm_virtual_network_gateway" "vng" {
 
 }
 
-resource "azurerm_local_network_gateway" "lngw1" {
-  name                = "${var.name}-LocalNetworkGateway1-${var.vpn_list[count.index]}"
+resource "azurerm_local_network_gateway" "lngw" {
+  name                = "${var.name}-LocalNetworkGateway-${var.gcp_azure_vpns[count.index].name}"
   resource_group_name = "${var.resource_group}"
   location            = "${var.region}"
-  gateway_address     = "${var.vpn_connections[count.index][0].tunnel2_address}"
-  address_space       = ["${var.vpn_vpc_list[count.index].cidr_block}"]
-  count               = length(var.vpn_list)
+  gateway_address     = "${var.gcp_azure_vpns[count.index].external_ip}"
+  address_space       = ["${var.gcp_azure_vpns[count.index].cidr}"]
+  count               = length(var.gcp_azure_vpns)
+}
+resource "azurerm_local_network_gateway" "lngw1" {
+  name                = "${var.name}-LocalNetworkGateway1-${var.aws_vpns[count.index].name}"
+  resource_group_name = "${var.resource_group}"
+  location            = "${var.region}"
+  gateway_address     = "${var.aws_vpns[count.index].external_ip[var.vnet_name].tunnel1_address}"
+  address_space       = "${var.aws_vpns[count.index].cidr_list}"
+  count               = length(var.aws_vpns)
 }
 
 resource "azurerm_local_network_gateway" "lngw2" {
-  name                = "${var.name}-LocalNetworkGateway2-${var.vpn_list[count.index]}"
+  name                = "${var.name}-LocalNetworkGateway2-${var.aws_vpns[count.index].name}"
   resource_group_name = "${var.resource_group}"
   location            = "${var.region}"
-  gateway_address     = "${var.vpn_connections[count.index][0].tunnel1_address}"
-  address_space       = ["${var.vpn_vpc_list[count.index].cidr_block}"]
-  count               = length(var.vpn_list)
+  gateway_address     = "${var.aws_vpns[count.index].external_ip[var.vnet_name].tunnel2_address}"
+  address_space       = "${var.aws_vpns[count.index].cidr_list}"
+  count               = length(var.aws_vpns)
+}
+
+resource "azurerm_virtual_network_gateway_connection" "vngc" {
+  name                = "${var.name}-VirtualNetworkConnection-${var.gcp_azure_vpns[count.index].name}"
+  location            = "${var.region}"
+  resource_group_name = "${var.resource_group}"
+  count               = length(var.gcp_azure_vpns)
+
+  type                       = "IPsec"
+  virtual_network_gateway_id = "${azurerm_virtual_network_gateway.vng[0].id}"
+  local_network_gateway_id   = "${azurerm_local_network_gateway.lngw[count.index].id}"
+
+  shared_key = "${var.gcp_azure_vpns[count.index].secret_key}"
 }
 
 resource "azurerm_virtual_network_gateway_connection" "vngc1" {
-  name                = "${var.name}-VirtualNetworkConnection1-${var.vpn_list[count.index]}"
+  name                = "${var.name}-VirtualNetworkConnection1-${var.aws_vpns[count.index].name}"
   location            = "${var.region}"
   resource_group_name = "${var.resource_group}"
-  count               = length(var.vpn_list)
+  count               = length(var.aws_vpns)
 
   type                       = "IPsec"
   virtual_network_gateway_id = "${azurerm_virtual_network_gateway.vng[0].id}"
   local_network_gateway_id   = "${azurerm_local_network_gateway.lngw1[count.index].id}"
 
-  shared_key = "${var.vpn_connections[count.index][0].tunnel2_preshared_key}"
+  shared_key = "${var.aws_vpns[count.index].secret_key}"
 }
 
 resource "azurerm_virtual_network_gateway_connection" "vngc2" {
-  name                = "${var.name}-VirtualNetworkConnection2-${var.vpn_list[count.index]}"
+  name                = "${var.name}-VirtualNetworkConnection2-${var.aws_vpns[count.index].name}"
   location            = "${var.region}"
   resource_group_name = "${var.resource_group}"
-  count               = length(var.vpn_list)
+  count               = length(var.aws_vpns)
 
   type                       = "IPsec"
   virtual_network_gateway_id = "${azurerm_virtual_network_gateway.vng[0].id}"
   local_network_gateway_id   = "${azurerm_local_network_gateway.lngw2[count.index].id}"
 
-  shared_key = "${var.vpn_connections[count.index][0].tunnel1_preshared_key}"
+  shared_key = "${var.aws_vpns[count.index].secret_key}"
 }
 
-
-resource "azurerm_route_table" "route" {
-  name                = "${var.name}-VpnRouteTable-${var.vpn_list[count.index]}"
+resource "azurerm_route_table" "routeA" {
+  name                = "${var.name}-VpnRouteTableA-${var.gcp_azure_vpns[count.index].name}"
   location            = "${var.region}"
   resource_group_name = "${var.resource_group}"
-  count               = length(var.vpn_list)
+  count               = length(var.gcp_azure_vpns)
 
   route {
-    name           = "${var.name}-VpnRoute-${var.vpn_list[count.index]}"
-    address_prefix = "${var.vpn_vpc_list[count.index].cidr_block}"
+    name           = "${var.name}-VpnRoute-${var.gcp_azure_vpns[count.index].name}"
+    address_prefix = "${var.gcp_azure_vpns[count.index].cidr}"
+    next_hop_type  = "VirtualNetworkGateway"
+  }
+
+}
+
+resource "azurerm_route_table" "routeB" {
+  name                = "${var.name}-VpnRouteTableB-${local.aws_vpn[count.index].name}-${count.index}"
+  location            = "${var.region}"
+  resource_group_name = "${var.resource_group}"
+  count               = length(local.aws_vpn)
+
+  route {
+    name           = "${var.name}-VpnRoute-${local.aws_vpn[count.index].name}-${count.index}"
+    address_prefix = "${local.aws_vpn[count.index].cidr}"
     next_hop_type  = "VirtualNetworkGateway"
   }
 

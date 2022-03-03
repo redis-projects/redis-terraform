@@ -9,7 +9,6 @@ variable "boot_disk_size" {}
 variable "subnet" {}
 variable "gce_ssh_user" {}
 variable "gce_ssh_pub_key_file" {}
-variable "active_active_script" {}
 variable "resource_tags" {
   description = "hash with tags for all resources"
 }

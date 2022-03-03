@@ -20,10 +20,13 @@ def readconfigs():
         return yaml.load(f, Loader=yaml.FullLoader)
 
     configs = {
-        "gcp": readfile("config.yaml.gcp"),
-        "aws": readfile("config.yaml.aws"),
-        "azure": readfile("config.yaml.azure"),
-        "mixed": readfile("config.yaml.mixed")
+        "gcp": readfile("ExampleConfigFiles/config.yaml.gcp"),
+        "aws": readfile("ExampleConfigFiles/config.yaml.aws"),
+        "azure": readfile("ExampleConfigFiles/config.yaml.azure"),
+        "aws-azure": readfile("ExampleConfigFiles/config.yaml.aws-azure"),
+        "aws-gcp": readfile("ExampleConfigFiles/config.yaml.aws-gcp"),
+        "azure-gcp": readfile("ExampleConfigFiles/config.yaml.azure-gcp"),
+        "mixed": readfile("ExampleConfigFiles/config.yaml.mixed")
     }
     return configs
 
@@ -46,11 +49,14 @@ def readexpected():
         "gcp": readfiles("tests/provider.test.gcp"),
         "aws": readfiles("tests/provider.test.aws"),
         "azure": readfiles("tests/provider.test.azure"),
+        "aws-azure": readfiles("tests/provider.test.aws-azure"),
+        "aws-gcp": readfiles("tests/provider.test.aws-gcp"),
+        "azure-gcp": readfiles("tests/provider.test.azure-gcp"),
         "mixed": readfiles("tests/provider.test.mixed")
     }
     return expected
 
-@pytest.mark.parametrize("config_file", ["aws", "azure", "gcp", "mixed"] )
+@pytest.mark.parametrize("config_file", ["aws", "azure", "gcp", "aws-azure", "aws-gcp", "azure-gcp", "mixed"] )
 @patch('generator.vpc.VPC_GCP.VPC_GCP')
 @patch('generator.vpc.VNET_Azure.VNET_Azure')
 @patch('generator.vpc.VPC_AWS.VPC_AWS')
@@ -63,6 +69,16 @@ def test_register(aws_mock, azure_mock, gcp_mock, getenv, readconfigs, readexpec
     generator.generate(readconfigs[config_file])
 
     (exp_aws, exp_azure, exp_gcp) = readexpected[config_file]
+
+    #with open("gcp.json", "w") as outfile:
+    #    outfile.write(json.dumps(gcp_mock.mock_calls,indent='\t'))
+    #outfile.close()
+    #with open("aws.json", "w") as outfile:
+    #    outfile.write(json.dumps(aws_mock.mock_calls,indent='\t'))
+    #outfile.close()
+    #with open("azure.json", "w") as outfile:
+    #    outfile.write(json.dumps(azure_mock.mock_calls,indent='\t'))
+    #outfile.close()
 
     assert(exp_aws == json.loads(json.dumps(aws_mock.mock_calls)))
     assert(exp_azure == json.loads(json.dumps(azure_mock.mock_calls)))

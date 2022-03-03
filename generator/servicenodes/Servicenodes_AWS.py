@@ -17,7 +17,7 @@ class Servicenodes_AWS(Servicenodes):
             node_count      = self._count,
             instance_type   = self._machine_type,
             ami             = self._machine_image,
-            security_groups = f"${{module.network-{self._vpc}.public-security-groups}}",
+            security_groups = f"${{module.network-{self._vpc}.servicenode-security-group}}",
             redis_user      = self._redis_user,
             ssh_public_key  = self._ssh_public_key,
             ssh_key_name    = f"${{module.keypair-{self._vpc}.key-name}}",
@@ -27,8 +27,6 @@ class Servicenodes_AWS(Servicenodes):
             depends_on      = [f"module.bastion-{self._vpc}"]
         )
 
-        Output(f"AWS-servicenodes-{self._name}-private-ip-adresses",
-            value=f"${{module.servicenodes-{self._name}.servicenodes_private_ip}}")
         Output(f"AWS-servicenodes-{self._name}-public-ip-adresses",
             value=f"${{module.servicenodes-{self._name}.servicenodes_public_ip}}")
         

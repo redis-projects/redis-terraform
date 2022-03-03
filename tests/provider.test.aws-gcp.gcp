@@ -4,15 +4,14 @@
 		[],
 		{
 			"name": "vpc-gcp",
-			"public_cidr": "10.1.1.0/25",
-			"private_cidr": "10.1.0.128/25",
+			"public_cidr": "10.71.1.0/25",
+			"private_cidr": "10.71.0.128/25",
 			"region": "us-east1",
 			"bastion_zone": "us-east1-b",
 			"bastion_machine_image": "rhel-7-v20210721",
 			"bastion_machine_type": "n1-standard-1",
 			"provider": "gcp",
 			"peer_with": [
-				"vnet-az",
 				"vpc-aws"
 			],
 			"project": "redislabs-sa-training-services"
@@ -51,25 +50,9 @@
 		{}
 	],
 	[
-		"().get_provider",
-		[],
-		{}
-	],
-	[
-		"().get_provider",
-		[],
-		{}
-	],
-	[
-		"().get_region",
-		[],
-		{}
-	],
-	[
 		"().add_peers",
 		[
 			[
-				"vnet-az",
 				"vpc-aws"
 			]
 		],

@@ -1,0 +1,334 @@
+{
+    "data": {
+        "template_file": {
+            "aa_db": {
+                "template": "${file(\"${path.module}/templates/create_aa_db.tpl\")}",
+                "vars": {
+                    "FQDN1": "domain1.test.net",
+                    "FQDN2": "domain2.test.net",
+                    "redis_cluster_name": "dtest.rlabs.org",
+                    "redis_pwd": "admin",
+                    "redis_user_name": "admin@admin.com"
+                }
+            },
+            "extra_vars-prod-az-redis": {
+                "template": "${file(\"${path.module}/templates/extra-vars.tpl\")}",
+                "vars": {
+                    "ansible_user": "redislabs",
+                    "redis_cluster_name": "dtest.rlabs.org",
+                    "redis_email_from": "admin@domain.tld",
+                    "redis_pwd": "admin",
+                    "redis_smtp_host": "smtp.domain.tld",
+                    "redis_user_name": "admin@admin.com"
+                }
+            },
+            "extra_vars-prod-gcp-redis": {
+                "template": "${file(\"${path.module}/templates/extra-vars.tpl\")}",
+                "vars": {
+                    "ansible_user": "redislabs",
+                    "redis_cluster_name": "dtest.rlabs.org",
+                    "redis_email_from": "admin@domain.tld",
+                    "redis_pwd": "admin",
+                    "redis_smtp_host": "smtp.domain.tld",
+                    "redis_user_name": "admin@admin.com"
+                }
+            },
+            "inventory-prod-az-redis": {
+                "template": "${file(\"${path.module}/templates/inventory.tpl\")}",
+                "vars": {
+                    "ip_addrs": "${join(\",\", module.re-prod-az-redis.re-nodes.*.private_ip_address)}",
+                    "rack_ids": "${join(\",\", module.re-prod-az-redis.re-nodes.*.zone)}"
+                }
+            },
+            "inventory-prod-gcp-redis": {
+                "template": "${file(\"${path.module}/templates/inventory.tpl\")}",
+                "vars": {
+                    "ip_addrs": "${join(\",\", module.re-prod-gcp-redis.re-nodes.*.name)}",
+                    "rack_ids": "${join(\",\", module.re-prod-gcp-redis.re-nodes.*.zone)}"
+                }
+            }
+        }
+    },
+    "module": {
+        "bastion-prod-az-redis": {
+            "bastion_machine_plan": "",
+            "bastion_machine_type": "Standard_B2s",
+            "name": "unit-test-name-prod-az-redis",
+            "os": "OpenLogic:CentOS:7.5:7.5.201808150",
+            "providers": {
+                "azurerm": "azurerm.prod-az-redis"
+            },
+            "public_secgroup": "${module.network-prod-az-redis.public-security-groups}",
+            "public_subnet_id": "${module.network-prod-az-redis.public-subnet}",
+            "region": "CentralIndia",
+            "resource_group": "ps-verse-rg",
+            "source": "./modules/azure/bastion",
+            "ssh_pub_key_file": "~/.ssh/id_rsa.pub",
+            "ssh_user": "redislabs"
+        },
+        "bastion-prod-gcp-redis": {
+            "bastion_machine_type": "n1-standard-1",
+            "boot_disk_size": 50,
+            "gce_private_subnet_cidr": "10.70.0.0/24",
+            "gce_public_subnet_cidr": "10.70.1.0/24",
+            "gce_ssh_pub_key_file": "~/.ssh/id_rsa.pub",
+            "gce_ssh_user": "redislabs",
+            "name": "unit-test-name-prod-gcp-redis",
+            "os": "rhel-7-v20210721",
+            "providers": {
+                "google": "google.prod-gcp-redis"
+            },
+            "region": "us-east1",
+            "resource_tags": {
+                "env": "production",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "source": "./modules/gcp/bastion",
+            "subnet": "${module.network-prod-gcp-redis.public-subnet-name}",
+            "zone": "us-east1-b"
+        },
+        "docker-provisioner-prod-service-nodes-az": {
+            "bastion_host": "${module.bastion-prod-az-redis.bastion-public-ip}",
+            "depends_on": [
+                "module.servicenodes-prod-service-nodes-az"
+            ],
+            "servicenodes_private_ips": "${module.servicenodes-prod-service-nodes-az.servicenodes_private_ip}",
+            "source": "./modules/docker/create",
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "ssh_user": "redislabs"
+        },
+        "docker-service-prod-service-nodes-az-vi-az": {
+            "bastion_host": "${module.bastion-prod-az-redis.bastion-public-ip}",
+            "contents": "vi",
+            "depends_on": [
+                "module.docker-provisioner-prod-service-nodes-az"
+            ],
+            "servicenodes_private_ips": "${module.servicenodes-prod-service-nodes-az.servicenodes_private_ip}",
+            "source": "./modules/docker/services",
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "ssh_user": "redislabs",
+            "start_script": "start.sh"
+        },
+        "network-prod-az-redis": {
+            "aws_vpns": [],
+            "gateway_subnet_cidr": "10.94.3.0/26",
+            "gcp_azure_vpns": [
+                {
+                    "cidr": "10.70.0.0/24",
+                    "external_ip": "${module.network-prod-gcp-redis.vpn_external_ip}",
+                    "name": "prod-gcp-redis",
+                    "secret_key": "unittestdummysecretkey"
+                }
+            ],
+            "name": "unit-test-name-prod-az-redis",
+            "private_subnet_cidr": "10.94.0.128/25",
+            "providers": {
+                "azurerm": "azurerm.prod-az-redis"
+            },
+            "public_subnet_cidr": "10.94.1.0/25",
+            "region": "CentralIndia",
+            "resource_group": "ps-verse-rg",
+            "resource_name": "unit-test-name-prod-az-redis-vpc",
+            "resource_tags": {
+                "env": "production",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "source": "./modules/azure/network",
+            "ui_cidr": "",
+            "vnet_name": "prod-az-redis",
+            "vpc_accept_list": [],
+            "vpc_cidr": "10.94.0.0/22",
+            "vpc_request_list": [],
+            "vpn_list": [
+                "prod-gcp-redis"
+            ]
+        },
+        "network-prod-gcp-redis": {
+            "aws_vpns": [],
+            "cidr_list": [],
+            "gce_private_subnet_cidr": "10.70.0.0/24",
+            "gce_public_subnet_cidr": "10.70.1.0/24",
+            "gcp_azure_vpns": [
+                {
+                    "cidr": "10.94.0.128/25",
+                    "external_ip": "${module.network-prod-az-redis.vpn_external_ip}",
+                    "name": "prod-az-redis",
+                    "secret_key": "unittestdummysecretkey"
+                }
+            ],
+            "name": "unit-test-name-prod-gcp-redis",
+            "private_subnet_list": [
+                "10.94.0.128/25"
+            ],
+            "providers": {
+                "google": "google.prod-gcp-redis"
+            },
+            "region": "us-east1",
+            "resource_name": "unit-test-name-prod-gcp-redis-vpc",
+            "resource_tags": {
+                "env": "production",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "source": "./modules/gcp/network",
+            "ui_cidr": "",
+            "vpc_accept_list": [],
+            "vpc_name": "prod-gcp-redis",
+            "vpc_request_list": [],
+            "vpn_list": [
+                "prod-az-redis"
+            ]
+        },
+        "re-prod-az-redis": {
+            "machine_count": 3,
+            "machine_plan": "",
+            "machine_type": "Standard_B2s",
+            "name": "unit-test-name-prod-az-redis",
+            "os": "OpenLogic:CentOS:7.5:7.5.201808150",
+            "private_secgroup": "${module.network-prod-az-redis.private-security-groups}",
+            "private_subnet_id": "${module.network-prod-az-redis.private-subnet}",
+            "providers": {
+                "azurerm": "azurerm.prod-az-redis"
+            },
+            "region": "CentralIndia",
+            "resource_group": "ps-verse-rg",
+            "resource_tags": {
+                "env": "production",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "source": "./modules/azure/re",
+            "ssh_pub_key_file": "~/.ssh/id_rsa.pub",
+            "ssh_user": "redislabs",
+            "vpc": "${module.network-prod-az-redis.vpc}",
+            "zones": [
+                1,
+                2,
+                3
+            ]
+        },
+        "re-prod-gcp-redis": {
+            "boot_disk_size": 50,
+            "gce_ssh_pub_key_file": "~/.ssh/id_rsa.pub",
+            "gce_ssh_user": "redislabs",
+            "kube_worker_machine_count": 3,
+            "kube_worker_machine_image": "rhel-8-v20210721",
+            "kube_worker_machine_type": "n1-standard-4",
+            "name": "unit-test-name-prod-gcp-redis",
+            "providers": {
+                "google": "google.prod-gcp-redis"
+            },
+            "resource_tags": {
+                "env": "production",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "source": "./modules/gcp/re",
+            "subnet": "${module.network-prod-gcp-redis.private-subnet-name}",
+            "zones": [
+                "us-east1-b",
+                "us-east1-c",
+                "us-east1-d"
+            ]
+        },
+        "re-provisioner-prod-az-redis": {
+            "extra_vars": "${data.template_file.extra_vars-prod-az-redis}",
+            "host": "${module.bastion-prod-az-redis.bastion-public-ip}",
+            "inventory": "${data.template_file.inventory-prod-az-redis}",
+            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.8/redislabs-6.2.8-53-rhel7-x86_64.tar",
+            "source": "./modules/ansible/re",
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "ssh_user": "redislabs"
+        },
+        "re-provisioner-prod-gcp-redis": {
+            "extra_vars": "${data.template_file.extra_vars-prod-gcp-redis}",
+            "host": "${module.bastion-prod-gcp-redis.bastion-public-ip}",
+            "inventory": "${data.template_file.inventory-prod-gcp-redis}",
+            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.8/redislabs-6.2.8-53-rhel8-x86_64.tar",
+            "source": "./modules/ansible/re",
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "ssh_user": "redislabs"
+        },
+        "re-ui-prod-gcp-redis": {
+            "instances": "${module.re-prod-gcp-redis.re-nodes.*.name}",
+            "name": "unit-test-name-prod-gcp-redis",
+            "providers": {
+                "google": "google.prod-gcp-redis"
+            },
+            "resource_tags": {
+                "env": "production",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "source": "./modules/gcp/re-ui",
+            "ui_subnet": "${module.network-prod-gcp-redis.ui-subnet}",
+            "zones": "${module.re-prod-gcp-redis.re-nodes.*.zone}"
+        },
+        "servicenodes-prod-service-nodes-az": {
+            "depends_on": [
+                "module.bastion-prod-az-redis"
+            ],
+            "machine_count": 1,
+            "machine_plan": "",
+            "machine_type": "Standard_B2s",
+            "name": "unit-test-name-prod-az-redis",
+            "os": "OpenLogic:CentOS:7.5:7.5.201808150",
+            "providers": {
+                "azurerm": "azurerm.prod-az-redis"
+            },
+            "region": "CentralIndia",
+            "resource_group": "ps-verse-rg",
+            "resource_tags": {
+                "env": "production",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "security_groups": "${module.network-prod-az-redis.public-security-groups}",
+            "source": "./modules/azure/servicenodes",
+            "ssh_pub_key_file": "~/.ssh/id_rsa.pub",
+            "ssh_user": "redislabs",
+            "subnet": "${module.network-prod-az-redis.public-subnet}",
+            "zones": [
+                1
+            ]
+        }
+    },
+    "output": {
+        "Azure-bastion-prod-az-redis-ip-output": {
+            "value": "${module.bastion-prod-az-redis.bastion-public-ip}"
+        },
+        "Azure-servicenodes-prod-service-nodes-az-public-ip-adresses": {
+            "value": "${module.servicenodes-prod-service-nodes-az.servicenodes_public_ip}"
+        },
+        "GCP-bastion-prod-gcp-redis-ip-output": {
+            "value": "${module.bastion-prod-gcp-redis.bastion-public-ip}"
+        },
+        "GCP-re-ui-prod-gcp-redis-ip-output": {
+            "value": "${module.re-ui-prod-gcp-redis.ui-ip.address}"
+        }
+    },
+    "provider": {
+        "google": {
+            "alias": "prod-gcp-redis",
+            "credentials": "${file(\"${path.module}/terraform_account.json\")}",
+            "project": "redislabs-sa-training-services",
+            "region": "us-east1"
+        },
+        "google-beta": {
+            "alias": "prod-gcp-redis",
+            "credentials": "${file(\"${path.module}/terraform_account.json\")}",
+            "project": "redislabs-sa-training-services",
+            "region": "us-east1"
+        },
+        "azurerm": {
+            "alias": "prod-az-redis",
+            "client_certificate_path": "/Users/audi/.ssh/ps-verse-keyvault-ps-verse-20220208.pfx",
+            "client_id": "e333cbb0-7738-470a-8472-d9fe7484b217",
+            "features": {},
+            "subscription_id": "ef03f41d-d2bd-4691-b3a0-3aff1c6711f7",
+            "tenant_id": "1428732f-21cf-469e-ad48-5721f4eac1e2"
+        }
+    }
+}

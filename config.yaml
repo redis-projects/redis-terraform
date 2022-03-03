@@ -1,6 +1,7 @@
 ---
 clusters:
   - vpc: vpc-aws-us
+    name: aws-us-cluster
     worker_count: 3 
     machine_type: t2.xlarge
     machine_image: ami-05f238ddab9a512be
@@ -9,7 +10,10 @@ clusters:
     - us-east-1b
     - us-east-1c
     expose_ui: True
+    rack_aware: True
+    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
   - vpc: vpc-gcp
+    name: gcp-us-cluster
     worker_count: 3 
     machine_type: n1-standard-4
     machine_image: rhel-8-v20210721
@@ -18,21 +22,26 @@ clusters:
     - europe-west3-b
     - europe-west3-c
     expose_ui: True
+    rack_aware: True
+    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
 networks:
   - name: vpc-aws-us
     vpc_cidr: 10.1.0.0/16
-    public_cidr: 10.1.1.0/24
+    public_cidr: 
+      us-east-1c: 10.1.1.0/24
     private_cidr: 
       us-east-1a: 10.1.3.0/24
       us-east-1b: 10.1.2.0/24
       us-east-1c: 10.1.4.0/24
+    lb_cidr: 
+      us-east-1a: 10.1.5.0/24
+      us-east-1b: 10.1.6.0/24
+      us-east-1c: 10.1.7.0/24
     region: us-east-1
-    rack_aware: False
     bastion_zone: us-east-1c
     bastion_machine_image: ami-0b1db37f0fa006678
     bastion_machine_type: t2.micro
     provider: aws
-    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
   - name: vpc-gcp
     public_cidr: 10.1.0.0/24
     private_cidr: 10.2.0.0/16 
@@ -40,15 +49,13 @@ networks:
     bastion_zone: europe-west3-b
     bastion_machine_image: rhel-7-v20210721
     bastion_machine_type: n1-standard-1
-    rack_aware: True
     provider: gcp
-    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
 nameservers:
   - vpc: vpc-aws-us
+    cluster: aws-us-cluster
     parent_zone: aws.ps-redislabs.com
     domain: aws.ps-redislabs.com
-    provider: aws
   - vpc: vpc-gcp
+    cluster: gcp-us-cluster
     parent_zone: ps-redislabs
     domain: ps-redislabs.com
-    provider: gcp

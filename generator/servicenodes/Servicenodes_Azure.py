@@ -28,8 +28,6 @@ class Servicenodes_Azure(Servicenodes):
             depends_on        = [f"module.bastion-{self._vpc}"]
         )
 
-        Output(f"Azure-servicenodes-{self._name}-private-ip-adresses",
-            value=f"${{module.servicenodes-{self._name}.servicenodes_private_ip}}")
         Output(f"Azure-servicenodes-{self._name}-public-ip-adresses",
             value=f"${{module.servicenodes-{self._name}.servicenodes_public_ip}}")
  

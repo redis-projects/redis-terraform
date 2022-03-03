@@ -1,0 +1,479 @@
+{
+    "data": {
+        "template_file": {
+            "aa_db": {
+                "template": "${file(\"${path.module}/templates/create_aa_db.tpl\")}",
+                "vars": {
+                    "FQDN1": "domain1.test.net",
+                    "FQDN2": "domain2.test.net",
+                    "redis_cluster_name": "unit-test-name-az-redis-cluster.aws.ps-redislabs.com",
+                    "redis_pwd": "admin",
+                    "redis_user_name": "admin@admin.com"
+                }
+            },
+            "extra_vars-vcp-aws": {
+                "template": "${file(\"${path.module}/templates/extra-vars.tpl\")}",
+                "vars": {
+                    "ansible_user": "redislabs",
+                    "redis_cluster_name": "unit-test-name-aws-redis-cluster.aws.ps-redislabs.com",
+                    "redis_email_from": "admin@domain.tld",
+                    "redis_pwd": "admin",
+                    "redis_smtp_host": "smtp.domain.tld",
+                    "redis_user_name": "admin@admin.com"
+                }
+            },
+            "extra_vars-vnet-az": {
+                "template": "${file(\"${path.module}/templates/extra-vars.tpl\")}",
+                "vars": {
+                    "ansible_user": "redislabs",
+                    "redis_cluster_name": "unit-test-name-az-redis-cluster.aws.ps-redislabs.com",
+                    "redis_email_from": "admin@domain.tld",
+                    "redis_pwd": "admin",
+                    "redis_smtp_host": "smtp.domain.tld",
+                    "redis_user_name": "admin@admin.com"
+                }
+            },
+            "inventory-vcp-aws": {
+                "template": "${file(\"${path.module}/templates/inventory.tpl\")}",
+                "vars": {
+                    "ip_addrs": "${join(\",\", module.re-vcp-aws.re-nodes.*.private_ip)}",
+                    "rack_ids": "${join(\",\", module.re-vcp-aws.re-nodes.*.availability_zone)}"
+                }
+            },
+            "inventory-vnet-az": {
+                "template": "${file(\"${path.module}/templates/inventory.tpl\")}",
+                "vars": {
+                    "ip_addrs": "${join(\",\", module.re-vnet-az.re-nodes.*.private_ip_address)}",
+                    "rack_ids": "${join(\",\", module.re-vnet-az.re-nodes.*.zone)}"
+                }
+            }
+        }
+    },
+    "module": {
+        "bastion-vcp-aws": {
+            "ami": "ami-04c84f136b3c9d872",
+            "availability_zone": "ap-south-1c",
+            "instance_type": "t3.medium",
+            "name": "unit-test-name-vcp-aws",
+            "providers": {
+                "aws": "aws.vcp-aws"
+            },
+            "redis_user": "redislabs",
+            "resource_tags": {
+                "env": "production",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "security_groups": "${module.network-vcp-aws.public-security-groups}",
+            "source": "./modules/aws/bastion",
+            "ssh_key_name": "${module.keypair-vcp-aws.key-name}",
+            "ssh_public_key": "~/.ssh/id_rsa.pub",
+            "subnet": "${module.network-vcp-aws.public-subnet[2].id}",
+            "vpc": "${module.network-vcp-aws.vpc}"
+        },
+        "bastion-vnet-az": {
+            "bastion_machine_plan": "",
+            "bastion_machine_type": "Standard_B2s",
+            "name": "unit-test-name-vnet-az",
+            "os": "OpenLogic:CentOS:7.5:7.5.201808150",
+            "providers": {
+                "azurerm": "azurerm.vnet-az"
+            },
+            "public_secgroup": "${module.network-vnet-az.public-security-groups}",
+            "public_subnet_id": "${module.network-vnet-az.public-subnet}",
+            "region": "CentralIndia",
+            "resource_group": "ps-verse-rg",
+            "source": "./modules/azure/bastion",
+            "ssh_pub_key_file": "~/.ssh/id_rsa.pub",
+            "ssh_user": "redislabs"
+        },
+        "docker-provisioner-prod-service-nodes-aws": {
+            "bastion_host": "${module.bastion-vcp-aws.bastion-public-ip}",
+            "depends_on": [
+                "module.servicenodes-prod-service-nodes-aws"
+            ],
+            "servicenodes_private_ips": "${module.servicenodes-prod-service-nodes-aws.servicenodes_private_ip}",
+            "source": "./modules/docker/create",
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "ssh_user": "redislabs"
+        },
+        "docker-provisioner-prod-service-nodes-az": {
+            "bastion_host": "${module.bastion-vnet-az.bastion-public-ip}",
+            "depends_on": [
+                "module.servicenodes-prod-service-nodes-az"
+            ],
+            "servicenodes_private_ips": "${module.servicenodes-prod-service-nodes-az.servicenodes_private_ip}",
+            "source": "./modules/docker/create",
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "ssh_user": "redislabs"
+        },
+        "docker-service-prod-service-nodes-aws-vi-aws": {
+            "bastion_host": "${module.bastion-vcp-aws.bastion-public-ip}",
+            "contents": "vi",
+            "depends_on": [
+                "module.docker-provisioner-prod-service-nodes-aws"
+            ],
+            "servicenodes_private_ips": "${module.servicenodes-prod-service-nodes-aws.servicenodes_private_ip}",
+            "source": "./modules/docker/services",
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "ssh_user": "redislabs",
+            "start_script": "start.sh"
+        },
+        "docker-service-prod-service-nodes-az-vi-az": {
+            "bastion_host": "${module.bastion-vnet-az.bastion-public-ip}",
+            "contents": "vi",
+            "depends_on": [
+                "module.docker-provisioner-prod-service-nodes-az"
+            ],
+            "servicenodes_private_ips": "${module.servicenodes-prod-service-nodes-az.servicenodes_private_ip}",
+            "source": "./modules/docker/services",
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "ssh_user": "redislabs",
+            "start_script": "start.sh"
+        },
+        "keypair-vcp-aws": {
+            "name": "unit-test-name-vcp-aws-keypair",
+            "providers": {
+                "aws": "aws.vcp-aws"
+            },
+            "resource_tags": {
+                "env": "production",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "source": "./modules/aws/keypair",
+            "ssh_public_key": "~/.ssh/id_rsa.pub"
+        },
+        "network-vcp-aws": {
+            "availability_zone": "ap-south-1c",
+            "cidr_map": {
+                "vcp-aws": "10.93.0.0/23"
+            },
+            "gcp_azure_vpns": [
+                {
+                    "cidr": "10.71.0.128/25",
+                    "external_ip": "${module.network-vnet-az.vpn_external_ip}",
+                    "name": "vnet-az",
+                    "secret_key": "unittestdummysecretkey"
+                }
+            ],
+            "lb_subnet_cidr": {
+                "ap-south-1a": "10.93.0.0/28",
+                "ap-south-1b": "10.93.0.16/28",
+                "ap-south-1c": "10.93.0.32/28"
+            },
+            "name": "unit-test-name-vcp-aws",
+            "peer_accept_list": [],
+            "peer_request_list": [],
+            "private_subnet_cidr": {
+                "ap-south-1a": "10.93.1.64/26",
+                "ap-south-1b": "10.93.1.128/26",
+                "ap-south-1c": "10.93.1.192/26"
+            },
+            "private_subnet_list": [
+                "${module.network-vnet-az.private_subnet_address_prefix}"
+            ],
+            "providers": {
+                "aws": "aws.vcp-aws"
+            },
+            "public_subnet_cidr": {
+                "ap-south-1a": "10.93.0.64/26",
+                "ap-south-1b": "10.93.0.128/26",
+                "ap-south-1c": "10.93.0.192/26"
+            },
+            "region_map": {
+                "vcp-aws": "ap-south-1",
+                "vnet-az": "CentralIndia"
+            },
+            "resource_name": "aws-redis-vpc",
+            "resource_tags": {
+                "env": "production",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "source": "./modules/aws/network",
+            "ui_cidr": {
+                "ap-south-1a": "10.93.1.0/28",
+                "ap-south-1b": "10.93.1.16/28",
+                "ap-south-1c": "10.93.1.32/28"
+            },
+            "vpc_accept_list": [],
+            "vpc_cidr": "10.93.0.0/23",
+            "vpc_conn_index": [],
+            "vpc_name": "vcp-aws",
+            "vpc_request_list": [],
+            "vpn_list": [
+                "vnet-az"
+            ]
+        },
+        "network-vnet-az": {
+            "aws_vpns": [
+                {
+                    "cidr": {
+                        "ap-south-1a": "10.93.1.64/26",
+                        "ap-south-1b": "10.93.1.128/26",
+                        "ap-south-1c": "10.93.1.192/26"
+                    },
+                    "cidr_list": [
+                        "10.93.1.64/26",
+                        "10.93.1.128/26",
+                        "10.93.1.192/26"
+                    ],
+                    "external_ip": "${module.network-vcp-aws.vpn_external_ip}",
+                    "name": "vcp-aws",
+                    "secret_key": "unittestdummysecretkey"
+                }
+            ],
+            "gateway_subnet_cidr": "10.71.3.0/26",
+            "gcp_azure_vpns": [],
+            "name": "unit-test-name-vnet-az",
+            "private_subnet_cidr": "10.71.0.128/25",
+            "providers": {
+                "azurerm": "azurerm.vnet-az"
+            },
+            "public_subnet_cidr": "10.71.1.0/25",
+            "region": "CentralIndia",
+            "resource_group": "ps-verse-rg",
+            "resource_name": "az-redis-vnet",
+            "resource_tags": {
+                "env": "production",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "source": "./modules/azure/network",
+            "ui_cidr": "",
+            "vnet_name": "vnet-az",
+            "vpc_accept_list": [],
+            "vpc_cidr": "10.71.0.0/22",
+            "vpc_request_list": [],
+            "vpn_list": [
+                "vcp-aws"
+            ]
+        },
+        "ns-aws-redis-cluster": {
+            "cluster_fqdn": "unit-test-name-aws-redis-cluster.aws.ps-redislabs.com",
+            "dns_lb_name": "${module.re-vcp-aws.dns-lb-name}",
+            "parent_zone": "aws.ps-redislabs.com",
+            "providers": {
+                "aws": "aws.vcp-aws"
+            },
+            "resource_tags": {
+                "env": "production",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "source": "./modules/aws/ns"
+        },
+        "ns-az-redis-cluster": {
+            "cluster_fqdn": "unit-test-name-az-redis-cluster.aws.ps-redislabs.com",
+            "dns_lb_name": "${module.re-vnet-az.dns-lb-name}",
+            "parent_zone": "aws.ps-redislabs.com",
+            "providers": {
+                "aws": "aws.vcp-aws"
+            },
+            "resource_tags": {
+                "env": "production",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "source": "./modules/aws/ns"
+        },
+        "re-provisioner-vcp-aws": {
+            "extra_vars": "${data.template_file.extra_vars-vcp-aws}",
+            "host": "${module.bastion-vcp-aws.bastion-public-ip}",
+            "inventory": "${data.template_file.inventory-vcp-aws}",
+            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.8/redislabs-6.2.8-53-rhel7-x86_64.tar",
+            "source": "./modules/ansible/re",
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "ssh_user": "redislabs"
+        },
+        "re-provisioner-vnet-az": {
+            "extra_vars": "${data.template_file.extra_vars-vnet-az}",
+            "host": "${module.bastion-vnet-az.bastion-public-ip}",
+            "inventory": "${data.template_file.inventory-vnet-az}",
+            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.8/redislabs-6.2.8-53-rhel7-x86_64.tar",
+            "source": "./modules/ansible/re",
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "ssh_user": "redislabs"
+        },
+        "re-ui-vcp-aws": {
+            "ips": "${module.re-vcp-aws.re-nodes.*.private_ip}",
+            "name": "unit-test-name-vcp-aws",
+            "providers": {
+                "aws": "aws.vcp-aws"
+            },
+            "resource_tags": {
+                "env": "production",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "source": "./modules/aws/re-ui",
+            "subnets": "${module.network-vcp-aws.lb-subnet.*.id}",
+            "ui_subnets": "${module.network-vcp-aws.ui-subnet.*.id}",
+            "vpc": "${module.network-vcp-aws.vpc}"
+        },
+        "re-ui-vnet-az": {
+            "instances": "${module.re-vnet-az.re-nodes.*.private_ip_address}",
+            "name": "unit-test-name-vnet-az",
+            "providers": {
+                "azurerm": "azurerm.vnet-az"
+            },
+            "region": "CentralIndia",
+            "resource_group": "ps-verse-rg",
+            "source": "./modules/azure/re-ui",
+            "ui_subnet": "${module.network-vnet-az.ui-subnet}",
+            "vnet": "${module.network-vnet-az.vpc}"
+        },
+        "re-vcp-aws": {
+            "ami": "ami-04c84f136b3c9d872",
+            "instance_type": "t3.medium",
+            "lb_subnet": "${module.network-vcp-aws.lb-subnet}",
+            "name": "unit-test-name-vcp-aws",
+            "providers": {
+                "aws": "aws.vcp-aws"
+            },
+            "redis_user": "redislabs",
+            "resource_tags": {
+                "env": "production",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "security_groups": "${module.network-vcp-aws.private-security-groups}",
+            "source": "./modules/aws/re",
+            "ssh_key_name": "${module.keypair-vcp-aws.key-name}",
+            "ssh_public_key": "~/.ssh/id_rsa.pub",
+            "subnet": "${module.network-vcp-aws.private-subnet}",
+            "vpc": "${module.network-vcp-aws.vpc}",
+            "worker_count": 3,
+            "zones": [
+                "ap-south-1a",
+                "ap-south-1b",
+                "ap-south-1c"
+            ]
+        },
+        "re-vnet-az": {
+            "machine_count": 3,
+            "machine_plan": "",
+            "machine_type": "Standard_B2s",
+            "name": "unit-test-name-vnet-az",
+            "os": "OpenLogic:CentOS:7.5:7.5.201808150",
+            "private_secgroup": "${module.network-vnet-az.private-security-groups}",
+            "private_subnet_id": "${module.network-vnet-az.private-subnet}",
+            "providers": {
+                "azurerm": "azurerm.vnet-az"
+            },
+            "region": "CentralIndia",
+            "resource_group": "ps-verse-rg",
+            "resource_tags": {
+                "env": "production",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "source": "./modules/azure/re",
+            "ssh_pub_key_file": "~/.ssh/id_rsa.pub",
+            "ssh_user": "redislabs",
+            "vpc": "${module.network-vnet-az.vpc}",
+            "zones": [
+                1,
+                2,
+                3
+            ]
+        },
+        "servicenodes-prod-service-nodes-aws": {
+            "ami": "ami-04c84f136b3c9d872",
+            "depends_on": [
+                "module.bastion-vcp-aws"
+            ],
+            "instance_type": "t3.medium",
+            "name": "unit-test-name-vcp-aws",
+            "node_count": 1,
+            "providers": {
+                "aws": "aws.vcp-aws"
+            },
+            "redis_user": "redislabs",
+            "resource_tags": {
+                "env": "production",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "security_groups": "${module.network-vcp-aws.servicenode-security-group}",
+            "source": "./modules/aws/servicenodes",
+            "ssh_key_name": "${module.keypair-vcp-aws.key-name}",
+            "ssh_public_key": "~/.ssh/id_rsa.pub",
+            "subnet": "${module.network-vcp-aws.public-subnet}",
+            "zones": [
+                "ap-south-1a"
+            ]
+        },
+        "servicenodes-prod-service-nodes-az": {
+            "depends_on": [
+                "module.bastion-vnet-az"
+            ],
+            "machine_count": 1,
+            "machine_plan": "",
+            "machine_type": "Standard_B2s",
+            "name": "unit-test-name-vnet-az",
+            "os": "OpenLogic:CentOS:7.5:7.5.201808150",
+            "providers": {
+                "azurerm": "azurerm.vnet-az"
+            },
+            "region": "CentralIndia",
+            "resource_group": "ps-verse-rg",
+            "resource_tags": {
+                "env": "production",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "security_groups": "${module.network-vnet-az.public-security-groups}",
+            "source": "./modules/azure/servicenodes",
+            "ssh_pub_key_file": "~/.ssh/id_rsa.pub",
+            "ssh_user": "redislabs",
+            "subnet": "${module.network-vnet-az.public-subnet}",
+            "zones": [
+                1
+            ]
+        }
+    },
+    "output": {
+        "AWS-bastion-vcp-aws-ip-output": {
+            "value": "${module.bastion-vcp-aws.bastion-public-ip}"
+        },
+        "AWS-re-ui-vcp-aws-ip-output": {
+            "value": "${module.re-ui-vcp-aws.ui-ip}"
+        },
+        "AWS-servicenodes-prod-service-nodes-aws-public-ip-adresses": {
+            "value": "${module.servicenodes-prod-service-nodes-aws.servicenodes_public_ip}"
+        },
+        "Azure-bastion-vnet-az-ip-output": {
+            "value": "${module.bastion-vnet-az.bastion-public-ip}"
+        },
+        "Azure-re-ui-vnet-az-ip-output": {
+            "value": "${module.re-ui-vnet-az.ui-ip}"
+        },
+        "Azure-servicenodes-prod-service-nodes-az-public-ip-adresses": {
+            "value": "${module.servicenodes-prod-service-nodes-az.servicenodes_public_ip}"
+        },
+        "DNS-Name_cluster_aws-redis-cluster": {
+            "value": "unit-test-name-aws-redis-cluster.aws.ps-redislabs.com"
+        },
+        "DNS-Name_cluster_az-redis-cluster": {
+            "value": "unit-test-name-az-redis-cluster.aws.ps-redislabs.com"
+        }
+    },
+    "provider": {
+        "azurerm": {
+            "alias": "vnet-az",
+            "client_certificate_path": "/Users/audi/.ssh/ps-verse-keyvault-ps-verse-20220208.pfx",
+            "client_id": "e333cbb0-7738-470a-8472-d9fe7484b217",
+            "features": {},
+            "subscription_id": "ef03f41d-d2bd-4691-b3a0-3aff1c6711f7",
+            "tenant_id": "1428732f-21cf-469e-ad48-5721f4eac1e2"
+        },
+        "aws": {
+            "access_key": "",
+            "alias": "vcp-aws",
+            "region": "ap-south-1",
+            "secret_key": ""
+        }
+    }
+}

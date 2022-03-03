@@ -36,11 +36,12 @@ resource "azurerm_subnet" "private-subnet" {
     address_prefixes     = [ var.private_subnet_cidr ]
 }
 
-resource "azurerm_subnet" "lb-subnet" {
-    name                 = "${var.name}-lb-subnet"
+resource "azurerm_subnet" "ui-subnet" {
+    count                = length(var.ui_cidr) == 0 ? 0 : 1
+    name                 = "${var.name}-ui-subnet"
     resource_group_name  = var.resource_group
     virtual_network_name = azurerm_virtual_network.vpc.name
-    address_prefixes     = [ var.lb_subnet_cidr ]
+    address_prefixes     = [ var.ui_cidr ]
 }
 
 resource "azurerm_public_ip_prefix" "redis-public-prefix" {

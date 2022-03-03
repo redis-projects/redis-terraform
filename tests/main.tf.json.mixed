@@ -1,467 +1,722 @@
 {
     "data": {
         "template_file": {
-            "inventory-vpc-aws-us": {
-                "template": "${file(\"${path.module}/templates/inventory.tpl\")}",
-                "vars": {
-                    "ip_addrs": "${join(\",\", module.re-vpc-aws-us.re-nodes.*.private_ip)}",
-                    "rack_ids": "${join(\",\", module.re-vpc-aws-us.re-nodes.*.availability_zone)}"
-                }
-            },
-            "extra_vars-vpc-aws-us": {
-                "template": "${file(\"${path.module}/templates/extra-vars.tpl\")}",
-                "vars": {
-                    "ansible_user": "redislabs",
-                    "redis_cluster_name": "unit-test-name-cluster1.aws.ps-redislabs.com",
-                    "redis_user_name": "admin@admin.com",
-                    "redis_pwd": "admin",
-                    "redis_email_from": "admin@domain.tld",
-                    "redis_smtp_host": "smtp.domain.tld"
-                }
-            },
-            "inventory-vpc-azure-us": {
-                "template": "${file(\"${path.module}/templates/inventory.tpl\")}",
-                "vars": {
-                    "ip_addrs": "${join(\",\", module.re-vpc-azure-us.re-nodes.*.private_ip_address)}",
-                    "rack_ids": "${join(\",\", module.re-vpc-azure-us.re-nodes.*.zone)}"
-                }
-            },
             "aa_db": {
                 "template": "${file(\"${path.module}/templates/create_aa_db.tpl\")}",
                 "vars": {
-                    "redis_user_name": "admin@admin.com",
-                    "redis_pwd": "admin",
-                    "redis_cluster_name": "unit-test-name-cluster3.ps-redislabs.com",
                     "FQDN1": "domain1.test.net",
-                    "FQDN2": "domain2.test.net"
+                    "FQDN2": "domain2.test.net",
+                    "redis_cluster_name": "unit-test-name-gcp-redis-cluster.ps-redislabs.com",
+                    "redis_pwd": "admin",
+                    "redis_user_name": "admin@admin.com"
                 }
             },
-            "extra_vars-vpc-azure-us": {
+            "extra_vars-vnet-az": {
                 "template": "${file(\"${path.module}/templates/extra-vars.tpl\")}",
                 "vars": {
                     "ansible_user": "redislabs",
-                    "redis_cluster_name": "unit-test-name-cluster2.azure.ps-redislabs.com",
-                    "redis_user_name": "admin@admin.com",
-                    "redis_pwd": "admin",
+                    "redis_cluster_name": "unit-test-name-az-redis-cluster.azure.ps-redislabs.com",
                     "redis_email_from": "admin@domain.tld",
-                    "redis_smtp_host": "smtp.domain.tld"
+                    "redis_pwd": "admin",
+                    "redis_smtp_host": "smtp.domain.tld",
+                    "redis_user_name": "admin@admin.com"
                 }
             },
-            "inventory-vpc-gcp-us": {
+            "extra_vars-vpc-aws": {
+                "template": "${file(\"${path.module}/templates/extra-vars.tpl\")}",
+                "vars": {
+                    "ansible_user": "redislabs",
+                    "redis_cluster_name": "unit-test-name-aws-redis-cluster.aws.ps-redislabs.com",
+                    "redis_email_from": "admin@domain.tld",
+                    "redis_pwd": "admin",
+                    "redis_smtp_host": "smtp.domain.tld",
+                    "redis_user_name": "admin@admin.com"
+                }
+            },
+            "extra_vars-vpc-gcp": {
+                "template": "${file(\"${path.module}/templates/extra-vars.tpl\")}",
+                "vars": {
+                    "ansible_user": "redislabs",
+                    "redis_cluster_name": "unit-test-name-gcp-redis-cluster.ps-redislabs.com",
+                    "redis_email_from": "admin@domain.tld",
+                    "redis_pwd": "admin",
+                    "redis_smtp_host": "smtp.domain.tld",
+                    "redis_user_name": "admin@admin.com"
+                }
+            },
+            "inventory-vnet-az": {
                 "template": "${file(\"${path.module}/templates/inventory.tpl\")}",
                 "vars": {
-                    "ip_addrs": "${join(\",\", module.re-vpc-gcp-us.re-nodes.*.name)}",
-                    "rack_ids": "${join(\",\", module.re-vpc-gcp-us.re-nodes.*.zone)}"
+                    "ip_addrs": "${join(\",\", module.re-vnet-az.re-nodes.*.private_ip_address)}",
+                    "rack_ids": "${join(\",\", module.re-vnet-az.re-nodes.*.zone)}"
                 }
             },
-            "extra_vars-vpc-gcp-us": {
-                "template": "${file(\"${path.module}/templates/extra-vars.tpl\")}",
+            "inventory-vpc-aws": {
+                "template": "${file(\"${path.module}/templates/inventory.tpl\")}",
                 "vars": {
-                    "ansible_user": "redislabs",
-                    "redis_cluster_name": "unit-test-name-cluster3.ps-redislabs.com",
-                    "redis_user_name": "admin@admin.com",
-                    "redis_pwd": "admin",
-                    "redis_email_from": "admin@domain.tld",
-                    "redis_smtp_host": "smtp.domain.tld"
+                    "ip_addrs": "${join(\",\", module.re-vpc-aws.re-nodes.*.private_ip)}",
+                    "rack_ids": "${join(\",\", module.re-vpc-aws.re-nodes.*.availability_zone)}"
+                }
+            },
+            "inventory-vpc-gcp": {
+                "template": "${file(\"${path.module}/templates/inventory.tpl\")}",
+                "vars": {
+                    "ip_addrs": "${join(\",\", module.re-vpc-gcp.re-nodes.*.name)}",
+                    "rack_ids": "${join(\",\", module.re-vpc-gcp.re-nodes.*.zone)}"
                 }
             }
-        }
-    },
-    "provider": {
-        "aws": {
-            "region": "us-east-1",
-            "access_key": "",
-            "secret_key": "",
-            "alias": "vpc-aws-us"
-        },
-        "azurerm": {
-            "features": {},
-            "client_id": "801fb60b-0efb-4a9e-aa4a-98f8abff125e",
-            "tenant_id": "1428732f-21cf-469e-ad48-5721f4eac1e2",
-            "subscription_id": "ef03f41d-d2bd-4691-b3a0-3aff1c6711f7",
-            "client_certificate_path": "./terraform_account.pfx",
-            "alias": "vpc-azure-us"
-        },
-        "google": {
-            "project": "redislabs-sa-training-services",
-            "region": "us-central1",
-            "credentials": "${file(\"${path.module}/terraform_account.json\")}",
-            "alias": "vpc-gcp-us"
-        },
-        "google-beta": {
-            "project": "redislabs-sa-training-services",
-            "region": "us-central1",
-            "credentials": "${file(\"${path.module}/terraform_account.json\")}",
-            "alias": "vpc-gcp-us"
-        }
-    },
-    "output": {
-        "vpc-aws-us-ui-endpoint": {
-            "value": "${module.re-ui-vpc-aws-us.ui-ip}"
-        },
-        "re-ui-vpc-azure-us-ip-output": {
-            "value": "${module.re-ui-vpc-azure-us.ui-ip}"
-        },
-        "AWS-bastion-vpc-aws-us-ip-output": {
-            "value": "${module.bastion-vpc-aws-us.bastion-public-ip}"
-        },
-        "Azure-bastion-vpc-azure-us-ip-output": {
-            "value": "${module.bastion-vpc-azure-us.bastion-public-ip}"
-        },
-        "gcp-bastion-vpc-gcp-us-ip-output": {
-            "value": "${module.bastion-vpc-gcp-us.bastion-public-ip}"
-        },
-        "DNS-Name_cluster_cluster1": {
-            "value": "unit-test-name-cluster1.aws.ps-redislabs.com"
-        },
-        "DNS-Name_cluster_cluster2": {
-            "value": "unit-test-name-cluster2.azure.ps-redislabs.com"
-        },
-        "DNS-Name_cluster_cluster3": {
-            "value": "unit-test-name-cluster3.ps-redislabs.com"
-        },
-        "Azure-servicenodes-qa-riot-nodes-private-ip-adresses": {
-            "value": "${module.servicenodes-qa-riot-nodes.servicenodes_private_ip}"
-        },
-        "Azure-servicenodes-qa-riot-nodes-public-ip-adresses": {
-            "value": "${module.servicenodes-qa-riot-nodes.servicenodes_public_ip}"
         }
     },
     "module": {
-        "network-vpc-aws-us": {
-            "source": "./modules/aws/network",
-            "name": "unit-test-name-vpc-aws-us",
-            "resource_name": "unit-test-name-vpc-aws-us-vpc",
-            "resource_tags": {},
-            "vpc_name": "vpc-aws-us",
-            "vpc_cidr": "10.17.0.0/23",
-            "availability_zone": "us-east-1c",
-            "public_subnet_cidr": {
-                "us-east-1a": "10.17.0.64/26",
-                "us-east-1b": "10.17.0.128/26",
-                "us-east-1c": "10.17.0.192/26"
-            },
-            "lb_subnet_cidr": {
-                "us-east-1a": "10.17.0.0/27",
-                "us-east-1b": "10.17.0.32/27",
-                "us-east-1c": "10.17.1.0/27"
-            },
-            "ui_cidr": {},
-            "providers": {
-                "aws": "aws.vpc-aws-us"
-            },
-            "peer_request_list": [],
-            "peer_accept_list": [],
-            "vpc_request_list": [],
-            "vpc_accept_list": [],
-            "vpn_list": [],
-            "vpn_connections": [],
-            "vpn_external_ips": [],
-            "region_map": {
-                "vpc-aws-us": "us-east-1",
-                "vpc-azure-us": "WestUS3",
-                "vpc-gcp-us": "us-central1"
-            },
-            "cidr_map": {
-                "vpc-aws-us": "10.17.0.0/23"
-            },
-            "vpc_conn_index": [],
-            "private_subnet_list": [],
-            "private_subnet_cidr": {
-                "us-east-1a": "10.17.1.64/26",
-                "us-east-1b": "10.17.1.128/26",
-                "us-east-1c": "10.17.1.192/26"
-            }
-        },
-        "re-ui-vpc-aws-us": {
-            "source": "./modules/aws/re-ui",
-            "name": "unit-test-name-vpc-aws-us",
-            "vpc": "${module.network-vpc-aws-us.vpc}",
-            "resource_tags": {},
-            "ips": "${module.re-vpc-aws-us.re-nodes.*.private_ip}",
-            "subnets": "${module.network-vpc-aws-us.lb-subnet.*.id}",
-            "ui_subnets": "${module.network-vpc-aws-us.ui-subnet.*.id}",
-            "providers": {
-                "aws": "aws.vpc-aws-us"
-            }
-        },
-        "network-vpc-azure-us": {
-            "source": "./modules/azure/network",
-            "name": "unit-test-name-vpc-azure-us",
-            "resource_name": "unit-test-name-vpc-azure-us-vpc",
-            "resource_tags": {},
-            "vpc_cidr": "10.2.0.0/16",
-            "public_subnet_cidr": "10.2.1.0/24",
-            "private_subnet_cidr": "10.2.2.0/24",
-            "gateway_subnet_cidr": "10.2.3.0/27",
-            "lb_subnet_cidr": {},
-            "region": "WestUS3",
-            "resource_group": "terratest-rg",
-            "expose_ui": true,
-            "vpc_request_list": [],
-            "vpc_accept_list": [],
-            "vpn_list": [],
-            "vpn_connections": [],
-            "vpn_vpc_list": [],
-            "providers": {
-                "azurerm": "azurerm.vpc-azure-us"
-            }
-        },
-        "re-ui-vpc-azure-us": {
-            "source": "./modules/azure/re-ui",
-            "name": "unit-test-name-vpc-azure-us",
-            "instances": "${module.re-vpc-azure-us.re-nodes.*.private_ip_address}",
-            "providers": {
-                "azurerm": "azurerm.vpc-azure-us"
-            },
-            "vnet": "${module.network-vpc-azure-us.vpc}",
-            "region": "WestUS3",
-            "resource_group": "terratest-rg"
-        },
-        "network-vpc-gcp-us": {
-            "source": "./modules/gcp/network",
-            "name": "unit-test-name-vpc-gcp-us",
-            "resource_name": "unit-test-name-vpc-gcp-us-vpc",
-            "resource_tags": {},
-            "gce_public_subnet_cidr": "10.3.1.0/24",
-            "region": "us-central1",
-            "providers": {
-                "google": "google.vpc-gcp-us"
-            },
-            "vpc_request_list": [],
-            "vpc_accept_list": [],
-            "cidr_list": [],
-            "gce_private_subnet_cidr": "10.3.2.0/16"
-        },
-        "keypair-vpc-aws-us": {
-            "name": "unit-test-name-vpc-aws-us-keypair",
-            "source": "./modules/aws/keypair",
-            "ssh_public_key": "~/.ssh/id_rsa.pub",
-            "resource_tags": {},
-            "providers": {
-                "aws": "aws.vpc-aws-us"
-            }
-        },
-        "bastion-vpc-aws-us": {
-            "source": "./modules/aws/bastion",
-            "vpc": "${module.network-vpc-aws-us.vpc}",
-            "name": "unit-test-name-vpc-aws-us",
-            "resource_tags": {},
-            "subnet": "${module.network-vpc-aws-us.public-subnet[2].id}",
-            "ami": "ami-0b1db37f0fa006678",
-            "instance_type": "t2.micro",
-            "redis_user": "redislabs",
-            "ssh_public_key": "~/.ssh/id_rsa.pub",
-            "ssh_key_name": "${module.keypair-vpc-aws-us.key-name}",
-            "providers": {
-                "aws": "aws.vpc-aws-us"
-            },
-            "security_groups": "${module.network-vpc-aws-us.public-security-groups}",
-            "availability_zone": "us-east-1c"
-        },
-        "bastion-vpc-azure-us": {
-            "source": "./modules/azure/bastion",
-            "name": "unit-test-name-vpc-azure-us",
-            "region": "WestUS3",
-            "resource_group": "terratest-rg",
-            "public_subnet_id": "${module.network-vpc-azure-us.public-subnet}",
-            "public_secgroup": "${module.network-vpc-azure-us.public-security-groups}",
-            "os": "cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810",
-            "bastion_machine_type": "Standard_B1s",
+        "bastion-vnet-az": {
             "bastion_machine_plan": "",
-            "ssh_user": "redislabs",
+            "bastion_machine_type": "Standard_B2s",
+            "name": "unit-test-name-vnet-az",
+            "os": "OpenLogic:CentOS:7.5:7.5.201808150",
+            "providers": {
+                "azurerm": "azurerm.vnet-az"
+            },
+            "public_secgroup": "${module.network-vnet-az.public-security-groups}",
+            "public_subnet_id": "${module.network-vnet-az.public-subnet}",
+            "region": "CentralIndia",
+            "resource_group": "terratest-rg",
+            "source": "./modules/azure/bastion",
             "ssh_pub_key_file": "~/.ssh/id_rsa.pub",
-            "providers": {
-                "azurerm": "azurerm.vpc-azure-us"
-            }
+            "ssh_user": "redislabs"
         },
-        "bastion-vpc-gcp-us": {
-            "source": "./modules/gcp/bastion",
-            "name": "unit-test-name-vpc-gcp-us",
-            "resource_tags": {},
-            "gce_public_subnet_cidr": "10.3.1.0/24",
-            "gce_private_subnet_cidr": "10.3.2.0/16",
-            "region": "us-central1",
-            "subnet": "${module.network-vpc-gcp-us.public-subnet-name}",
-            "os": "rhel-7-v20210721",
-            "boot_disk_size": 50,
-            "bastion_machine_type": "n1-standard-1",
-            "gce_ssh_user": "redislabs",
-            "gce_ssh_pub_key_file": "~/.ssh/id_rsa.pub",
-            "active_active_script": "${data.template_file.aa_db}",
+        "bastion-vpc-aws": {
+            "ami": "ami-04c84f136b3c9d872",
+            "availability_zone": "ap-south-1c",
+            "instance_type": "t3.medium",
+            "name": "unit-test-name-vpc-aws",
             "providers": {
-                "google": "google.vpc-gcp-us"
+                "aws": "aws.vpc-aws"
             },
-            "zone": "us-central1-b"
-        },
-        "ns-cluster1": {
-            "source": "./modules/aws/ns",
-            "providers": {
-                "aws": "aws.vpc-aws-us"
-            },
-            "cluster_fqdn": "unit-test-name-cluster1.aws.ps-redislabs.com",
-            "parent_zone": "aws.ps-redislabs.com",
-            "resource_tags": {},
-            "dns_lb_name": "${module.re-vpc-aws-us.dns-lb-name}"
-        },
-        "ns-cluster2": {
-            "source": "./modules/azure/ns",
-            "providers": {
-                "azurerm": "azurerm.vpc-azure-us"
-            },
-            "cluster_fqdn": "unit-test-name-cluster2.azure.ps-redislabs.com",
-            "parent_zone": "azure.ps-redislabs.com",
-            "ip_addresses": "${module.re-vpc-azure-us.re-public-ips}",
-            "resource_tags": {},
-            "resource_group": "terratest-rg"
-        },
-        "ns-cluster3": {
-            "source": "./modules/gcp/ns",
-            "providers": {
-                "google-beta": "google-beta.vpc-gcp-us"
-            },
-            "cluster_fqdn": "unit-test-name-cluster3.ps-redislabs.com",
-            "parent_zone": "ps-redislabs",
-            "resource_tags": {},
-            "ip_addresses": "${module.re-vpc-gcp-us.re-public-ips}"
-        },
-        "re-vpc-aws-us": {
-            "source": "./modules/aws/re",
-            "name": "unit-test-name-vpc-aws-us",
-            "vpc": "${module.network-vpc-aws-us.vpc}",
-            "resource_tags": {},
-            "worker_count": 3,
-            "instance_type": "t2.xlarge",
-            "ami": "ami-05f238ddab9a512be",
-            "security_groups": "${module.network-vpc-aws-us.private-security-groups}",
             "redis_user": "redislabs",
+            "resource_tags": {
+                "env": "test",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "security_groups": "${module.network-vpc-aws.public-security-groups}",
+            "source": "./modules/aws/bastion",
+            "ssh_key_name": "${module.keypair-vpc-aws.key-name}",
             "ssh_public_key": "~/.ssh/id_rsa.pub",
-            "ssh_key_name": "${module.keypair-vpc-aws-us.key-name}",
+            "subnet": "${module.network-vpc-aws.public-subnet[2].id}",
+            "vpc": "${module.network-vpc-aws.vpc}"
+        },
+        "bastion-vpc-gcp": {
+            "bastion_machine_type": "n1-standard-1",
+            "boot_disk_size": 50,
+            "gce_private_subnet_cidr": "10.1.0.128/25",
+            "gce_public_subnet_cidr": "10.1.1.0/25",
+            "gce_ssh_pub_key_file": "~/.ssh/id_rsa.pub",
+            "gce_ssh_user": "redislabs",
+            "name": "unit-test-name-vpc-gcp",
+            "os": "rhel-7-v20210721",
             "providers": {
-                "aws": "aws.vpc-aws-us"
+                "google": "google.vpc-gcp"
             },
-            "zones": [
-                "us-east-1a",
-                "us-east-1b",
-                "us-east-1c"
+            "region": "us-east1",
+            "resource_tags": {
+                "env": "test",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "source": "./modules/gcp/bastion",
+            "subnet": "${module.network-vpc-gcp.public-subnet-name}",
+            "zone": "us-east1-b"
+        },
+        "docker-provisioner-service-nodes-aws": {
+            "bastion_host": "${module.bastion-vpc-aws.bastion-public-ip}",
+            "depends_on": [
+                "module.servicenodes-service-nodes-aws"
             ],
-            "subnet": "${module.network-vpc-aws-us.private-subnet}",
-            "lb_subnet": "${module.network-vpc-aws-us.lb-subnet}"
-        },
-        "re-provisioner-vpc-aws-us": {
-            "source": "./modules/ansible/re",
-            "ssh_user": "redislabs",
-            "inventory": "${data.template_file.inventory-vpc-aws-us}",
-            "extra_vars": "${data.template_file.extra_vars-vpc-aws-us}",
+            "servicenodes_private_ips": "${module.servicenodes-service-nodes-aws.servicenodes_private_ip}",
+            "source": "./modules/docker/create",
             "ssh_private_key_file": "~/.ssh/id_rsa",
-            "host": "${module.bastion-vpc-aws-us.bastion-public-ip}",
-            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar"
+            "ssh_user": "redislabs"
         },
-        "re-vpc-azure-us": {
-            "source": "./modules/azure/re",
-            "name": "unit-test-name-vpc-azure-us",
-            "vpc": "${module.network-vpc-azure-us.vpc}",
-            "resource_tags": {},
-            "machine_count": 3,
-            "machine_type": "Standard_B2s",
-            "os": "cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810",
-            "machine_plan": "",
-            "private_subnet_id": "${module.network-vpc-azure-us.private-subnet}",
-            "private_secgroup": "${module.network-vpc-azure-us.private-security-groups}",
+        "docker-provisioner-service-nodes-az": {
+            "bastion_host": "${module.bastion-vnet-az.bastion-public-ip}",
+            "depends_on": [
+                "module.servicenodes-service-nodes-az"
+            ],
+            "servicenodes_private_ips": "${module.servicenodes-service-nodes-az.servicenodes_private_ip}",
+            "source": "./modules/docker/create",
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "ssh_user": "redislabs"
+        },
+        "docker-provisioner-service-nodes-gcp": {
+            "bastion_host": "${module.bastion-vpc-gcp.bastion-public-ip}",
+            "depends_on": [
+                "module.servicenodes-service-nodes-gcp"
+            ],
+            "servicenodes_private_ips": "${module.servicenodes-service-nodes-gcp.servicenodes_private_ip}",
+            "source": "./modules/docker/create",
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "ssh_user": "redislabs"
+        },
+        "docker-service-service-nodes-aws-vi-aws": {
+            "bastion_host": "${module.bastion-vpc-aws.bastion-public-ip}",
+            "contents": "vi",
+            "depends_on": [
+                "module.docker-provisioner-service-nodes-aws"
+            ],
+            "servicenodes_private_ips": "${module.servicenodes-service-nodes-aws.servicenodes_private_ip}",
+            "source": "./modules/docker/services",
+            "ssh_private_key_file": "~/.ssh/id_rsa",
             "ssh_user": "redislabs",
-            "ssh_pub_key_file": "~/.ssh/id_rsa.pub",
+            "start_script": "start.sh"
+        },
+        "docker-service-service-nodes-az-vi-az": {
+            "bastion_host": "${module.bastion-vnet-az.bastion-public-ip}",
+            "contents": "vi",
+            "depends_on": [
+                "module.docker-provisioner-service-nodes-az"
+            ],
+            "servicenodes_private_ips": "${module.servicenodes-service-nodes-az.servicenodes_private_ip}",
+            "source": "./modules/docker/services",
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "ssh_user": "redislabs",
+            "start_script": "start.sh"
+        },
+        "docker-service-service-nodes-gcp-vi-gcp": {
+            "bastion_host": "${module.bastion-vpc-gcp.bastion-public-ip}",
+            "contents": "vi",
+            "depends_on": [
+                "module.docker-provisioner-service-nodes-gcp"
+            ],
+            "servicenodes_private_ips": "${module.servicenodes-service-nodes-gcp.servicenodes_private_ip}",
+            "source": "./modules/docker/services",
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "ssh_user": "redislabs",
+            "start_script": "start.sh"
+        },
+        "keypair-vpc-aws": {
+            "name": "unit-test-name-vpc-aws-keypair",
             "providers": {
-                "azurerm": "azurerm.vpc-azure-us"
+                "aws": "aws.vpc-aws"
             },
+            "resource_tags": {
+                "env": "test",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "source": "./modules/aws/keypair",
+            "ssh_public_key": "~/.ssh/id_rsa.pub"
+        },
+        "network-vnet-az": {
+            "aws_vpns": [
+                {
+                    "cidr": {
+                        "ap-south-1a": "10.3.1.64/26",
+                        "ap-south-1b": "10.3.1.128/26",
+                        "ap-south-1c": "10.3.1.192/26"
+                    },
+                    "cidr_list": [
+                        "10.3.1.64/26",
+                        "10.3.1.128/26",
+                        "10.3.1.192/26"
+                    ],
+                    "external_ip": "${module.network-vpc-aws.vpn_external_ip}",
+                    "name": "vpc-aws",
+                    "secret_key": "unittestdummysecretkey"
+                }
+            ],
+            "gateway_subnet_cidr": "10.2.3.0/26",
+            "gcp_azure_vpns": [
+                {
+                    "cidr": "10.1.0.128/25",
+                    "external_ip": "${module.network-vpc-gcp.vpn_external_ip}",
+                    "name": "vpc-gcp",
+                    "secret_key": "unittestdummysecretkey"
+                }
+            ],
+            "name": "unit-test-name-vnet-az",
+            "private_subnet_cidr": "10.2.0.128/25",
+            "providers": {
+                "azurerm": "azurerm.vnet-az"
+            },
+            "public_subnet_cidr": "10.2.1.0/25",
+            "region": "CentralIndia",
+            "resource_group": "terratest-rg",
+            "resource_name": "az-redis-vnet",
+            "resource_tags": {
+                "env": "test",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "source": "./modules/azure/network",
+            "ui_cidr": "",
+            "vnet_name": "vnet-az",
+            "vpc_accept_list": [],
+            "vpc_cidr": "10.2.0.0/22",
+            "vpc_request_list": [],
+            "vpn_list": [
+                "vpc-aws",
+                "vpc-gcp"
+            ]
+        },
+        "network-vpc-aws": {
+            "availability_zone": "ap-south-1c",
+            "cidr_map": {
+                "vpc-aws": "10.3.0.0/23"
+            },
+            "gcp_azure_vpns": [
+                {
+                    "cidr": "10.1.0.128/25",
+                    "external_ip": "${module.network-vpc-gcp.vpn_external_ip}",
+                    "name": "vpc-gcp",
+                    "secret_key": "unittestdummysecretkey"
+                },
+                {
+                    "cidr": "10.2.0.128/25",
+                    "external_ip": "${module.network-vnet-az.vpn_external_ip}",
+                    "name": "vnet-az",
+                    "secret_key": "unittestdummysecretkey"
+                }
+            ],
+            "lb_subnet_cidr": {
+                "ap-south-1a": "10.3.0.0/28",
+                "ap-south-1b": "10.3.0.16/28",
+                "ap-south-1c": "10.3.0.32/28"
+            },
+            "name": "unit-test-name-vpc-aws",
+            "peer_accept_list": [],
+            "peer_request_list": [],
+            "private_subnet_cidr": {
+                "ap-south-1a": "10.3.1.64/26",
+                "ap-south-1b": "10.3.1.128/26",
+                "ap-south-1c": "10.3.1.192/26"
+            },
+            "private_subnet_list": [
+                "${module.network-vnet-az.private_subnet_address_prefix}",
+                "${module.network-vpc-gcp.private_subnet_address_prefix}"
+            ],
+            "providers": {
+                "aws": "aws.vpc-aws"
+            },
+            "public_subnet_cidr": {
+                "ap-south-1a": "10.3.0.64/26",
+                "ap-south-1b": "10.3.0.128/26",
+                "ap-south-1c": "10.3.0.192/26"
+            },
+            "region_map": {
+                "vnet-az": "CentralIndia",
+                "vpc-aws": "ap-south-1",
+                "vpc-gcp": "us-east1"
+            },
+            "resource_name": "aws-redis-vpc",
+            "resource_tags": {
+                "env": "test",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "source": "./modules/aws/network",
+            "ui_cidr": {},
+            "vpc_accept_list": [],
+            "vpc_cidr": "10.3.0.0/23",
+            "vpc_conn_index": [],
+            "vpc_name": "vpc-aws",
+            "vpc_request_list": [],
+            "vpn_list": [
+                "vnet-az",
+                "vpc-gcp"
+            ]
+        },
+        "network-vpc-gcp": {
+            "aws_vpns": [
+                {
+                    "cidr": {
+                        "ap-south-1a": "10.3.1.64/26",
+                        "ap-south-1b": "10.3.1.128/26",
+                        "ap-south-1c": "10.3.1.192/26"
+                    },
+                    "cidr_list": [
+                        "10.3.1.64/26",
+                        "10.3.1.128/26",
+                        "10.3.1.192/26"
+                    ],
+                    "external_ip": "${module.network-vpc-aws.vpn_external_ip}",
+                    "name": "vpc-aws",
+                    "secret_key": "unittestdummysecretkey"
+                }
+            ],
+            "cidr_list": [],
+            "gce_private_subnet_cidr": "10.1.0.128/25",
+            "gce_public_subnet_cidr": "10.1.1.0/25",
+            "gcp_azure_vpns": [
+                {
+                    "cidr": "10.2.0.128/25",
+                    "external_ip": "${module.network-vnet-az.vpn_external_ip}",
+                    "name": "vnet-az",
+                    "secret_key": "unittestdummysecretkey"
+                }
+            ],
+            "name": "unit-test-name-vpc-gcp",
+            "private_subnet_list": [
+                "10.2.0.128/25",
+                "10.3.1.64/26",
+                "10.3.1.128/26",
+                "10.3.1.192/26"
+            ],
+            "providers": {
+                "google": "google.vpc-gcp"
+            },
+            "region": "us-east1",
+            "resource_name": "unit-test-name-vpc-gcp-vpc",
+            "resource_tags": {
+                "env": "test",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "source": "./modules/gcp/network",
+            "ui_cidr": "",
+            "vpc_accept_list": [],
+            "vpc_name": "vpc-gcp",
+            "vpc_request_list": [],
+            "vpn_list": [
+                "vnet-az",
+                "vpc-aws"
+            ]
+        },
+        "ns-aws-redis-cluster": {
+            "cluster_fqdn": "unit-test-name-aws-redis-cluster.aws.ps-redislabs.com",
+            "dns_lb_name": "${module.re-vpc-aws.dns-lb-name}",
+            "parent_zone": "aws.ps-redislabs.com",
+            "providers": {
+                "aws": "aws.vpc-aws"
+            },
+            "resource_tags": {
+                "env": "test",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "source": "./modules/aws/ns"
+        },
+        "ns-az-redis-cluster": {
+            "cluster_fqdn": "unit-test-name-az-redis-cluster.azure.ps-redislabs.com",
+            "dns_lb_name": "${module.re-vnet-az.dns-lb-name}",
+            "parent_zone": "azure.ps-redislabs.com",
+            "providers": {
+                "azurerm": "azurerm.vnet-az"
+            },
+            "resource_group": "terratest-rg",
+            "resource_tags": {
+                "env": "test",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "source": "./modules/azure/ns"
+        },
+        "ns-gcp-redis-cluster": {
+            "cluster_fqdn": "unit-test-name-gcp-redis-cluster.ps-redislabs.com",
+            "dns_lb_name": "${module.re-vpc-gcp.dns-lb-name}",
+            "parent_zone": "ps-redislabs",
+            "providers": {
+                "google-beta": "google-beta.vpc-gcp"
+            },
+            "resource_tags": {
+                "env": "test",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "source": "./modules/gcp/ns"
+        },
+        "re-provisioner-vnet-az": {
+            "extra_vars": "${data.template_file.extra_vars-vnet-az}",
+            "host": "${module.bastion-vnet-az.bastion-public-ip}",
+            "inventory": "${data.template_file.inventory-vnet-az}",
+            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.8/redislabs-6.2.8-53-rhel7-x86_64.tar",
+            "source": "./modules/ansible/re",
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "ssh_user": "redislabs"
+        },
+        "re-provisioner-vpc-aws": {
+            "extra_vars": "${data.template_file.extra_vars-vpc-aws}",
+            "host": "${module.bastion-vpc-aws.bastion-public-ip}",
+            "inventory": "${data.template_file.inventory-vpc-aws}",
+            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.8/redislabs-6.2.8-53-rhel7-x86_64.tar",
+            "source": "./modules/ansible/re",
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "ssh_user": "redislabs"
+        },
+        "re-provisioner-vpc-gcp": {
+            "extra_vars": "${data.template_file.extra_vars-vpc-gcp}",
+            "host": "${module.bastion-vpc-gcp.bastion-public-ip}",
+            "inventory": "${data.template_file.inventory-vpc-gcp}",
+            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.8/redislabs-6.2.8-53-rhel8-x86_64.tar",
+            "source": "./modules/ansible/re",
+            "ssh_private_key_file": "~/.ssh/id_rsa",
+            "ssh_user": "redislabs"
+        },
+        "re-ui-vnet-az": {
+            "instances": "${module.re-vnet-az.re-nodes.*.private_ip_address}",
+            "name": "unit-test-name-vnet-az",
+            "providers": {
+                "azurerm": "azurerm.vnet-az"
+            },
+            "region": "CentralIndia",
+            "resource_group": "terratest-rg",
+            "source": "./modules/azure/re-ui",
+            "ui_subnet": "${module.network-vnet-az.ui-subnet}",
+            "vnet": "${module.network-vnet-az.vpc}"
+        },
+        "re-ui-vpc-aws": {
+            "ips": "${module.re-vpc-aws.re-nodes.*.private_ip}",
+            "name": "unit-test-name-vpc-aws",
+            "providers": {
+                "aws": "aws.vpc-aws"
+            },
+            "resource_tags": {
+                "env": "test",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "source": "./modules/aws/re-ui",
+            "subnets": "${module.network-vpc-aws.lb-subnet.*.id}",
+            "ui_subnets": "${module.network-vpc-aws.ui-subnet.*.id}",
+            "vpc": "${module.network-vpc-aws.vpc}"
+        },
+        "re-ui-vpc-gcp": {
+            "instances": "${module.re-vpc-gcp.re-nodes.*.name}",
+            "name": "unit-test-name-vpc-gcp",
+            "providers": {
+                "google": "google.vpc-gcp"
+            },
+            "resource_tags": {
+                "env": "test",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "source": "./modules/gcp/re-ui",
+            "ui_subnet": "${module.network-vpc-gcp.ui-subnet}",
+            "zones": "${module.re-vpc-gcp.re-nodes.*.zone}"
+        },
+        "re-vnet-az": {
+            "machine_count": 3,
+            "machine_plan": "",
+            "machine_type": "Standard_B2s",
+            "name": "unit-test-name-vnet-az",
+            "os": "OpenLogic:CentOS:7.5:7.5.201808150",
+            "private_secgroup": "${module.network-vnet-az.private-security-groups}",
+            "private_subnet_id": "${module.network-vnet-az.private-subnet}",
+            "providers": {
+                "azurerm": "azurerm.vnet-az"
+            },
+            "region": "CentralIndia",
+            "resource_group": "terratest-rg",
+            "resource_tags": {
+                "env": "test",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "source": "./modules/azure/re",
+            "ssh_pub_key_file": "~/.ssh/id_rsa.pub",
+            "ssh_user": "redislabs",
+            "vpc": "${module.network-vnet-az.vpc}",
             "zones": [
                 1,
                 2,
                 3
-            ],
-            "region": "WestUS3",
-            "resource_group": "terratest-rg"
+            ]
         },
-        "re-provisioner-vpc-azure-us": {
-            "source": "./modules/ansible/re",
-            "ssh_user": "redislabs",
-            "inventory": "${data.template_file.inventory-vpc-azure-us}",
-            "extra_vars": "${data.template_file.extra_vars-vpc-azure-us}",
-            "ssh_private_key_file": "~/.ssh/id_rsa",
-            "host": "${module.bastion-vpc-azure-us.bastion-public-ip}",
-            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar"
-        },
-        "re-vpc-gcp-us": {
-            "source": "./modules/gcp/re",
-            "name": "unit-test-name-vpc-gcp-us",
-            "resource_tags": {},
-            "kube_worker_machine_count": 3,
-            "kube_worker_machine_type": "n1-standard-4",
-            "boot_disk_size": 50,
-            "kube_worker_machine_image": "rhel-8-v20210721",
-            "subnet": "${module.network-vpc-gcp-us.private-subnet-name}",
-            "gce_ssh_user": "redislabs",
-            "gce_ssh_pub_key_file": "~/.ssh/id_rsa.pub",
+        "re-vpc-aws": {
+            "ami": "ami-04c84f136b3c9d872",
+            "instance_type": "t3.medium",
+            "lb_subnet": "${module.network-vpc-aws.lb-subnet}",
+            "name": "unit-test-name-vpc-aws",
             "providers": {
-                "google": "google.vpc-gcp-us"
+                "aws": "aws.vpc-aws"
             },
+            "redis_user": "redislabs",
+            "resource_tags": {
+                "env": "test",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "security_groups": "${module.network-vpc-aws.private-security-groups}",
+            "source": "./modules/aws/re",
+            "ssh_key_name": "${module.keypair-vpc-aws.key-name}",
+            "ssh_public_key": "~/.ssh/id_rsa.pub",
+            "subnet": "${module.network-vpc-aws.private-subnet}",
+            "vpc": "${module.network-vpc-aws.vpc}",
+            "worker_count": 3,
             "zones": [
-                "us-central1-a",
-                "us-central1-b",
-                "us-central1-c"
+                "ap-south-1a",
+                "ap-south-1b",
+                "ap-south-1c"
             ]
         },
-        "re-provisioner-vpc-gcp-us": {
-            "source": "./modules/ansible/re",
-            "ssh_user": "redislabs",
-            "inventory": "${data.template_file.inventory-vpc-gcp-us}",
-            "extra_vars": "${data.template_file.extra_vars-vpc-gcp-us}",
-            "ssh_private_key_file": "~/.ssh/id_rsa",
-            "host": "${module.bastion-vpc-gcp-us.bastion-public-ip}",
-            "redis_distro": "https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar"
-        },
-        "servicenodes-qa-riot-nodes": {
-            "source": "./modules/azure/servicenodes",
-            "name": "unit-test-name-vpc-azure-us",
-            "resource_tags": {},
-            "machine_count": 3,
-            "machine_type": "Standard_B1s",
-            "os": "cognosys:centos-8-3-free:centos-8-3-free:1.2019.0810",
-            "machine_plan": "",
-            "subnet": "${module.network-vpc-azure-us.public-subnet}",
-            "security_groups": "${module.network-vpc-azure-us.public-security-groups}",
-            "ssh_user": "redislabs",
-            "ssh_pub_key_file": "~/.ssh/id_rsa.pub",
+        "re-vpc-gcp": {
+            "boot_disk_size": 50,
+            "gce_ssh_pub_key_file": "~/.ssh/id_rsa.pub",
+            "gce_ssh_user": "redislabs",
+            "kube_worker_machine_count": 3,
+            "kube_worker_machine_image": "rhel-8-v20210721",
+            "kube_worker_machine_type": "n1-standard-4",
+            "name": "unit-test-name-vpc-gcp",
             "providers": {
-                "azurerm": "azurerm.vpc-azure-us"
+                "google": "google.vpc-gcp"
             },
-            "zones": null,
-            "region": "WestUS3",
-            "resource_group": "terratest-rg",
-            "depends_on": [
-                "module.bastion-vpc-azure-us"
+            "resource_tags": {
+                "env": "test",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "source": "./modules/gcp/re",
+            "subnet": "${module.network-vpc-gcp.private-subnet-name}",
+            "zones": [
+                "us-east1-b",
+                "us-east1-c",
+                "us-east1-d"
             ]
         },
-        "docker-provisioner-qa-riot-nodes": {
+        "servicenodes-service-nodes-aws": {
+            "ami": "ami-04c84f136b3c9d872",
             "depends_on": [
-                "module.servicenodes-qa-riot-nodes"
+                "module.bastion-vpc-aws"
             ],
-            "source": "./modules/docker/create",
-            "ssh_user": "redislabs",
-            "ssh_private_key_file": "~/.ssh/id_rsa",
-            "servicenodes_private_ips": "${module.servicenodes-qa-riot-nodes.servicenodes_private_ip}",
-            "bastion_host": "${module.bastion-vpc-azure-us.bastion-public-ip}"
+            "instance_type": "t3.medium",
+            "name": "unit-test-name-vpc-aws",
+            "node_count": 1,
+            "providers": {
+                "aws": "aws.vpc-aws"
+            },
+            "redis_user": "redislabs",
+            "resource_tags": {
+                "env": "test",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "security_groups": "${module.network-vpc-aws.servicenode-security-group}",
+            "source": "./modules/aws/servicenodes",
+            "ssh_key_name": "${module.keypair-vpc-aws.key-name}",
+            "ssh_public_key": "~/.ssh/id_rsa.pub",
+            "subnet": "${module.network-vpc-aws.public-subnet}",
+            "zones": [
+                "ap-south-1a"
+            ]
         },
-        "docker-service-qa-riot-nodes-vault-server": {
-            "source": "./modules/docker/services",
+        "servicenodes-service-nodes-az": {
             "depends_on": [
-                "module.docker-provisioner-qa-riot-nodes"
+                "module.bastion-vnet-az"
             ],
+            "machine_count": 1,
+            "machine_plan": "",
+            "machine_type": "Standard_B2s",
+            "name": "unit-test-name-vnet-az",
+            "os": "OpenLogic:CentOS:7.5:7.5.201808150",
+            "providers": {
+                "azurerm": "azurerm.vnet-az"
+            },
+            "region": "CentralIndia",
+            "resource_group": "terratest-rg",
+            "resource_tags": {
+                "env": "test",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "security_groups": "${module.network-vnet-az.public-security-groups}",
+            "source": "./modules/azure/servicenodes",
+            "ssh_pub_key_file": "~/.ssh/id_rsa.pub",
             "ssh_user": "redislabs",
-            "contents": "vault",
-            "start_script": "start.sh",
-            "ssh_private_key_file": "~/.ssh/id_rsa",
-            "servicenodes_private_ips": "${module.servicenodes-qa-riot-nodes.servicenodes_private_ip}",
-            "bastion_host": "${module.bastion-vpc-azure-us.bastion-public-ip}"
+            "subnet": "${module.network-vnet-az.public-subnet}",
+            "zones": [
+                1
+            ]
+        },
+        "servicenodes-service-nodes-gcp": {
+            "boot_disk_size": 50,
+            "depends_on": [
+                "module.bastion-vpc-gcp"
+            ],
+            "gce_ssh_pub_key_file": "~/.ssh/id_rsa.pub",
+            "gce_ssh_user": "redislabs",
+            "kube_worker_machine_count": 1,
+            "kube_worker_machine_image": "rhel-8-v20210721",
+            "kube_worker_machine_type": "n1-standard-1",
+            "name": "unit-test-name-vpc-gcp",
+            "providers": {
+                "google": "google.vpc-gcp"
+            },
+            "resource_tags": {
+                "env": "test",
+                "owner": "Homer Simpson",
+                "service": "donut"
+            },
+            "source": "./modules/gcp/servicenodes",
+            "subnet": "${module.network-vpc-gcp.private-subnet-name}",
+            "zones": [
+                "us-east1-c"
+            ]
+        }
+    },
+    "output": {
+        "AWS-bastion-vpc-aws-ip-output": {
+            "value": "${module.bastion-vpc-aws.bastion-public-ip}"
+        },
+        "AWS-re-ui-vpc-aws-ip-output": {
+            "value": "${module.re-ui-vpc-aws.ui-ip}"
+        },
+        "AWS-servicenodes-service-nodes-aws-public-ip-adresses": {
+            "value": "${module.servicenodes-service-nodes-aws.servicenodes_public_ip}"
+        },
+        "Azure-bastion-vnet-az-ip-output": {
+            "value": "${module.bastion-vnet-az.bastion-public-ip}"
+        },
+        "Azure-re-ui-vnet-az-ip-output": {
+            "value": "${module.re-ui-vnet-az.ui-ip}"
+        },
+        "Azure-servicenodes-service-nodes-az-public-ip-adresses": {
+            "value": "${module.servicenodes-service-nodes-az.servicenodes_public_ip}"
+        },
+        "DNS-Name_cluster_aws-redis-cluster": {
+            "value": "unit-test-name-aws-redis-cluster.aws.ps-redislabs.com"
+        },
+        "DNS-Name_cluster_az-redis-cluster": {
+            "value": "unit-test-name-az-redis-cluster.azure.ps-redislabs.com"
+        },
+        "DNS-Name_cluster_gcp-redis-cluster": {
+            "value": "unit-test-name-gcp-redis-cluster.ps-redislabs.com"
+        },
+        "GCP-bastion-vpc-gcp-ip-output": {
+            "value": "${module.bastion-vpc-gcp.bastion-public-ip}"
+        },
+        "GCP-re-ui-vpc-gcp-ip-output": {
+            "value": "${module.re-ui-vpc-gcp.ui-ip.address}"
+        },
+        "GCP-servicenodes-service-nodes-gcp-public-ip-adresses": {
+            "value": "${module.servicenodes-service-nodes-gcp.servicenodes_public_ip}"
+        }
+    },
+    "provider": {
+        "google-beta": {
+            "alias": "vpc-gcp",
+            "credentials": "${file(\"${path.module}/terraform_account.json\")}",
+            "project": "redislabs-sa-training-services",
+            "region": "us-east1"
+        },
+        "azurerm": {
+            "alias": "vnet-az",
+            "client_certificate_path": "/Users/audi/Documents/GIT/rl-terraform/terraform_account.pfx",
+            "client_id": "801fb60b-0efb-4a9e-aa4a-98f8abff125e",
+            "features": {},
+            "subscription_id": "ef03f41d-d2bd-4691-b3a0-3aff1c6711f7",
+            "tenant_id": "1428732f-21cf-469e-ad48-5721f4eac1e2"
+        },
+        "aws": {
+            "access_key": "",
+            "alias": "vpc-aws",
+            "region": "ap-south-1",
+            "secret_key": ""
+        },
+        "google": {
+            "alias": "vpc-gcp",
+            "credentials": "${file(\"${path.module}/terraform_account.json\")}",
+            "project": "redislabs-sa-training-services",
+            "region": "us-east1"
         }
     }
 }

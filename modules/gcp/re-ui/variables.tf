@@ -9,3 +9,7 @@ variable "zones" {
 variable "resource_tags" {
   description = "hash with tags for all resources"
 }
+
+variable "ui_subnet" {
+  description = "UI subnet object"
+}

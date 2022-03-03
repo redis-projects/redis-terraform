@@ -15,6 +15,9 @@ class Cloud_Provider_VPC_VNET(object):
     def create_bastion(self) -> int:
         pass
 
+    def set_ui(self,set_ui):
+        self._expose_ui = set_ui
+
     def expose_re_ui(self) -> int:
         if self._expose_ui:
             return self.create_re_ui()
@@ -49,7 +52,7 @@ class Cloud_Provider_VPC_VNET(object):
         from generator.generator import vpc
         for peer in peer_list:
             if peer not in vpc:
-                raise Exception(f'ERROR: Requested peering vpc {peer} not found in config file')
+                raise Exception(f"ERROR: Requested peering vpc {peer} not found in config file")
             if peer not in self._peer_request_list and self._name not in vpc[peer].get_peer_request_list():
                 # Same provider, go for VPC/VNET peering
                 if self._provider == vpc[peer]._provider:
@@ -68,6 +71,33 @@ class Cloud_Provider_VPC_VNET(object):
     def add_to_vpn_set(self,peer) -> int:
         self._vpn_set.add(peer)
         return(0)
+
+    def set_vpns(self,name,cidr,secret_key, external_ip) -> int:
+        self._vpns.append({
+        'name' : name,
+        'cidr' : cidr,
+        'secret_key' : secret_key,
+        'external_ip' : external_ip})
+        return(0)
+
+    def get_vpns(self):
+        return([s['name'] for s in self._vpns])
+
+    def get_vpn_peers(self) -> set:
+        return(self._vpn_set)
+
+    def get_private_cidr(self) -> set:
+        return(self._private_cidr)
+
+    def create_vpn_secrets(self) -> str:
+        import string
+        import secrets
+        from generator.generator import deployment_name
+        if deployment_name() == "unit-test-name":
+            return('unittestdummysecretkey')
+        alphabet = string.ascii_letters + string.digits
+        password = ''.join(secrets.choice(alphabet) for i in range(32))
+        return(password)
 
     @classmethod
     def __init__(self, **kwargs):
@@ -95,7 +125,8 @@ class Cloud_Provider_VPC_VNET(object):
         self._peer_request_list = []
         self._vpc_accept_list = []
         self._vpc_request_list = []
-        self._vpn_set = set()   
+        self._vpn_set = set()
+        self._vpns = []
 
         if not "provider" in kwargs:
             raise Exception("A provider must be specified for each network")

@@ -1,0 +1,150 @@
+---
+global:
+  resource_tags:
+    owner: Homer Simpson
+    env: test
+    service: donut
+clusters:
+  - name: az-redis-cluster
+    vpc: vnet-az
+    worker_count: 3
+    machine_type: Standard_B2s
+    machine_image: OpenLogic:CentOS:7.5:7.5.201808150
+    zones:
+    - 1
+    - 2
+    - 3
+    expose_ui: True
+    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.8/redislabs-6.2.8-53-rhel7-x86_64.tar
+    rack_aware: True
+  - name: aws-redis-cluster
+    vpc: vpc-aws
+    worker_count: 3
+    machine_type: t3.medium
+    machine_image: ami-04c84f136b3c9d872
+    zones:
+    - ap-south-1a
+    - ap-south-1b
+    - ap-south-1c
+    expose_ui: True
+    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.8/redislabs-6.2.8-53-rhel7-x86_64.tar
+    rack_aware: True
+  - name: gcp-redis-cluster
+    vpc: vpc-gcp
+    worker_count: 3
+    machine_type: n1-standard-4
+    machine_image: rhel-8-v20210721
+    zones:
+    - us-east1-b
+    - us-east1-c
+    - us-east1-d
+    expose_ui: True
+    redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.8/redislabs-6.2.8-53-rhel8-x86_64.tar
+    rack_aware: True
+networks:
+  - name: vpc-gcp
+    public_cidr: 10.1.1.0/25
+    private_cidr: 10.1.0.128/25
+    region: us-east1
+    bastion_zone: us-east1-b
+    bastion_machine_image: rhel-7-v20210721
+    bastion_machine_type: n1-standard-1
+    provider: gcp
+    peer_with:
+    - vnet-az
+    - vpc-aws
+    project: redislabs-sa-training-services
+  - name: vnet-az
+    resource_name: az-redis-vnet
+    vpc_cidr: 10.2.0.0/22
+    public_cidr: 10.2.1.0/25
+    private_cidr: 10.2.0.128/25
+    gateway_cidr: 10.2.3.0/26
+    region: CentralIndia
+    bastion_zone: 3
+    bastion_machine_image: OpenLogic:CentOS:7.5:7.5.201808150
+    bastion_machine_type: Standard_B2s
+    provider: azure
+    resource_group: terratest-rg
+    subscription_id: ef03f41d-d2bd-4691-b3a0-3aff1c6711f7
+    tenant_id: 1428732f-21cf-469e-ad48-5721f4eac1e2
+    application_id: 801fb60b-0efb-4a9e-aa4a-98f8abff125e
+    client_certificate_path: /Users/audi/Documents/GIT/rl-terraform/terraform_account.pfx
+    peer_with:
+    - vpc-gcp
+    - vpc-aws
+  - name: vpc-aws
+    resource_name: aws-redis-vpc
+    vpc_cidr: 10.3.0.0/23
+    public_cidr:
+      ap-south-1a: 10.3.0.64/26
+      ap-south-1b: 10.3.0.128/26
+      ap-south-1c: 10.3.0.192/26
+    private_cidr:
+      ap-south-1a: 10.3.1.64/26
+      ap-south-1b: 10.3.1.128/26
+      ap-south-1c: 10.3.1.192/26
+    lb_cidr:
+      ap-south-1a: 10.3.0.0/28
+      ap-south-1b: 10.3.0.16/28
+      ap-south-1c: 10.3.0.32/28
+#    ui_cidr: 
+#      ap-south-1a: 10.3.1.0/28
+#      ap-south-1b: 10.3.1.16/28
+#      ap-south-1c: 10.3.1.32/28
+    region: ap-south-1
+    bastion_zone: ap-south-1c
+    bastion_machine_image: ami-04c84f136b3c9d872
+    bastion_machine_type: t3.medium
+    peer_with:
+    - vnet-az
+    - vpc-gcp
+    provider: aws
+services:
+  - type: docker
+    name: vi-aws
+    contents: vi
+    servicenode: service-nodes-aws
+  - type: docker
+    name: vi-az
+    contents: vi
+    servicenode: service-nodes-az
+  - type: docker
+    name: vi-gcp
+    contents: vi
+    servicenode: service-nodes-gcp
+servicenodes:
+  - name: service-nodes-az
+    vpc: vnet-az
+    count: 1
+    machine_type: Standard_B2s
+    machine_image: OpenLogic:CentOS:7.5:7.5.201808150
+    zones:
+    - 1
+  - name: service-nodes-aws
+    vpc: vpc-aws
+    count: 1
+    machine_type: t3.medium
+    machine_image: ami-04c84f136b3c9d872
+    zones:
+    - ap-south-1a
+  - name: service-nodes-gcp
+    vpc: vpc-gcp
+    count: 1
+    machine_type: n1-standard-1
+    machine_image: rhel-8-v20210721
+    zones:
+    - us-east1-c
+nameservers:
+  - cluster: aws-redis-cluster
+    vpc: vpc-aws
+    parent_zone: aws.ps-redislabs.com
+    domain: aws.ps-redislabs.com
+  - cluster: az-redis-cluster
+    vpc: vnet-az
+    parent_zone: azure.ps-redislabs.com
+    domain: azure.ps-redislabs.com
+  - cluster: gcp-redis-cluster
+    vpc: vpc-gcp
+    parent_zone: ps-redislabs
+    domain: ps-redislabs.com

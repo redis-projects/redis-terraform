@@ -15,7 +15,7 @@ resource "google_compute_instance" "node" {
   count           = var.kube_worker_machine_count
   name            = "${var.name}-service-${count.index}"
   machine_type    = var.kube_worker_machine_type
-  zone            = var.zones[count.index % length(var.zones)]
+  zone            = sort(var.zones)[count.index % length(var.zones)]
   can_ip_forward  = true
 
   boot_disk {

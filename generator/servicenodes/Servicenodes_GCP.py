@@ -24,6 +24,9 @@ class Servicenodes_GCP(Servicenodes):
             zones                     = self._zones,
             depends_on                = [f"module.bastion-{self._vpc}"]
         )
+
+        Output(f"GCP-servicenodes-{self._name}-public-ip-adresses",
+            value=f"${{module.servicenodes-{self._name}.servicenodes_public_ip}}")
         
     def __init__(self, **kwargs):
         from generator.generator import vpc

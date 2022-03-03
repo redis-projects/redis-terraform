@@ -43,14 +43,12 @@ principal with a certificate but a password also supported
 
 The configuration is in yaml format and is by default expected in a file called config.yaml.  A different configuration file can be specified by specifying the path in an environment variable called config.
 
-Options for the rl-terraform configuration file
-===============================================
-"clusters" Section
-------------------
+### Options for the rl-terraform configuration file
+#### "clusters" Section
 
 This section of the yaml file describes how the Redis clusters should look like, e.g. their size and types where they should be deployed.
 
-1.  **expose_ui** *[optional]*\
+*  **expose_ui** *[optional]*\
     Access to the Redis cluster through the GUI (running on port 843/tcp) is very cumbersome because the cluster nodes are accessible to the "outside world". One way to solve this problem is to use X11 forwarding when connecting to the bastion node and opening a browser window there, connecting to the cluster nodes. A simpler way to solve the problem is when you set the value of "expose_ui" to "True". This will create a network load balancer in your VPC with a public or private IP address that is distributing traffic on port 8443 in a round-robin fashion to the Redis cluster nodes. In that case, you can simply point your browser to the frontend IP address on port 8443 and connect to the cluster directly. For security reasons, we would not recommend public IPs for any production environments.\
     Example:
 
@@ -58,7 +56,7 @@ This section of the yaml file describes how the Redis clusters should look like,
     expose_ui: True
     ```
 
-2.  **machine_image** *[required]*\
+*  **machine_image** *[required]*\
     This key determines the OS image for the Redis cluster nodes (all nodes use the same image). The image is of course highly dependent on the cloud provider and in addition, you need to ensure the image is available in your desired region. For AWS, the same image often has a different name in different regions. For GCP and Azure, you cannot assume that the same image exists in all regions. You must make sure the image you specify is available in the region you specify.\
     Examples:
 
@@ -68,7 +66,15 @@ This section of the yaml file describes how the Redis clusters should look like,
     (Azure) machine_image: OpenLogic:CentOS:7.5:7.5.201808150
     ```
 
-3.  **machine_type** *[required]*\
+*  **machine_plan** [requirement depends on image type] \
+    This flag is only meaningful to the Azure platform! Some OS images require a specific 'Purchase Plan' to be specified. If your image requires a specific purchase plan, specify it here. The syntax is 'name:product:publisher'.\
+    Example:
+
+    ```
+    machine_plan: centos-8-3-free:centos-8-3-free:cognosys
+    ```
+
+*  **machine_type** *[required]*\
     machine_type specifies the type of hardware (VM type) to be selected for the Redis cluster nodes. This type is provider-specific and determines parameters like number of CPUs, size f the memory, size of the disks, etc. You must ensure that your machine_type is available in the region you select and that you have quota and permissions to create these VM instances.\
     Examples:
 
@@ -78,7 +84,7 @@ This section of the yaml file describes how the Redis clusters should look like,
     (Azure) machine_type: Standard_B2s
     ```
 
-4.  **name** *[required]*\
+*  **name** *[required]*\
     Each cluster must have a **unique** name attached to it\
     Example
 
@@ -86,7 +92,7 @@ This section of the yaml file describes how the Redis clusters should look like,
     name: az-redis-cluster
     ```
 
-5.  **rack_aware** *[required]*\
+*  **rack_aware** *[required]*\
     This key is boolean (True or False) and lets you choose if the cluster to be built should take the availability zones into account for a better resiliency (e.g. one availability zone going down)\
     Example:
 
@@ -94,7 +100,7 @@ This section of the yaml file describes how the Redis clusters should look like,
     rack_aware: True
     ```
 
-6.  **redis_distro** *[required]*\
+*  **redis_distro** *[required]*\
     This field is required and points to the URI to download the Redis Enterprise software from\
     Example:
 
@@ -102,7 +108,7 @@ This section of the yaml file describes how the Redis clusters should look like,
     redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.8/redislabs-6.2.8-53-rhel7-x86_64.tar
     ```
 
-7.  **worker_count** *[required]*\
+*  **worker_count** *[required]*\
     Its value is of type integer and specifies the number of Redis cluster nodes.\
     Example:
 
@@ -110,7 +116,7 @@ This section of the yaml file describes how the Redis clusters should look like,
     worker_count: 3
     ```
 
-8.  **vpc** *[required]*\
+*  **vpc** *[required]*\
     The value of vpc is the name of the VPC (Virtual Private Cloud) where the RE cluster will be deployed. This VPC must be defined with the identical name in the "Networks" section of the config file.\
     Examples:
 
@@ -120,7 +126,7 @@ This section of the yaml file describes how the Redis clusters should look like,
     vpc: vnet-azure
     ```
 
-9.  **zones** *[required]*\
+*  **zones** *[required]*\
     "zones" is of a type list/array and specifies which availability zones are to be used for the Redis cluster nodes. Often, the number of zones equals the number of cluster nodes but you can have more cluster nodes than zones. In that case, the zones are used in a round-robin fashion. If, for example, you had 3 zones and 7 nodes two zones would host 2 nodes and one zone would host 3 nodes.\
     Examples:
 
@@ -141,20 +147,18 @@ This section of the yaml file describes how the Redis clusters should look like,
       - 3
     ```
 
-"global" Section
-----------------
+#### "global" Section
 
 Currently, this section is optional. It supports only the keyword "resource_tags"
 
-1.  **resource_tags** *[optional]*\
+*  **resource_tags** *[optional]*\
     resource_tags has a map/hash/dictionary as its value. This value defines all key-value pairs that will be added as 'tags' for Azure und AWS for the resources. This makes it easy to search for specific resources deployed by the "terraform" run. This feature exists only to provide a better description/tagging of the resources
 
-"nameservers" Section
----------------------
+#### "nameservers" Section
 
 This section is not required but optional. Adding this section to your config file only makes sense when your parent DNS zone is hosted in AWS or GCP. As an example: If your clusters would be "cluster1.myredisclusters.mycompany.com" the parent zone is "myredisclusters.mycompany.com". This DNS parent zone needs to be hosted in AWS (Route53) or GCP (Cloud DNS) and you need permissions to make modifications to that parent zone. In that case, the necessary NS-records and A-records will be added automatically through terraform and you don't need to make any DNS adjustments manually. But if you don't have permission to modify the parent zone or if you use your own company-DNS infrastructure, don't specify this section.
 
-1.  **cluster** *[required]*\
+*  **cluster** *[required]*\
     This property refers to the cluster in the "clusters" section and must match one value of the "name" property of the "clusters" section. The DNS entries will be created for this cluster.\
     Example:
 
@@ -162,7 +166,7 @@ This section is not required but optional. Adding this section to your config fi
     cluster: aws-redis-cluster
     ```
 
-2.  **domain** *[required]*\
+*  **domain** *[required]*\
     The domain value sets the DNS subdomain in which the cluster gets created. The resulting FQDN of the cluster will be <CLUSTER>.<DOMAIN>\
     Example:
 
@@ -170,7 +174,7 @@ This section is not required but optional. Adding this section to your config fi
     domain: aws.ps-redislabs.com
     ```
 
-3.  **parent_zone** *[required]*\
+*  **parent_zone** *[required]*\
     This key specifies the name of the DNS zone used in your provider DNS configuration. Often, this name is identical to the domain variable. But it can also be different.\
     Example:
 
@@ -178,7 +182,7 @@ This section is not required but optional. Adding this section to your config fi
     parent_zone: aws.ps-redislabs.com
     ```
 
-4.  **provider** *[optional]*\
+*  **provider** *[optional]*\
     As a default setting, we assume that the provider of the cluster VMs is also the provider hosting DNS and in that case, the key "provider" doesn't need to be specified. In case you for example provision a cluster in AWS but the DNS zone is hosted in GCP you need to set the provider for the DNS hosting.\
     Examples:
 
@@ -188,7 +192,7 @@ This section is not required but optional. Adding this section to your config fi
     provider: azure
     ```
 
-5.  **vpc** *[required]*\
+*  **vpc** *[required]*\
     The value of vpc is the name of the vpc (Virtual Private Cloud) which is used as the Terraform "provider" creating the DNS records\
     Examples:
 
@@ -196,10 +200,9 @@ This section is not required but optional. Adding this section to your config fi
     vpc: vpc-aws-europe 2vpc: vpc-gcp 3vpc: vnet-azure-asia
     ```
 
-"networks" Section
-------------------
+#### "networks" Section
 
-1.  **application_id** *[required]*\
+*  **application_id** *[required]*\
     The "application_id" parameter is only meaningful and required for Azure deployments. It specifies the user or application ID of your service principal. It can be retrieved from the Azure portal.\
     Examples:
 
@@ -207,7 +210,7 @@ This section is not required but optional. Adding this section to your config fi
     subscription_id: ef44f35d-d2ad-9491-b1a4-3aff1c2143f9
     ```
 
-2.  **bastion_machine_image** *[required]*\
+*  **bastion_machine_image** *[required]*\
     This key is used to set the OS image for the bastion node. As for the cluster nodes, you must make sure that the image is available in the desired zone.\
     Example:
 
@@ -217,7 +220,15 @@ This section is not required but optional. Adding this section to your config fi
     bastion_machine_image: rhel-7-v20210721
     ```
 
-3.  **bastion_machine_type** *[required]*\
+*  **bastion_machine_plan** [requirement depends on image type] \
+    This flag is only meaningful to the Azure platform! Some OS images require a specific 'Purchase Plan' to be specified. If your image requires a specific purchase plan, specify it here. The syntax is 'name:product:publisher'.\
+    Example:
+
+    ```
+    machine_plan: centos-8-3-free:centos-8-3-free:cognosys
+    ```
+
+*  **bastion_machine_type** *[required]*\
     This value sets the hardware type of the bastion node. Bastion nodes are typically much smaller than the Redis cluster nodes as they handle only interactive sessions. Ensure the availability of the specified hardware type in the desired region.\
     Examples:
 
@@ -227,7 +238,7 @@ This section is not required but optional. Adding this section to your config fi
     bastion_machine_type: Standard_B2s
     ```
 
-4.  **bastion_zone** *[required]*\
+*  **bastion_zone** *[required]*\
     "bastion_zone" advises Terraform which availability zone should be used to place the bastion node. The zone must of course be valid for your provider.\
     Examples:
 
@@ -235,7 +246,7 @@ This section is not required but optional. Adding this section to your config fi
     bastion_zone: europe-west3-b 2bastion_zone: us-east-1c 3bastion_zone: 3
     ```
 
-5.  **client_certificate_path** *[optional]*\
+*  **client_certificate_path** *[optional]*\
     The "client_certificate_path" parameter is only meaningful and required for Azure deployments. It specifies the file where the certificate of the service principal is stored.\
     Examples:
 
@@ -243,7 +254,7 @@ This section is not required but optional. Adding this section to your config fi
     client_certificate_path: /home/homer/secrets/mycert.pfx
     ```
 
-6.  **client_secret** *[optional]*\
+*  **client_secret** *[optional]*\
     The "client_secret" parameter is only meaningful and required for Azure deployments. It specifies the password of the service principal in clear text\
     Examples:
 
@@ -251,7 +262,7 @@ This section is not required but optional. Adding this section to your config fi
     client_certificate_path: /home/homer/secrets/mycert.pfx
     ```
 
-7.  **lb_cidr** *[required]*\
+*  **lb_cidr** *[required]*\
     This flag is required for AWS. Public DNS resolvers will need access to the DNS processes running on the Redis cluster nodes in the private subnet. To fulfill this requirement a network load balancer for DNS attaches all Redis cluster nodes as its backend. The frontend (listener) for port 53/udp must be reachable from the internet, therefore a subnet is created using an internet gateway where the frontend of the DNS load balancer is living. This subnet is specified with lb_cidr. For AWS, one subnet cannot span across multiple availability zones. For resiliency, we need to have load balancers in all zones and we must therefore specify a map/hash/dictionary of availability zones and CIDRs.\
     Example:
 
@@ -262,7 +273,7 @@ This section is not required but optional. Adding this section to your config fi
       ap-south-1c: 10.99.0.32/28
     ```
 
-8.  **name** *[required]*\
+*  **name** *[required]*\
     The "name" key specifies the name of the VPC (Virtual Private Cloud) to be created. This value is referenced in the other sections ("clusters" and "networks") through their "vpc" key.\
     Examples:
 
@@ -272,7 +283,7 @@ This section is not required but optional. Adding this section to your config fi
     name: vnet-azure
     ```
 
-9.  **peer_with** *[optional]*\
+*  **peer_with** *[optional]*\
     This tool was designed to provide not only single clusters but also multiple Redis Enterprise clusters in an A-A (active-active) configuration. This of course requires that clusters in different VPCs can communicate with each other. This is currently supported through "VPC peering" within a single provider and VPN tunnels across different providers. Therefore we implement VPC peering between clusters from the same cloud provider. By default, no peering is set up unless you specify the "peer_with" key. Its value is a **list/array** of VPCs you would like to peer with. You only need to specify the VPC peering requestor in the config file, the acceptor is automatically derived.\
     Example:
 
@@ -281,7 +292,7 @@ This section is not required but optional. Adding this section to your config fi
       - vpc-aws-europe
     ```
 
-10. **private_cidr** *[required]*\
+* **private_cidr** *[required]*\
     GCP and Azure provide the luxury of subnets that can span across multiple availability zones. For AWS, that is not the case. Therefore, the type of the private_cidr is different between AWS and GCP/Azure. For GCP/Azure it is just one value, the CIDR of the private subnet containing all Redis cluster nodes. For AWS deployments, the value is a hash/directory of CIDRs specifying the private subnets for each availability zone.\
     Examples:
 
@@ -299,7 +310,7 @@ This section is not required but optional. Adding this section to your config fi
     private_cidr: 10.71.0.128/25
     ```
 
-11. **project** *[required]*\
+* **project** *[required]*\
     This key is only relevant for GCP. The value of "project" is the name of the GCP project to be used for the deployment.\
     Example:
 
@@ -307,7 +318,7 @@ This section is not required but optional. Adding this section to your config fi
     project: redislabs-sa-training-services
     ```
 
-12. **provider** *[required]*\
+* **provider** *[required]*\
     This value sets the cloud provider (currently "aws", "azure" and "gcp") for the VPC and cluster deployment.\
     Example
 
@@ -317,7 +328,7 @@ This section is not required but optional. Adding this section to your config fi
     provider: azure
     ```
 
-13. **public_cidr** *[required]*\
+* **public_cidr** *[required]*\
     public_cidr specifies the subnet which is used for the bastion node. This public subnet is open to the "outside world". It must be a subnet of the vpc_cidr for AWS deployments. As described for the "private_cidr" the same rules apply to the "public_cidr". For GCP and Azure, one public subnet is required because it can span availability zones. For AWS, one subnet per availability zone is required; therefore public_cidr is a hash/map/dictionary for AWS\
     Example:
 
@@ -337,7 +348,7 @@ This section is not required but optional. Adding this section to your config fi
 
     For this example, all addresses in the public subnets start with 10.3.X.Y
 
-14. **region** *[required]*\
+* **region** *[required]*\
     The "region" parameter tells terraform where the VPC should be deployed. Its value depends on the cloud provider, you must make sure that you specify a valid region for your provider.\
     Examples:
 
@@ -347,7 +358,7 @@ This section is not required but optional. Adding this section to your config fi
     region: CentralIndia
     ```
 
-15. **resource_group** *[required]*\
+* **resource_group** *[required]*\
     The "resource_group" parameter is only meaningful and required for Azure deployments. Take into account that the specified resource group must already exist when you start the terraform deployment.\
     Examples:
 
@@ -355,7 +366,7 @@ This section is not required but optional. Adding this section to your config fi
     resource_group: az-test-rg
     ```
 
-16. **resource_name** *[optional]*\
+* **resource_name** *[optional]*\
     The "resource_name" parameter overwrites the default name for the VPC or VNET with your specified value\
     Examples:
 
@@ -363,7 +374,7 @@ This section is not required but optional. Adding this section to your config fi
     resource_name: az-redis-vnet
     ```
 
-17. **subscription_id** *[required]*\
+* **subscription_id** *[required]*\
     The "subscription_id" parameter is only meaningful and required for Azure deployments. This parameter identifies the ID of your Azure subscription. It can be retrieved from the Azure portal.\
     Examples:
 
@@ -371,7 +382,7 @@ This section is not required but optional. Adding this section to your config fi
     subscription_id: ef35f66d-d2ad-4991-b1a4-3aff1c5734f8
     ```
 
-18. **tenant_id** *[required]*\
+* **tenant_id** *[required]*\
     The "tenant_id" parameter is only meaningful and required for Azure deployments. It specifies the ID or your AD (Active Directory). It can be retrieved from the Azure portal.\
     Examples:
 
@@ -379,7 +390,7 @@ This section is not required but optional. Adding this section to your config fi
     subscription_id: ef44f35d-d2ad-9491-b1a4-3aff1c2143f9
     ```
 
-19. **ui_cidr** *[optional]*\
+* **ui_cidr** *[optional]*\
     If this flag is not set and the "expose_ui" flag is set to "True" the load balancer with the Redis cluster nodes port 8443/tcp at its backend will have a public IP address for the frontend. This is convenient when setting up a demo cluster but of course a big security risk for anything productive secret. In those cases, you might want to have the frontend of the UI load balancer point to in internal/private network. You can control who would have access to this load balancer frontend. For Azure and GCP, the backend nodes (Redis cluster nodes) are all in one subnet. For AWS, one subnet per availability zone is required. Therefore, the same rules tat apply to the public and private subnet specifications. A single value for GCP/Azure, a map/hash/dictionary for AWS. If 'expose_ui' is set to 'False' ui_cidr meaningless\
     Examples:
 
@@ -397,7 +408,7 @@ This section is not required but optional. Adding this section to your config fi
     ui_cidr: 10.100.64.0/24
     ```
 
-20. **vpc_cidr** *[required]*\
+* **vpc_cidr** *[required]*\
     The vpc_cidr specification applies **only** to AWS and Azure deployments. It is meaningless for GCP deployments. All subnets (public and private) need to be subnets of the vpc_cidr.\
     Example:
 
@@ -407,12 +418,11 @@ This section is not required but optional. Adding this section to your config fi
 
     In the above example, all subnets need to have the addresses 10.1.X.Y
 
-"servicenodes" Section
-----------------------
+#### "servicenodes" Section
 
 Service nodes, as the name implies are provisioned to run all sorts of services. If only a few resources are required, service nodes are not needed but small services could be started on the bastion node. But for better isolation and providing more resources, one can request one or multiple service nodes to be deployed. These nodes will be placed on the public subnet and they will be getting public IP addresses. The services which will be running on these nodes are specified in the 'services' section of this configuration file. It could be services like grafana, prometheus, RIOT etc.
 
-1.  **count** *[required]*\
+*  **count** *[required]*\
     The "count" parameter determines the number of nodes to be deployed in this group of service nodes\
     Examples:
 
@@ -420,7 +430,7 @@ Service nodes, as the name implies are provisioned to run all sorts of services.
     count: 3
     ```
 
-2.  **vpc** *[required]*\
+*  **vpc** *[required]*\
     The value of vpc is the name of the VPC (Virtual Private Cloud) where the service nodes will be deployed. This VPC must be defined with the identical name in the "Networks" section of the config file.\
     Examples:
 
@@ -430,7 +440,7 @@ Service nodes, as the name implies are provisioned to run all sorts of services.
     vpc: vnet-azure
     ```
 
-3.  **machine_image** *[required]*\
+*  **machine_image** *[required]*\
     This key determines the OS image for the service nodes (all nodes use the same image). The image is of course highly dependent on the cloud provider and in addition, you need to ensure the image is available in your desired region. For AWS, the same image often has a different name in different regions. For GCP and Azure, you cannot assume that the same image exists in all regions. You must make sure the image you specify is available in the region you specify.\
     Examples:
 
@@ -440,7 +450,15 @@ Service nodes, as the name implies are provisioned to run all sorts of services.
     (Azure) machine_image: OpenLogic:CentOS:7.5:7.5.201808150
     ```
 
-4.  **machine_type** *[required]*\
+*  **machine_plan** [requirement depends on image type] \
+    This flag is only meaningful to the Azure platform! Some OS images require a specific 'Purchase Plan' to be specified. If your image requires a specific purchase plan, specify it here. The syntax is 'name:product:publisher'.\
+    Example:
+
+    ```
+    machine_plan: centos-8-3-free:centos-8-3-free:cognosys
+    ```
+
+*  **machine_type** *[required]*\
     machine_type specifies the type of hardware (VM type) to be selected for the service nodes. This type is provider-specific and determines parameters like number of CPUs, size f the memory, size of the disks, etc. You must ensure that your machine_type is available in the region you select and that you have quota and permissions to create these VM instances.\
     Examples:
 
@@ -450,7 +468,7 @@ Service nodes, as the name implies are provisioned to run all sorts of services.
     (Azure) machine_type: Standard_B2s
     ```
 
-5.  **zones** *[required]*\
+*  **zones** *[required]*\
     "zones" is of a type list/array and specifies which availability zones are to be used for the service nodes. Often, the number of zones equals the number of cluster nodes but you can have more cluster nodes than zones. In that case, the zones are used in a round-robin fashion. If, for example, you had 3 zones and 7 nodes two zones would host 2 nodes and one zone would host 3 nodes.\
     Examples:
 
@@ -471,7 +489,7 @@ Service nodes, as the name implies are provisioned to run all sorts of services.
     - 3
     ```
 
-6.  **name** *[required]*\
+*  **name** *[required]*\
     Each group of service nodes must have a **unique** name attached to it. This property is referenced in the "services" section of the configuration file\
     Examples:
 
@@ -481,10 +499,9 @@ Service nodes, as the name implies are provisioned to run all sorts of services.
     name: prod-service-nodes-gcp
     ```
 
-"services" Section
-------------------
+#### "services" Section
 
-1.  **contents** *[required]*\
+*  **contents** *[required]*\
     There are pre-defined services to run, as of now there is "vi". This service provides Grafana, prometheus and RIOT\
     Examples:
 
@@ -492,7 +509,7 @@ Service nodes, as the name implies are provisioned to run all sorts of services.
     contents: vi
     ```
 
-2.  **name** *[required]*\
+*  **name** *[required]*\
     Each service must have a **unique** name attached to it.\
     Examples:
 
@@ -502,7 +519,7 @@ Service nodes, as the name implies are provisioned to run all sorts of services.
     name: vi-gcp
     ```
 
-3.  **servicenode** *[required]*\
+*  **servicenode** *[required]*\
     Each service must have a **unique** name attached to it.\
     Examples:
 
@@ -512,7 +529,7 @@ Service nodes, as the name implies are provisioned to run all sorts of services.
     name: prod-service-nodes-gcp
     ```
 
-4.  **type** *[required]*\
+*  **type** *[required]*\
     The current implementation supports only one type which is "docker".\
     Examples:
 

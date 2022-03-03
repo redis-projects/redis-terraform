@@ -14,7 +14,7 @@ class VPC_AWS(Cloud_Provider_VPC_VNET):
         from generator.generator import vpc, deployment_name
         region_map = {}
         cidr_map = {}
-        vpn_list = list(self._vpn_set)
+        vpn_list = sorted(self._vpn_set)
         cidr_map[self._name] = self._vpc_cidr
         for vpc_iter in itertools.chain(self._peer_accept_list, self._peer_request_list):
             cidr_map[vpc_iter] = vpc[vpc_iter].get_vpc_cidr()
@@ -24,9 +24,13 @@ class VPC_AWS(Cloud_Provider_VPC_VNET):
         vpc_request_list    = [f'${{module.network-{s}.vpc}}' for s in self._peer_request_list]
         vpc_accept_list     = [f'${{module.network-{s}.vpc}}' for s in self._peer_accept_list]
         vpc_conn_index      = [f'${{module.network-{s}.peering-request-ids["{self._name}"]}}' for s in self._peer_accept_list]
-        vpn_connections     = [f'${{module.network-{s}.vpc}}' for s in vpn_list]
-        vpn_external_ips    = [f'${{module.network-{s}.vpn_external_ip}}' for s in vpn_list]
         private_subnet_list = [f'${{module.network-{s}.private_subnet_address_prefix}}' for s in vpn_list]
+        aws_vpns = [s for s in self._vpns if type(s["cidr"]) is dict]
+        for vpn in aws_vpns:
+            vpn['cidr_list'] = []
+            for zone,cidr in vpn['cidr'].items():
+                vpn['cidr_list'].append(cidr)
+
 
         Module(f"network-{self._name}", 
             source              = f"./modules/{self._provider}/network",
@@ -45,8 +49,7 @@ class VPC_AWS(Cloud_Provider_VPC_VNET):
             vpc_request_list    = vpc_request_list,
             vpc_accept_list     = vpc_accept_list,
             vpn_list            = vpn_list,
-            vpn_connections     = vpn_connections,
-            vpn_external_ips    = vpn_external_ips,
+            gcp_azure_vpns      = [s for s in self._vpns if type(s["cidr"]) is not dict],
             region_map          = region_map,
             cidr_map            = cidr_map,
             vpc_conn_index      = vpc_conn_index,
@@ -99,7 +102,7 @@ class VPC_AWS(Cloud_Provider_VPC_VNET):
             providers      = {"aws": f"aws.{self._name}"}
         )
 
-        Output(f"{self._name}-ui-endpoint",
+        Output(f"AWS-re-ui-{self._name}-ip-output",
             value=f'${{module.re-ui-{self._name}.ui-ip}}')
 
     def VPC_AWS(self):
@@ -116,6 +119,8 @@ class VPC_AWS(Cloud_Provider_VPC_VNET):
         self._provider : str = "aws"
         self._region : str = "us-east-1"
         self._vpc_cidr : str = "10.1.0.0/16"
+        self._public_cidr = {}
+        self._private_cidr = {}
         self._lb_cidr = {}
         self._ui_cidr = {}
         self._worker_machine_image : str = "ami-0b1db37f0fa006678"
@@ -127,6 +132,8 @@ class VPC_AWS(Cloud_Provider_VPC_VNET):
         self._vpc_accept_list = []
         self._vpc_request_list = []
         self._vpn_set = set()
+        self._vpns = []
+
         logging.debug("Creating Object of class "+self.__class__.__name__+" with class arguments "+str(kwargs))
 
         for key, value in kwargs.items():
@@ -150,6 +157,13 @@ class VPC_AWS(Cloud_Provider_VPC_VNET):
 
         if self._resource_name is None:
             self._resource_name = f'{deployment_name()}-{self._name}-vpc'
+        
+        cidr_list = list(self._private_cidr.keys())
+        lb_list = list(self._lb_cidr.keys())
+        cidr_list.sort()
+        lb_list.sort()
+        if cidr_list != lb_list:
+            raise Exception("You must specify the lb_cidr for AWS networks to have the same number of elements than private_cidr")
 
         Provider("aws", region=self._region, access_key=os.getenv("AWS_ACCESS_KEY_ID", ""),
              secret_key=os.getenv("AWS_SECRET_ACCESS_KEY", ""), alias=self._name)
