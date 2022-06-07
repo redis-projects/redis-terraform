@@ -1,61 +1,91 @@
 ---
+global:
+  resource_tags:
+    customer: JPMC
 clusters:
-  - vpc: vpc-aws-us
-    name: aws-us-cluster
-    worker_count: 3 
+  - vpc: vpc-aws-uk
+    name: jpmc-uk-rec
+    worker_count: 3
+    # 4cpu 16GiB
     machine_type: t2.xlarge
-    machine_image: ami-05f238ddab9a512be
-    zones: 
-    - us-east-1a
-    - us-east-1b
-    - us-east-1c
+    # Red Hat Enterprise Linux (RHEL) 8 Latest with support by ProComputers
+    machine_image: ami-07f71dcffce39fd04
+    # eu-west-2 (London)
+    zones:
+    - eu-west-2a
+    - eu-west-2b
+    - eu-west-2c
     expose_ui: True
     rack_aware: True
     redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
-  - vpc: vpc-gcp
-    name: gcp-us-cluster
-    worker_count: 3 
-    machine_type: n1-standard-4
-    machine_image: rhel-8-v20210721
+  - vpc: vpc-aws-eu
+    name: jpmc-eu-rec
+    worker_count: 3
+    # 4cpu 16GiB
+    machine_type: t2.xlarge
+    # Red Hat Enterprise Linux (RHEL) 8 Latest with support by ProComputers
+    machine_image: ami-0a59a1cda4ae8374c
+    # eu-central-1 (Frankfurt)
     zones: 
-    - europe-west3-a
-    - europe-west3-b
-    - europe-west3-c
+    - eu-central-1a
+    - eu-central-1b
+    - eu-central-1c
     expose_ui: True
     rack_aware: True
     redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
 networks:
-  - name: vpc-aws-us
-    vpc_cidr: 10.1.0.0/16
-    public_cidr: 
-      us-east-1c: 10.1.1.0/24
-    private_cidr: 
-      us-east-1a: 10.1.3.0/24
-      us-east-1b: 10.1.2.0/24
-      us-east-1c: 10.1.4.0/24
-    lb_cidr: 
-      us-east-1a: 10.1.5.0/24
-      us-east-1b: 10.1.6.0/24
-      us-east-1c: 10.1.7.0/24
-    region: us-east-1
-    bastion_zone: us-east-1c
-    bastion_machine_image: ami-0b1db37f0fa006678
+  - name: vpc-aws-uk
+    vpc_cidr: 10.1.0.0/23
+    public_cidr:
+      eu-west-2a: 10.1.0.64/26
+      eu-west-2b: 10.1.0.128/26
+      eu-west-2c: 10.1.0.192/26
+    private_cidr:
+      eu-west-2a: 10.1.1.64/26
+      eu-west-2b: 10.1.1.128/26
+      eu-west-2c: 10.1.1.192/26
+    lb_cidr:
+      eu-west-2a: 10.1.0.0/28
+      eu-west-2b: 10.1.0.16/28
+      eu-west-2c: 10.1.0.32/28
+    # eu-west-2 (London)
+    region: eu-west-2
+    bastion_zone: eu-west-2c
+    # Red Hat Enterprise Linux (RHEL) 7 Latest with support by ProComputers
+    bastion_machine_image: ami-07f71dcffce39fd04
+    # 2vCPU 4GiB
+    bastion_machine_type: t2.medium
+    peer_with:
+      - vpc-aws-eu
+    provider: aws
+  - name: vpc-aws-eu
+    vpc_cidr: 10.2.0.0/23
+    public_cidr:
+      eu-central-1a: 10.2.0.64/26
+      eu-central-1b: 10.2.0.128/26
+      eu-central-1c: 10.2.0.192/26
+    private_cidr:
+      eu-central-1a: 10.2.1.64/26
+      eu-central-1b: 10.2.1.128/26
+      eu-central-1c: 10.2.1.192/26
+    lb_cidr:
+      eu-central-1a: 10.2.0.0/28
+      eu-central-1b: 10.2.0.16/28
+      eu-central-1c: 10.2.0.32/28
+    # eu-central-1 (Frankfurt)
+    region: eu-central-1
+    bastion_zone: eu-central-1c
+    # Red Hat Enterprise Linux (RHEL) 7 Latest with support by ProComputers
+    bastion_machine_image: ami-0a59a1cda4ae8374c
+    # 1vCPU 1GiB
     bastion_machine_type: t2.micro
     provider: aws
-  - name: vpc-gcp
-    public_cidr: 10.1.0.0/24
-    private_cidr: 10.2.0.0/16 
-    region: europe-west3
-    bastion_zone: europe-west3-b
-    bastion_machine_image: rhel-7-v20210721
-    bastion_machine_type: n1-standard-1
-    provider: gcp
 nameservers:
-  - vpc: vpc-aws-us
-    cluster: aws-us-cluster
-    parent_zone: aws.ps-redislabs.com
-    domain: aws.ps-redislabs.com
-  - vpc: vpc-gcp
-    cluster: gcp-us-cluster
-    parent_zone: ps-redislabs
-    domain: ps-redislabs.com
+  - cluster: jpmc-uk-rec
+    vpc: vpc-aws-uk
+    parent_zone: jpmc.aws.redisdemo.com
+    domain: jpmc.aws.redisdemo.com
+  - cluster: jpmc-eu-rec
+    vpc: vpc-aws-eu
+    parent_zone: jpmc.aws.redisdemo.com
+    domain: jpmc.aws.redisdemo.com
