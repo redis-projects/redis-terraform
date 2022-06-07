@@ -1,10 +1,10 @@
 ---
 global:
   resource_tags:
-    customer: JPMC
+    customer: jbank
 clusters:
   - vpc: vpc-aws-uk
-    name: jpmc-uk-rec
+    name: jbank-uk-rec
     worker_count: 3
     # 4cpu 16GiB
     machine_type: t2.xlarge
@@ -19,7 +19,7 @@ clusters:
     rack_aware: True
     redis_distro: https://s3.amazonaws.com/redis-enterprise-software-downloads/6.2.6/redislabs-6.2.6-7-rhel8-x86_64.tar
   - vpc: vpc-aws-eu
-    name: jpmc-eu-rec
+    name: jbank-eu-rec
     worker_count: 3
     # 4cpu 16GiB
     machine_type: t2.xlarge
@@ -81,11 +81,11 @@ networks:
     bastion_machine_type: t2.micro
     provider: aws
 nameservers:
-  - cluster: jpmc-uk-rec
+  - cluster: jbank-uk-rec
     vpc: vpc-aws-uk
-    parent_zone: jpmc.aws.redisdemo.com
-    domain: jpmc.aws.redisdemo.com
-  - cluster: jpmc-eu-rec
+    parent_zone: jbank.aws.redisdemo.com
+    domain: jbank.aws.redisdemo.com
+  - cluster: jbank-eu-rec
     vpc: vpc-aws-eu
-    parent_zone: jpmc.aws.redisdemo.com
-    domain: jpmc.aws.redisdemo.com
+    parent_zone: jbank.aws.redisdemo.com
+    domain: jbank.aws.redisdemo.com
